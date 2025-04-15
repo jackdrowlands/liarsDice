@@ -2,6 +2,7 @@ import os
 import time
 import json
 import random
+import re
 from .player import Player
 
 # Check for OpenRouter support (required)
@@ -12,29 +13,21 @@ except ImportError:
     OPENROUTER_AVAILABLE = False
 
 class AIPlayer(Player):
-    def __init__(self, name, model, api_key=None):
+    def __init__(self, name, model, api_key=None, api_url=None):
         super().__init__(name)
         self.model = model
         self.game_history = []
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
+        self.api_url = api_url
+        
+        # Check if using local endpoint
+        self.is_local_endpoint = self.api_url and "127.0.0.1" in self.api_url
 
-    
     def record_game_state(self, game_state):
         self.game_history.append(game_state)
     
     def get_prompt_for_game(self, game_state):
-        """Create a prompt for the AI model"""
-        # Use the same strategy prompt for all models to ensure fair comparison
-        strategy_style = """
-        Strategy tips:
-        1. Calculate probability distributions for each value based on visible dice
-        2. Track each player's behavior patterns over time
-        3. Use strategic bluffing when appropriate
-        4. Consider the risk/reward of calling "Liar" vs making a higher bid
-        5. Use the move history to understand each player's tendencies
-        6. Consider how many dice are left in the game when calculating probabilities
-        """
-            
+        """Create a prompt for the AI model"""            
         # Format the prompt with game information - same for all models
         system_prompt = f"""
         You are playing Liar's Dice. In this game, each player has dice that only they can see.
@@ -49,7 +42,13 @@ class AIPlayer(Player):
         4. Be strategic - consider probability and bluffing
         5. Return your decision in JSON format as specified
         
-        {strategy_style}
+        Strategy tips:
+        1. Calculate probability distributions for each value based on visible dice
+        2. Track each player's behavior patterns over time
+        3. Use strategic bluffing when appropriate
+        4. Consider the risk/reward of calling "Liar" vs making a higher bid
+        5. Use the move history to understand each player's tendencies
+        6. Consider how many dice are left in the game when calculating probabilities
         
         Think step by step about your decision.
         """
@@ -95,58 +94,98 @@ class AIPlayer(Player):
         if not OPENROUTER_AVAILABLE:
             raise ImportError("Requests package is not installed. Install with 'pip install requests'")
         
-        if not self.api_key:
-            raise ValueError("OpenRouter API key is required")
+        # No API key needed for local endpoints
+        if not self.api_key and not self.is_local_endpoint:
+            raise ValueError("API key is required for cloud endpoints")
         
         prompt = self.get_prompt_for_game(game_state)
         
         try:
+            # Prepare headers based on endpoint type
             headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": ""
+                "Content-Type": "application/json"
             }
             
+            # Add authorization for cloud endpoints
+            if not self.is_local_endpoint:
+                headers["Authorization"] = f"Bearer {self.api_key}"
+                headers["HTTP-Referer"] = ""
+            
+            # Prepare request data with common structure
             data = {
                 "model": self.model,
                 "messages": [
                     {"role": "system", "content": prompt["system"]},
-                    {"role": "user", "content": prompt["user"]}
+                    {"role": "user", "content": prompt["user"]},
                 ],
-                "temperature": 0.7,
-                "max_tokens": 500
             }
             
+            # Determine the correct endpoint URL
+            endpoint_url = "https://openrouter.ai/api/v1/chat/completions"
+            if self.api_url:
+                endpoint_url = self.api_url
+            
+            # Make the API request
             response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+                endpoint_url,
                 headers=headers,
-                json=data
+                json=data,
             )
             
             if response.status_code != 200:
-                print(f"OpenRouter API Error: {response.status_code} - {response.text}")
-                return {"action": "bid", "quantity": 1, "value": 4}
+                raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
             
             result = response.json()
             content = result["choices"][0]["message"]["content"].strip()
+            with open("llm_responses.json", "a") as f:
+                    json.dump({
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "response_text": content,
+                        "model": self.model,
+                    }, f)
+                    f.write("\n")
             
-            # Try to extract JSON from the response
             try:
-                # Find JSON in the response if it's embedded in text
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    decision = json.loads(json_str)
-                else:
-                    # Default fallback if no JSON found
-                    decision = {"action": "bid", "quantity": 1, "value": 4}
-            except json.JSONDecodeError:
-                # Fallback to a default bid if parsing fails
-                decision = {"action": "bid", "quantity": 1, "value": 4}
-            
-            return decision
+                json_objects = re.findall(r'\{[^{}]*\}', content)
+                number_words = {
+                    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4,
+                    "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+                    "ten": 10
+                }
+
+                for obj in json_objects:
+                    try:
+                        parsed = json.loads(obj)
+                        if isinstance(parsed, dict) and "action" in parsed:
+                            if parsed["action"] == "bid":
+                                # Convert number words to integers if needed
+                                for key in ["quantity", "value"]:
+                                    if isinstance(parsed.get(key), str):
+                                        word = parsed[key].lower()
+                                        if word in number_words:
+                                            parsed[key] = number_words[word]
+                            return parsed
+                    except json.JSONDecodeError:
+                        continue
+                raise ValueError("No valid JSON with 'action' found.")
+            except Exception:
+                print(content)
+                with open("invalid_llm_responses.json", "a") as f:
+                    json.dump({
+                        "model": self.model,
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "response_text": content
+                    }, f)
+                    f.write("\n")
+                raise ValueError("No valid JSON found in LLM response.")
         except Exception as e:
-            print(f"Error getting AI decision: {e}")
-            # Fallback to a default bid
-            return {"action": "bid", "quantity": 1, "value": 4}
+            with open("invalid_responses.json", "a") as f:
+                    json.dump({
+                        "model": self.model,
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                        "response": response.json(),
+                        "error": str(e),
+                    }, f)
+                    f.write("\n")
+            print(response.json())
+            raise RuntimeError(f"Error getting AI decision: {e}")

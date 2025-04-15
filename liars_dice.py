@@ -222,7 +222,8 @@ class LiarsDice:
         self.round_number = 1   # Track game rounds
     
     def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # os.system('cls' if os.name == 'nt' else 'clear')
+        print("clear")
     
     def add_player(self, name):
         player = Player(name)
@@ -735,10 +736,10 @@ class LiarsDice:
         
         return False
     
-    def play_round(self, auto_mode=False):
+    def play_round(self, auto_mode=False, game_num=0):
         # Start by rolling all dice and display round number
         self.roll_all_dice()
-        print(f"\n===== ROUND {self.round_number} =====")
+        print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
         
         while not self.game_over:
             current_player = self.players[self.current_player_idx]
@@ -754,7 +755,7 @@ class LiarsDice:
                 
                 # Start new round
                 self.round_number += 1
-                print(f"\n===== ROUND {self.round_number} =====")
+                print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
                 self.roll_all_dice()
                 continue
             
@@ -1020,7 +1021,7 @@ class GameBatchRunner:
         try:
             # Play the game in auto mode
             while not game.game_over:
-                game.play_round(auto_mode=True)
+                game.play_round(auto_mode=True, game_num=game_num)
             
             # Record the winner and update leaderboard
             winner_model = None

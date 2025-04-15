@@ -1,0 +1,208 @@
+Script started on Tue Apr 15 15:22:47 2025
+]1337;RemoteHost=jack@Jacks-MacBook-Pro.local]1337;CurrentDir=/Users/jack/liarsDice]1337;ShellIntegrationVersion=14;shell=zsh[1m[7m%[27m[1m[0m                                                                                                                                                                                           ]0;jack@Jacks-MacBook-Pro: ~/liarsDice]133;D;0]1337;RemoteHost=jack@Jacks-MacBook-Pro.local]1337;CurrentDir=/Users/jack/liarsDice[0m[27m[24m[J]133;A
+[1m[33m(2)[39m[0m [1m[36m~/liarsDice[39m[0m on [1m[35mmaster [31m[$!][39m[0m via [1m[33m.venv[39m[0m
+[1m[32m%[39m[0m ]133;B[K[?1h=[?2004hl[32ml[39m[32ml[39m[90ms[39m[32ml[32ms[39m[?1l>[?2004l
+]133;C;[1m[34m__pycache__[39;49m[0m                invalid_llm_responses.json llm_responses.json         output2.log                [1m[34msrc[39;49m[0m
+CLAUDE.md                  invalid_responses.json     main.py                    prompts.md
+[1m[34mfrontend[39;49m[0m                   liars_dice.py              output.log                 README.md
+[1m[7m%[27m[1m[0m                                                                                                                                                                                           ]0;jack@Jacks-MacBook-Pro: ~/liarsDice]133;D;0]1337;RemoteHost=jack@Jacks-MacBook-Pro.local]1337;CurrentDir=/Users/jack/liarsDice[0m[27m[24m[J]133;A
+[1m[33m(2)[39m[0m [1m[36m~/liarsDice[39m[0m on [1m[35mmaster [31m[$!][39m[0m via [1m[33m.venv[39m[0m
+[1m[32m%[39m[0m ]133;B[K[?1h=[?2004hl[32ml[39m[32ml[39m[90ms[39m[32ml[32ms[39m[?1l>[?2004l
+]133;C;[1m[34m__pycache__[39;49m[0m                invalid_llm_responses.json llm_responses.json         output2.log                [1m[34msrc[39;49m[0m
+CLAUDE.md                  invalid_responses.json     main.py                    prompts.md
+[1m[34mfrontend[39;49m[0m                   liars_dice.py              output.log                 README.md
+[1m[7m%[27m[1m[0m                                                                                                                                                                                           ]0;jack@Jacks-MacBook-Pro: ~/liarsDice]133;D;0]1337;RemoteHost=jack@Jacks-MacBook-Pro.local]1337;CurrentDir=/Users/jack/liarsDice[0m[27m[24m[J]133;A
+[1m[33m(2)[39m[0m [1m[36m~/liarsDice[39m[0m on [1m[35mmaster [31m[$!][39m[0m via [1m[33m.venv[39m[0m
+[1m[32m%[39m[0m ]133;B[K[?1h=[?2004hm[1m[31mm[0m[39m[1m[31mm[0m[39m[90man frida-ps[39m[11D[1m[31mm[1m[31ma[0m[39m[1m[31mm[1m[31ma[1m[31mn[0m[39m[0m[32mm[0m[32ma[0m[32mn[39m[32mn[32m [39m[32mn[39m[39m [39ms[39m [39m [39m [39m [39m [39m [39m [4ms[24m[90mysctl[39m[4ms[39m[4mc[24m[39m [39m [39m [39m [24ms[24mcript[?1l>[?2004l
+]133;C;[?1h=SCRIPT(1)                                                                        General Commands Manual                                                                        SCRIPT(1)[m
+[m
+[1;31mNAME[0m[m
+     [1;31mscript[0m – make typescript of terminal session[m
+[m
+[1;31mSYNOPSIS[0m[m
+     [1;31mscript[0m [[1;31m-aeFkqr[0m] [[1;31m-t[0m [1;32mtime[0m] [[1;32mfile[0m [[1;32mcommand[0m [1;32m...[0m]][m
+     [1;31mscript[0m [1;31m-p[0m [[1;31m-deq[0m] [[1;31m-T[0m [1;32mfmt[0m] [[1;32mfile[0m][m
+[m
+[1;31mDESCRIPTION[0m[m
+     The [1;31mscript[0m utility makes a typescript of everything printed on your terminal.  It is useful for students who need a hardcopy record of an interactive session as proof of an[m
+     assignment, as the typescript file can be printed out later with lpr(1).[m
+[m
+     If the argument [1;32mfile[0m is given, [1;31mscript[0m saves all dialogue in [1;32mfile[0m.  If no file name is given, the typescript is saved in the file [1;32mtypescript[0m.[m
+[m
+     If the argument [1;32mcommand[0m is given, [1;31mscript[0m will run the specified command with an optional argument vector instead of an interactive shell.[m
+[m
+     The following options are available:[m
+[m
+     [1;31m-a[0m       Append the output to [1;32mfile[0m or [1;32mtypescript[0m, retaining the prior contents.[m
+[m
+     [1;31m-d[0m       When playing back a session with the [1;31m-p[0m flag, do not sleep between records when playing back a timestamped session.[m
+[m
+     [1;31m-e[0m       Accepted for compatibility with [1;32mutil-linux[0m [1;31mscript[0m.  The child command exit status is always the exit status of [1;31mscript[0m.[m
+[m
+     [1;31m-F[0m       Immediately flush output after each write.  This will allow a user to create a named pipe using mkfifo(1) and another user may watch the live session using a utility like[m
+              cat(1).[m
+[m
+     [1;31m-k[0m       Log keys sent to the program as well as output.[m
+[m
+     [1;31m-p[0m       Play back a session recorded with the [1;31m-r[0m flag in real time.[m
+[7mlines 1-31[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 2-32[27m[K[K [KESCESC[KOO[KAA[K[HMSCRIPT(1)                                                                        General Commands Manual                                                                        SCRIPT(1)[m
+[32;1H[K[7mlines 1-31[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 2-32[27m[K[K [KESCESC[KOO[KBB[K     [1;31m-q[0m       Run in quiet mode, omit the start, stop and command status messages.[m
+[7mlines 3-33[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 4-34[27m[K[K [KESCESC[KOO[KBB[K     [1;31m-r[0m       Record a session with input, output, and timestamping.[m
+[7mlines 5-35[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 6-36[27m[K[K [KESCESC[KOO[KBB[K     [1;31m-t[0m [1;32mtime[0m  Specify the interval at which the script output file will be flushed to disk, in seconds.  A value of 0 causes [1;31mscript[0m to flush after every character I/O event.  The[m
+[7mlines 7-37[27m[K[K [KESCESC[KOO[KBB[K              default interval is 30 seconds.[m
+[7mlines 8-38[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 9-39[27m[K[K [KESCESC[KOO[KBB[K     [1;31m-T[0m [1;32mfmt[0m   Implies [1;31m-p[0m, but just reports the time-stamp of each output.  This is very useful for assessing the timing of events.[m
+[7mlines 10-40[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 11-41[27m[K[K [KESCESC[KOO[KBB[K              If [1;32mfmt[0m does not contain any ‘%’ characters, it indicates the default format: ‘%n@ %s [%Y-%m-%d %T]%n’, which is useful for both tools and humans to read, should be used.[m
+[7mlines 12-42[27m[K[K [KESCESC[KOO[KBB[K              Note that time-stamps will only be output when different from the previous one.[m
+[7mlines 13-43[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 14-44[27m[K[K [KESCESC[KOO[KBB[K     The script ends when the forked shell (or command) exits (a [1;32mcontrol-D[0m to exit the Bourne shell (sh(1)), and [1;32mexit[0m, [1;32mlogout[0m or [1;32mcontrol-D[0m (if [1;32mignoreeof[0m is not set) for the C-shell,[m
+[7mlines 15-45[27m[K[K [KESCESC[KOO[KBB[K     csh(1)).[m
+[7mlines 16-46[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 17-47[27m[K[K [KESCESC[KOO[KBB[K     Certain interactive commands, such as vi(1), create garbage in the typescript file.  The [1;31mscript[0m utility works best with commands that do not manipulate the screen.  The results are[m
+[7mlines 18-48[27m[K[K [KESCESC[KOO[KBB[K     meant to emulate a hardcopy terminal, not an addressable one.[m
+[7mlines 19-49[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 20-50[27m[K[K [KESCESC[KOO[KBB[K[1;31mENVIRONMENT[0m[m
+[7mlines 21-51[27m[K[K [KESCESC[KOO[KBB[K     The following environment variables are utilized by [1;31mscript[0m:[m
+[7mlines 22-52[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 23-53[27m[K[K [KESCESC[KOO[KBB[K     SCRIPT  The SCRIPT environment variable is added to the sub-shell.  If SCRIPT already existed in the users environment, its value is overwritten within the sub-shell.  The value of[m
+[7mlines 24-54[27m[K[K [KESCESC[KOO[KBB[K             SCRIPT is the name of the [1;32mtypescript[0m file.[m
+[7mlines 25-55[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 26-56[27m[K[K [KESCESC[KOO[KBB[K     SHELL   If the variable SHELL exists, the shell forked by [1;31mscript[0m will be that shell.  If SHELL is not set, the Bourne shell is assumed.  (Most shells set this variable[m
+[7mlines 27-57[27m[K[K [KESCESC[KOO[KBB[K             automatically).[m
+[7mlines 28-58[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 29-59[27m[K[K [KESCESC[KOO[KBB[K[1;31mEXAMPLES[0m[m
+[7mlines 30-60[27m[K[K [KESCESC[KOO[KBB[K     Record a simple csh(1) session with no additional details like input, output, and timestamping:[m
+[7mlines 31-61[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 32-62[27m[K[K [KESCESC[KOO[KBB[K           $ SHELL=/bin/csh script[m
+[7mlines 33-63[27m[K[K [KESCESC[KOO[KBB[K           Script started, output file is typescript[m
+[7mlines 34-64[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 35-65[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:08:10 UTC 2021[m
+[7mlines 36-66[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 37-67[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 38-68[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 39-69[27m[K[K [KESCESC[KOO[KBB[K           Script done, output file is typescript[m
+[7mlines 40-70[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 41-71[27m[K[K [KESCESC[KOO[KBB[K     Now, replay the session recorded in the previous example:[m
+[7mlines 42-72[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 43-73[27m[K[K [KESCESC[KOO[KBB[K           $ cat ./typescript[m
+[7mlines 44-74[27m[K[K [KESCESC[KOO[KBB[K           Script started on Tue Jan  5 15:08:08 2021[m
+[7mlines 45-75[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 46-76[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:08:10 UTC 2021[m
+[7mlines 47-77[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 48-78[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 49-79[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 50-80[27m[K[K [KESCESC[KOO[KBB[K           Script done on Tue Jan  5 15:08:13 2021[m
+[7mlines 51-81[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 52-82[27m[K[K [KESCESC[KOO[KBB[K     Record a csh(1) session, but this time with additional details like timestamping:[m
+[7mlines 53-83[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 54-84[27m[K[K [KESCESC[KOO[KBB[K           $ SHELL=/bin/csh script -r[m
+[7mlines 55-85[27m[K[K [KESCESC[KOO[KBB[K           Script started, output file is typescript[m
+[7mlines 56-86[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 57-87[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:17:11 UTC 2021[m
+[7mlines 58-88[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 59-89[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 60-90[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 61-91[27m[K[K [KESCESC[KOO[KBB[K           Script done, output file is typescript[m
+[7mlines 62-92[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 63-93[27m[K[K [KESCESC[KOO[KBB[K     In order to replay a sessions recorded with the [1;31m-r[0m flag, it is necessary to specify [1;31m-p[0m (cat(1) will not work because of all the aditional information stored in the session file).[m
+[7mlines 64-94[27m[K[K [KESCESC[KOO[KBB[K     Also, let us use [1;31m-d[0m to print the whole session at once:[m
+[7mlines 65-95[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 66-96[27m[K[K [KESCESC[KOO[KBB[K           $ script -dp ./typescript[m
+[7mlines 67-97[27m[K[K [KESCESC[KOO[KBB[K           Script started on Tue Jan  5 15:17:09 2021[m
+[7mlines 68-98[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 69-99[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:17:11 UTC 2021[m
+[7mlines 70-100[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 71-101[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 72-102[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 73-103[27m[K[K [KESCESC[KOO[KBB[K           Script done on Tue Jan  5 15:17:14 2021[m
+[7mlines 74-104[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 75-105[27m[K[K [KESCESC[KOO[KBB[K[1;31mSEE[0m [1;31mALSO[0m[m
+[7mlines 76-106[27m[K[K [KESCESC[KOO[KBB[K     csh(1) (for the [1;32mhistory[0m mechanism)[m
+[7mlines 77-107[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 78-108[27m[K[K [KESCESC[KOO[KBB[K[1;31mHISTORY[0m[m
+[7mlines 79-109[27m[K[K [KESCESC[KOO[KBB[K     The [1;31mscript[0m command appeared in 3.0BSD.[m
+[7mlines 80-110[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 81-111[27m[K[K [KESCESC[KOO[KBB[K     The [1;31m-d[0m, [1;31m-p[0m and [1;31m-r[0m options first appeared in NetBSD 2.0 and were ported to FreeBSD 9.2.[m
+[7mlines 82-112[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 83-113[27m[K[K [KESCESC[KOO[KBB[K[1;31mBUGS[0m[m
+[7mlines 84-114[27m[K[K [KESCESC[KOO[KAA[K[HM     Record a csh(1) session, but this time with additional details like timestamping:[m
+[32;1H[K[7mlines 83-113[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 82-112[27m[K[K [KESCESC[KOO[KAA[K[HM           Script done on Tue Jan  5 15:08:13 2021[m
+[32;1H[K[7mlines 81-111[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 80-110[27m[K[K [KESCESC[KOO[KAA[K[HM           exit[m
+[32;1H[K[7mlines 79-109[27m[K[K [KESCESC[KOO[KAA[K[HM           % exit[m
+[32;1H[K[7mlines 78-108[27m[K[K [KESCESC[KOO[KAA[K[HM           Tue Jan  5 15:08:10 UTC 2021[m
+[32;1H[K[7mlines 77-107[27m[K[K [KESCESC[KOO[KAA[K[HM           % date[m
+[32;1H[K[7mlines 76-106[27m[K[K [KESCESC[KOO[KAA[K[HM           Script started on Tue Jan  5 15:08:08 2021[m
+[32;1H[K[7mlines 75-105[27m[K[K [KESCESC[KOO[KAA[K[HM           $ cat ./typescript[m
+[32;1H[K[7mlines 74-104[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 73-103[27m[K[K [KESCESC[KOO[KAA[K[HM     Now, replay the session recorded in the previous example:[m
+[32;1H[K[7mlines 72-102[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 71-101[27m[K[K [KESCESC[KOO[KAA[K[HM           Script done, output file is typescript[m
+[32;1H[K[7mlines 70-100[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 69-99[27m[K[K [KESCESC[KOO[KAA[K[HM           exit[m
+[32;1H[K[7mlines 68-98[27m[K[K [KESCESC[KOO[KAA[K[HM           % exit[m
+[32;1H[K[7mlines 67-97[27m[K[K [KESCESC[KOO[KAA[K[HM           Tue Jan  5 15:08:10 UTC 2021[m
+[32;1H[K[7mlines 66-96[27m[K[K [KESCESC[KOO[KAA[K[HM           % date[m
+[32;1H[K[7mlines 65-95[27m[K[K [KESCESC[KOO[KAA[K[HM           Script started, output file is typescript[m
+[32;1H[K[7mlines 64-94[27m[K[K [KESCESC[KOO[KAA[K[HM           $ SHELL=/bin/csh script[m
+[32;1H[K[7mlines 63-93[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 62-92[27m[K[K [KESCESC[KOO[KAA[K[HM     Record a simple csh(1) session with no additional details like input, output, and timestamping:[m
+[32;1H[K[7mlines 61-91[27m[K[K [KESCESC[KOO[KAA[K[HM[1;31mEXAMPLES[0m[m
+[32;1H[K[7mlines 60-90[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 59-89[27m[K[K [KESCESC[KOO[KAA[K[HM             automatically).[m
+[32;1H[K[7mlines 58-88[27m[K[K [KESCESC[KOO[KAA[K[HM     SHELL   If the variable SHELL exists, the shell forked by [1;31mscript[0m will be that shell.  If SHELL is not set, the Bourne shell is assumed.  (Most shells set this variable[m
+[32;1H[K[7mlines 57-87[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 56-86[27m[K[K [KESCESC[KOO[KAA[K[HM             SCRIPT is the name of the [1;32mtypescript[0m file.[m
+[32;1H[K[7mlines 55-85[27m[K[K [KESCESC[KOO[KAA[K[HM     SCRIPT  The SCRIPT environment variable is added to the sub-shell.  If SCRIPT already existed in the users environment, its value is overwritten within the sub-shell.  The value of[m
+[32;1H[K[7mlines 54-84[27m[K[K [KESCESC[KOO[KAA[K[HM[m
+[32;1H[K[7mlines 53-83[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 54-84[27m[K[K [KESCESC[KOO[KBB[K           $ SHELL=/bin/csh script -r[m
+[7mlines 55-85[27m[K[K [KESCESC[KOO[KBB[K           Script started, output file is typescript[m
+[7mlines 56-86[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 57-87[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:17:11 UTC 2021[m
+[7mlines 58-88[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 59-89[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 60-90[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 61-91[27m[K[K [KESCESC[KOO[KBB[K           Script done, output file is typescript[m
+[7mlines 62-92[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 63-93[27m[K[K [KESCESC[KOO[KBB[K     In order to replay a sessions recorded with the [1;31m-r[0m flag, it is necessary to specify [1;31m-p[0m (cat(1) will not work because of all the aditional information stored in the session file).[m
+[7mlines 64-94[27m[K[K [KESCESC[KOO[KBB[K     Also, let us use [1;31m-d[0m to print the whole session at once:[m
+[7mlines 65-95[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 66-96[27m[K[K [KESCESC[KOO[KBB[K           $ script -dp ./typescript[m
+[7mlines 67-97[27m[K[K [KESCESC[KOO[KBB[K           Script started on Tue Jan  5 15:17:09 2021[m
+[7mlines 68-98[27m[K[K [KESCESC[KOO[KBB[K           % date[m
+[7mlines 69-99[27m[K[K [KESCESC[KOO[KBB[K           Tue Jan  5 15:17:11 UTC 2021[m
+[7mlines 70-100[27m[K[K [KESCESC[KOO[KBB[K           % exit[m
+[7mlines 71-101[27m[K[K [KESCESC[KOO[KBB[K           exit[m
+[7mlines 72-102[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 73-103[27m[K[K [KESCESC[KOO[KBB[K           Script done on Tue Jan  5 15:17:14 2021[m
+[7mlines 74-104[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 75-105[27m[K[K [KESCESC[KOO[KBB[K[1;31mSEE[0m [1;31mALSO[0m[m
+[7mlines 76-106[27m[K[K [KESCESC[KOO[KBB[K     csh(1) (for the [1;32mhistory[0m mechanism)[m
+[7mlines 77-107[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 78-108[27m[K[K [KESCESC[KOO[KBB[K[1;31mHISTORY[0m[m
+[7mlines 79-109[27m[K[K [KESCESC[KOO[KBB[K     The [1;31mscript[0m command appeared in 3.0BSD.[m
+[7mlines 80-110[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 81-111[27m[K[K [KESCESC[KOO[KBB[K     The [1;31m-d[0m, [1;31m-p[0m and [1;31m-r[0m options first appeared in NetBSD 2.0 and were ported to FreeBSD 9.2.[m
+[7mlines 82-112[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 83-113[27m[K[K [KESCESC[KOO[KBB[K[1;31mBUGS[0m[m
+[7mlines 84-114[27m[K[K [KESCESC[KOO[KBB[K     The [1;31mscript[0m utility places [1;31meverything[0m in the log file, including linefeeds and backspaces.  This is not what the naive user expects.[m
+[7mlines 85-115[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 86-116[27m[K[K [KESCESC[KOO[KBB[K     It is not possible to specify a command without also naming the script file because of argument parsing compatibility issues.[m
+[7mlines 87-117[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 88-118[27m[K[K [KESCESC[KOO[KBB[K     When running in [1;31m-k[0m mode, echo cancelling is far from ideal.  The slave terminal mode is checked for ECHO mode to check when to avoid manual echo logging.  This does not work when[m
+[7mlines 89-119[27m[K[K [KESCESC[KOO[KBB[K     the terminal is in a raw mode where the program being run is doing manual echo.[m
+[7mlines 90-120[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 91-121[27m[K[K [KESCESC[KOO[KBB[K     If [1;31mscript[0m reads zero bytes from the terminal, it switches to a mode when it only attempts to read once a second until there is data to read.  This prevents [1;31mscript[0m from spinning on[m
+[7mlines 92-122[27m[K[K [KESCESC[KOO[KBB[K     zero-byte reads, but might cause a 1-second delay in processing of user input.[m
+[7mlines 93-123[27m[K[K [KESCESC[KOO[KBB[K[m
+[7mlines 94-124[27m[K[K [KESCESC[KOO[KBB[KmacOS 15.5                                                                           October 26, 2022                                                                          macOS 15.5[m
+[7mlines 95-125[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7mlines 95-125/125 (END)[27m[K[K[?1l>[1m[7m%[27m[1m[0m                                                                                                                                                                                           ]0;jack@Jacks-MacBook-Pro: ~/liarsDice]133;D;0]1337;RemoteHost=jack@Jacks-MacBook-Pro.local]1337;CurrentDir=/Users/jack/liarsDice[0m[27m[24m[J]133;A
+[1m[33m(2)[39m[0m [1m[36m~/liarsDice[39m[0m on [1m[35mmaster [31m[$!][39m[0m via [1m[33m.venv[39m[0m took [1m[33m52s[39m[0m
+[1m[32m%[39m[0m ]133;B[K[?1h=[?2004h

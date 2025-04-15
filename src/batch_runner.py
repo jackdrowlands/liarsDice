@@ -18,6 +18,9 @@ class GameBatchRunner:
         self.game_results = []
         self.total_games = 0
         self.model_stats = {}
+        self.use_local_endpoint = False
+        self.local_endpoint_url = None
+        self.local_models = []
     
     def setup_batch(self):
         """Setup a batch of games to run"""
@@ -30,11 +33,16 @@ class GameBatchRunner:
         print("LIARS DICE MODEL TOURNAMENT")
         print("=" * 70)
         
-        # Get OpenRouter API key
+        # Ask if user wants to use a local LLM server
+        self.use_local_endpoint = input("Do you want to use a local LLM server at http://127.0.0.1:1234? (y/n): ").lower().strip() == 'y'
+        
+        # Get OpenRouter API key (still needed for OpenRouter models)
         self.api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        if not self.api_key:
+        if not self.api_key and not self.use_local_endpoint:
             self.api_key = input("Enter your OpenRouter API key: ")
             os.environ["OPENROUTER_API_KEY"] = self.api_key
+        elif not self.api_key and self.use_local_endpoint:
+            print("No OpenRouter API key provided. Will only use local models.")
         
         # Get the number of games to run
         while True:
@@ -58,15 +66,22 @@ class GameBatchRunner:
             except ValueError:
                 print("Please enter a valid number.")
         
-        # Get available models
+        # Get available models (including local models if enabled)
         game = LiarsDice()
-        self.available_models = game.get_available_models()
+        self.available_models = game.get_available_models(self.use_local_endpoint)
+        
+        if not self.available_models:
+            print("No models available. Check your API key and connection.")
+            return False
+        
         self.selected_models = []
         
         # Show available models
         print("\nAvailable models:")
         for i, model in enumerate(self.available_models):
-            print(f"{i+1}. {model}")
+            provider = model["provider"]
+            model_id = model["id"]
+            print(f"{i+1}. {model_id}{' (Local)' if provider == 'local' else ''}")
         
         # Select models to include
         print("\nSelect models to include (enter model numbers separated by spaces, or 'all'):")
@@ -92,18 +107,21 @@ class GameBatchRunner:
         # Print selected models
         print("\nSelected models for tournament:")
         for model in self.selected_models:
-            print(f"- {model}")
+            provider = model["provider"]
+            model_id = model["id"]
+            print(f"- {model_id}{' (Local)' if provider == 'local' else ''}")
         
         # Initialize leaderboard and stats for all models
         for model in self.selected_models:
-            self.leaderboard[model] = {
+            model_id = model["id"]
+            self.leaderboard[model_id] = {
                 "wins": 0,
                 "games_played": 0,
                 "win_rate": 0.0,
-                "model": model
+                "model": model_id
             }
             
-            self.model_stats[model] = {
+            self.model_stats[model_id] = {
                 "total_rounds_played": 0,
                 "avg_rounds_survived": 0,
                 "total_bids": 0,
@@ -136,18 +154,29 @@ class GameBatchRunner:
             game_models = random.sample(self.selected_models, self.models_per_game)
         
         # Add AI players with selected models
-        for i, model in enumerate(game_models):
+        for i, model_info in enumerate(game_models):
+            model_id = model_info["id"]
+            provider = model_info["provider"]
+            
             # Get a readable model name for the player name
-            model_short_name = model.split('/')[-1] if '/' in model else model
+            model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
             
             # Generate player name based on model
-            player_name = f"{model_short_name.upper()}-{i+1}"
+            if provider == "local":
+                player_name = f"LOCAL-{model_short_name.upper()}-{i+1}"
+            else:
+                player_name = f"{model_short_name.upper()}-{i+1}"
             
-            # Add the AI player
-            game.add_ai_player(player_name, model, self.api_key)
+            # Add the AI player with the appropriate configuration
+            game.add_ai_player(
+                name=player_name, 
+                model=model_id,
+                api_key=model_info["api_key"],
+                api_url=model_info["api_url"]
+            )
             
             # Update games played in leaderboard
-            self.leaderboard[model]["games_played"] += 1
+            self.leaderboard[model_id]["games_played"] += 1
         
         # Start the game without setup (we already added the players)
         game.current_player_idx = random.randint(0, len(game_models) - 1)
@@ -160,7 +189,7 @@ class GameBatchRunner:
         try:
             # Play the game in auto mode
             while not game.game_over:
-                game.play_round(auto_mode=True)
+                game.play_round(auto_mode=True, game_num=game_num)
             
             # Record the winner and update leaderboard
             winner_model = None

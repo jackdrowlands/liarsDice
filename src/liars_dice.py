@@ -28,7 +28,8 @@ class LiarsDice:
         self.bid_analyzer = BidAnalyzer()  # For analyzing bid optimality
     
     def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # os.system('cls' if os.name == 'nt' else 'clear')
+        print("clear")
     
     def add_player(self, name):
         player = Player(name)
@@ -36,12 +37,12 @@ class LiarsDice:
         # Initialize player history tracking
         self.player_history[name] = []
     
-    def add_ai_player(self, name, model, api_key=None):
+    def add_ai_player(self, name, model, api_key=None, api_url=None):
         if not OPENROUTER_AVAILABLE:
             print("Requests package is not installed. Install with 'pip install requests'")
             return False
         
-        ai_player = AIPlayer(name, model, api_key)
+        ai_player = AIPlayer(name, model, api_key, api_url)
         self.players.append(ai_player)
         # Initialize AI metrics tracking
         self.metrics.initialize_model(model)
@@ -49,25 +50,19 @@ class LiarsDice:
         self.player_history[name] = []
         return True
         
-    def get_available_models(self):
-        """Return a list of available models from OpenRouter"""
-        default_models = [
-            "openai/gpt-4-turbo",
-            "openai/gpt-4o",
-            "anthropic/claude-3-haiku",
-            "anthropic/claude-3-opus",
-            "anthropic/claude-3-sonnet",
-            "google/gemini-pro",
-            "mistralai/mistral-large",
-            "meta/llama-3-70b-instruct",
-            "meta/llama-3-8b-instruct",
-            "cohere/command-r-plus",
-            "anthropic/claude-3-5-sonnet"
-        ]
+    def get_available_models(self, use_local_endpoint=False):
+        """Return a list of available models from OpenRouter and local server"""
+        # Hardcoded local endpoint URL
+        LOCAL_ENDPOINT_URL = "http://127.0.0.1:1234"
+        
+        default_models = []
+        
+        models = []
         
         # Check if we have an OpenRouter API key
         openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
         
+        # First try to get OpenRouter models
         if OPENROUTER_AVAILABLE and openrouter_api_key:
             try:
                 headers = {
@@ -78,22 +73,137 @@ class LiarsDice:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    models = []
                     
                     for model in data["data"]:
-                        models.append(model["id"])
-                    
-                    # Sort models to group them by provider
-                    models.sort()
-                    return models
+                        models.append({
+                            "id": model["id"],
+                            "provider": "openrouter",
+                            "name": model["id"],
+                            "api_key": openrouter_api_key,
+                            "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                        })
                 else:
                     print(f"Error fetching OpenRouter models: {response.status_code}")
-                    return default_models
+                    # Fall back to default models
+                    for model in default_models:
+                        models.append({
+                            "id": model,
+                            "provider": "openrouter",
+                            "name": model,
+                            "api_key": openrouter_api_key,
+                            "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                        })
             except Exception as e:
                 print(f"Error fetching OpenRouter models: {e}")
-                return default_models
+                # Fall back to default models
+                for model in default_models:
+                    models.append({
+                        "id": model,
+                        "provider": "openrouter",
+                        "name": model,
+                        "api_key": openrouter_api_key,
+                        "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                    })
         else:
-            return default_models
+            # Fall back to default models
+            for model in default_models:
+                models.append({
+                    "id": model,
+                    "provider": "openrouter",
+                    "name": model,
+                    "api_key": openrouter_api_key,
+                    "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                })
+        
+        # Add local models by fetching from the models endpoint
+        if use_local_endpoint and OPENROUTER_AVAILABLE:
+            try:
+                print(f"Fetching models from local server at {LOCAL_ENDPOINT_URL}...")
+                
+                # Try to get models from the local server
+                response = requests.get(f"{LOCAL_ENDPOINT_URL}/v1/models")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Process the models data according to API format
+                    if "data" in data:
+                        # OpenAI-compatible format
+                        for model in data["data"]:
+                            models.append({
+                                "id": f"{model.get('id', 'unknown')}",
+                                "provider": "local",
+                                "name": model.get('id', 'unknown'),
+                                "api_key": None,
+                                "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                            })
+                    elif "models" in data:
+                        # Alternative format
+                        for model in data["models"]:
+                            if isinstance(model, str):
+                                models.append({
+                                    "id": f"local/{model}",
+                                    "provider": "local",
+                                    "name": model,
+                                    "api_key": None,
+                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                })
+                            elif isinstance(model, dict) and "id" in model:
+                                models.append({
+                                    "id": f"local/{model['id']}",
+                                    "provider": "local",
+                                    "name": model["id"],
+                                    "api_key": None,
+                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                })
+                    else:
+                        # If no standard format, try to extract any model identifiers
+                        for key, value in data.items():
+                            if isinstance(value, list):
+                                for item in value:
+                                    if isinstance(item, str):
+                                        models.append({
+                                            "id": f"local/{item}",
+                                            "provider": "local",
+                                            "name": item,
+                                            "api_key": None,
+                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                        })
+                                    elif isinstance(item, dict) and "id" in item:
+                                        models.append({
+                                            "id": f"local/{item['id']}",
+                                            "provider": "local",
+                                            "name": item["id"],
+                                            "api_key": None,
+                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                        })
+                
+                else:
+                    print(f"Error fetching local models: {response.status_code} - {response.text}")
+                    # Add a default local model
+                    models.append({
+                        "id": "local/default-model",
+                        "provider": "local",
+                        "name": "default-model",
+                        "api_key": None,
+                        "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                    })
+                    
+            except Exception as e:
+                print(f"Error fetching local models: {e}")
+                # Add a default local model
+                models.append({
+                    "id": "local/default-model",
+                    "provider": "local",
+                    "name": "default-model",
+                    "api_key": None,
+                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                })
+        
+        # Sort models to group them by provider
+        models.sort(key=lambda x: x["id"])
+        
+        return models
         
     def setup_game(self):
         num_players = 0
@@ -151,6 +261,9 @@ class LiarsDice:
                 api_key = input("Enter your OpenRouter API key: ")
                 os.environ["OPENROUTER_API_KEY"] = api_key
         
+        # Ask about local LLM server
+        use_local_endpoint = input("\nDo you want to use a local LLM server at http://127.0.0.1:1234? (y/n): ").lower().strip() == 'y'
+        
         human_count = num_players - ai_count
         
         # Add human players
@@ -160,8 +273,8 @@ class LiarsDice:
         
         # Add AI players
         if ai_count > 0:
-            # Get available models
-            available_models = self.get_available_models()
+            # Get available models (including local models if enabled)
+            available_models = self.get_available_models(use_local_endpoint)
             
             if not available_models:
                 print("No models available. Check your API key and connection.")
@@ -169,7 +282,9 @@ class LiarsDice:
             
             print("\nAvailable Models:")
             for i, model in enumerate(available_models):
-                print(f"{i+1}. {model}")
+                provider = model["provider"]
+                model_name = model["id"]
+                print(f"{i+1}. {model_name}{' (Local)' if provider == 'local' else ''}")
             
             if all_ai_game:
                 print("\nSetting up AI vs AI game...")
@@ -186,20 +301,30 @@ class LiarsDice:
                         except ValueError:
                             print("Please enter a valid number.")
                     
-                    model_choice = available_models[model_idx]
+                    model_info = available_models[model_idx]
+                    model_id = model_info["id"]
                     
                     # Get a readable model name for the player name
-                    model_short_name = model_choice.split('/')[-1] if '/' in model_choice else model_choice
+                    model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
                     
                     # Name the AI based on the model
-                    default_name = f"{model_short_name.upper()}-{i+1}"
+                    if model_info["provider"] == "local":
+                        default_name = f"LOCAL-{model_short_name.upper()}-{i+1}"
+                    else:
+                        default_name = f"{model_short_name.upper()}-{i+1}"
+                        
                     name = input(f"Enter name for this AI (default: {default_name}): ")
                     if not name:
                         name = default_name
                     
-                    # Add the AI player
-                    self.add_ai_player(name, model_choice, api_key)
-                    print(f"Added AI player '{name}' using model: {model_choice}")
+                    # Add the AI player with the right config
+                    self.add_ai_player(
+                        name=name,
+                        model=model_id,
+                        api_key=model_info["api_key"],
+                        api_url=model_info["api_url"]
+                    )
+                    print(f"Added AI player '{name}' using model: {model_id}")
             else:
                 # In mixed mode, let user choose a model for each AI
                 for i in range(ai_count):
@@ -213,20 +338,30 @@ class LiarsDice:
                         except ValueError:
                             print("Please enter a valid number.")
                     
-                    model_choice = available_models[model_idx]
+                    model_info = available_models[model_idx]
+                    model_id = model_info["id"]
                     
                     # Get a readable model name for the player name
-                    model_short_name = model_choice.split('/')[-1] if '/' in model_choice else model_choice
+                    model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
                     
                     # Name the AI
-                    default_name = f"{model_short_name}-{i+1}"
+                    if model_info["provider"] == "local":
+                        default_name = f"LOCAL-{model_short_name}-{i+1}"
+                    else:
+                        default_name = f"{model_short_name}-{i+1}"
+                        
                     name = input(f"Enter name for this AI (default: {default_name}): ")
                     if not name:
                         name = default_name
                     
-                    # Add the AI player
-                    self.add_ai_player(name, model_choice, api_key)
-                    print(f"Added AI player '{name}' using model: {model_choice}")
+                    # Add the AI player with the right config
+                    self.add_ai_player(
+                        name=name,
+                        model=model_id,
+                        api_key=model_info["api_key"],
+                        api_url=model_info["api_url"]
+                    )
+                    print(f"Added AI player '{name}' using model: {model_id}")
         
         if self.players:
             self.current_player_idx = random.randint(0, len(self.players) - 1)
@@ -442,6 +577,9 @@ class LiarsDice:
                 # Fallback to a simple bid
                 if self.last_bid:
                     last_quantity, last_value = self.last_bid
+                    if last_quantity > self.total_dice_in_game:
+                        # Change decision to call liar due to invalid bid
+                        return True
                     if last_value < 6:
                         self.last_bid = (last_quantity, last_value + 1)
                     else:
@@ -515,16 +653,25 @@ class LiarsDice:
                 if not self.last_bid:
                     print("There is no previous bid to call 'Liar!' on.")
                     continue
+
+                # Determine the actual previous player who made the last bid
+                previous_bidder = None
+                for move in reversed(self.move_history):
+                    if move["action"] == "bid":
+                        previous_bidder = move["player"]
+                        break
+        
+                previous_player = next(p for p in self.players if p.name == previous_bidder)
                 
                 # Record liar call in history
                 self.move_history.append({
                     "round": len(self.move_history) + 1,
                     "player": player.name,
                     "action": "liar",
-                    "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name
+                    "target_player": previous_player
                 })
                 
-                return True  # Calling liar
+                return True  # Calling liar2
             
             else:
                 print("Invalid choice. Please enter 1 or 2.")
@@ -556,8 +703,15 @@ class LiarsDice:
     
     def handle_liar_call(self, auto_continue=False):
         calling_player = self.players[self.current_player_idx]
-        previous_player_idx = (self.current_player_idx - 1) % len(self.players)
-        previous_player = self.players[previous_player_idx]
+        
+        # Determine the actual previous player who made the last bid
+        previous_bidder = None
+        for move in reversed(self.move_history):
+            if move["action"] == "bid":
+                previous_bidder = move["player"]
+                break
+        
+        previous_player = next(p for p in self.players if p.name == previous_bidder)
         
         quantity, value = self.last_bid
         actual_count = self.count_dice(value)
@@ -685,11 +839,11 @@ class LiarsDice:
         
         return False
     
-    def play_round(self, auto_mode=False):
+    def play_round(self, auto_mode=False, game_num=0):
         # Start by rolling all dice and display round number
         self.roll_all_dice()
-        print(f"\n===== ROUND {self.round_number} =====")
-        
+        print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
+
         while not self.game_over:
             current_player = self.players[self.current_player_idx]
             self.show_dice_to_player(self.current_player_idx)
@@ -704,7 +858,7 @@ class LiarsDice:
                 
                 # Start new round
                 self.round_number += 1
-                print(f"\n===== ROUND {self.round_number} =====")
+                print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
                 self.roll_all_dice()
                 continue
             
@@ -798,7 +952,7 @@ class LiarsDice:
                 time.sleep(2)
         
         while not self.game_over:
-            self.play_round(auto_mode=auto_mode)
+            self.play_round(auto_mode=auto_mode, game_num=0)
         
         self.clear_screen()
         print(f"\nGame over! {self.winner.name} is the winner!")

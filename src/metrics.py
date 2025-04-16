@@ -17,6 +17,10 @@ class GameMetrics:
         self.bid_optimality = defaultdict(lambda: {"optimal": 0, "total": 0})
         self.adaptation_scores = defaultdict(lambda: {"adapted": 0, "opportunities": 0})
         self.rule_adherence = defaultdict(lambda: {"valid_actions": 0, "total_actions": 0})
+        self.api_response_times = defaultdict(list)  # Track API response times
+        
+        # Token usage tracking
+        self.token_usage = defaultdict(lambda: {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "actions": 0})
         
         # For tracking Elo
         self.k_factor = 32  # Standard K-factor for Elo calculation
@@ -92,6 +96,11 @@ class GameMetrics:
         self.rule_adherence[model_id]["total_actions"] += 1
         if valid_action:
             self.rule_adherence[model_id]["valid_actions"] += 1
+            
+    def record_api_response_time(self, model_id, response_time):
+        """Record the API response time for a model"""
+        if response_time is not None and response_time > 0:
+            self.api_response_times[model_id].append(response_time)
     
     def calculate_bluff_success_rate(self, model_id):
         """Calculate the bluff success rate for a model"""
@@ -150,7 +159,48 @@ class GameMetrics:
         if data["total_actions"] == 0:
             return 100  # If no actions yet, assume perfect adherence
         return (data["valid_actions"] / data["total_actions"]) * 100
+        
+    def calculate_avg_api_response_time(self, model_id):
+        """Calculate the average API response time for a model"""
+        times = self.api_response_times[model_id]
+        if not times:
+            return 0
+        return sum(times) / len(times)
     
+    def record_token_usage(self, model_id, prompt_tokens, completion_tokens, total_tokens=None):
+        """Record token usage for an API call"""
+        if total_tokens is None:
+            total_tokens = prompt_tokens + completion_tokens
+            
+        self.token_usage[model_id]["prompt_tokens"] += prompt_tokens
+        self.token_usage[model_id]["completion_tokens"] += completion_tokens
+        self.token_usage[model_id]["total_tokens"] += total_tokens
+        self.token_usage[model_id]["actions"] += 1
+    
+    def calculate_token_metrics(self, model_id):
+        """Calculate token usage metrics for a model"""
+        data = self.token_usage[model_id]
+        actions = data["actions"]
+        
+        if actions == 0:
+            return {
+                "total_prompt_tokens": 0,
+                "total_completion_tokens": 0,
+                "total_tokens": 0,
+                "avg_prompt_tokens_per_action": 0,
+                "avg_completion_tokens_per_action": 0, 
+                "avg_tokens_per_action": 0
+            }
+            
+        return {
+            "total_prompt_tokens": data["prompt_tokens"],
+            "total_completion_tokens": data["completion_tokens"],
+            "total_tokens": data["total_tokens"],
+            "avg_prompt_tokens_per_action": data["prompt_tokens"] / actions,
+            "avg_completion_tokens_per_action": data["completion_tokens"] / actions,
+            "avg_tokens_per_action": data["total_tokens"] / actions
+        }
+        
     def get_model_metrics(self, model_id):
         """Get comprehensive metrics for a specific model"""
         return {
@@ -160,7 +210,9 @@ class GameMetrics:
             "average_final_bid": self.calculate_average_final_bid(model_id),
             "bid_optimality": self.calculate_bid_optimality(model_id),
             "adaptation_score": self.calculate_adaptation_score(model_id),
-            "rule_adherence_rate": self.calculate_rule_adherence_rate(model_id)
+            "rule_adherence_rate": self.calculate_rule_adherence_rate(model_id),
+            "avg_api_response_time": self.calculate_avg_api_response_time(model_id),
+            "token_usage": self.calculate_token_metrics(model_id)
         }
     
     def get_all_metrics(self):

@@ -2,6 +2,11 @@ import random
 import os
 import time
 import json
+import concurrent.futures
+import pickle
+import signal
+import sys
+import threading
 
 # Import requests only if available
 try:
@@ -10,22 +15,34 @@ except ImportError:
     pass
 
 from .player import Player
-from .ai_player import AIPlayer, OPENROUTER_AVAILABLE
+from .ai_player import (
+    AIPlayer, REQUESTS_AVAILABLE,
+    PROVIDER_OPENROUTER, PROVIDER_LOCAL
+)
 from .metrics import GameMetrics, BidAnalyzer
 
 class LiarsDice:
-    def __init__(self):
-        self.players = []
-        self.current_player_idx = 0
-        self.last_bid = None
-        self.total_dice_in_game = 0
-        self.game_over = False
-        self.winner = None
-        self.move_history = []  # Track all moves in the game
-        self.round_number = 1   # Track game rounds
-        self.metrics = GameMetrics()  # Initialize metrics tracking
-        self.player_history = {}  # Track player actions across games
-        self.bid_analyzer = BidAnalyzer()  # For analyzing bid optimality
+    def __init__(self, save_file=None):
+        if save_file and os.path.exists(save_file):
+            self.load_game_state(save_file)
+        else:
+            self.players = []
+            self.current_player_idx = 0
+            self.last_bid = None
+            self.total_dice_in_game = 0
+            self.game_over = False
+            self.winner = None
+            self.move_history = []  # Track all moves in the game
+            self.round_number = 1   # Track game rounds
+            self.metrics = GameMetrics()  # Initialize metrics tracking
+            self.player_history = {}  # Track player actions across games
+            self.bid_analyzer = BidAnalyzer()  # For analyzing bid optimality
+            self.save_file = save_file
+        
+        # We'll set the signal handler in the main thread only to avoid 
+        # "signal only works in main thread" errors in multi-threaded environments
+        if threading.current_thread() is threading.main_thread():
+            signal.signal(signal.SIGINT, self._signal_handler)
     
     def clear_screen(self):
         # os.system('cls' if os.name == 'nt' else 'clear')
@@ -37,33 +54,42 @@ class LiarsDice:
         # Initialize player history tracking
         self.player_history[name] = []
     
-    def add_ai_player(self, name, model, api_key=None, api_url=None):
-        if not OPENROUTER_AVAILABLE:
+    def add_ai_player(self, name, model, provider=PROVIDER_OPENROUTER, api_key=None, api_url=None, project_id=None, region=None):
+        if not REQUESTS_AVAILABLE:
             print("Requests package is not installed. Install with 'pip install requests'")
             return False
         
-        ai_player = AIPlayer(name, model, api_key, api_url)
+        ai_player = AIPlayer(
+            name=name, 
+            model=model, 
+            provider=provider,
+            api_key=api_key, 
+            api_url=api_url,
+            project_id=project_id,
+            region=region
+        )
         self.players.append(ai_player)
+        
         # Initialize AI metrics tracking
         self.metrics.initialize_model(model)
+        
         # Initialize player history tracking
         self.player_history[name] = []
         return True
         
-    def get_available_models(self, use_local_endpoint=False):
-        """Return a list of available models from OpenRouter and local server"""
+    def get_available_models(self, use_local_endpoint=False, use_vertex_ai=False):
+        """Return a list of available models from OpenRouter, Google Vertex AI, and local server"""
         # Hardcoded local endpoint URL
         LOCAL_ENDPOINT_URL = "http://127.0.0.1:1234"
         
         default_models = []
-        
         models = []
         
         # Check if we have an OpenRouter API key
         openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
         
         # First try to get OpenRouter models
-        if OPENROUTER_AVAILABLE and openrouter_api_key:
+        if REQUESTS_AVAILABLE and openrouter_api_key:
             try:
                 headers = {
                     "Authorization": f"Bearer {openrouter_api_key}"
@@ -77,10 +103,12 @@ class LiarsDice:
                     for model in data["data"]:
                         models.append({
                             "id": model["id"],
-                            "provider": "openrouter",
+                            "provider": PROVIDER_OPENROUTER,
                             "name": model["id"],
                             "api_key": openrouter_api_key,
-                            "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                            "api_url": "https://openrouter.ai/api/v1/chat/completions",
+                            "project_id": None,
+                            "region": None
                         })
                 else:
                     print(f"Error fetching OpenRouter models: {response.status_code}")
@@ -88,10 +116,12 @@ class LiarsDice:
                     for model in default_models:
                         models.append({
                             "id": model,
-                            "provider": "openrouter",
+                            "provider": PROVIDER_OPENROUTER,
                             "name": model,
                             "api_key": openrouter_api_key,
-                            "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                            "api_url": "https://openrouter.ai/api/v1/chat/completions",
+                            "project_id": None,
+                            "region": None
                         })
             except Exception as e:
                 print(f"Error fetching OpenRouter models: {e}")
@@ -99,24 +129,29 @@ class LiarsDice:
                 for model in default_models:
                     models.append({
                         "id": model,
-                        "provider": "openrouter",
+                        "provider": PROVIDER_OPENROUTER,
                         "name": model,
                         "api_key": openrouter_api_key,
-                        "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                        "api_url": "https://openrouter.ai/api/v1/chat/completions",
+                        "project_id": None,
+                        "region": None
                     })
         else:
             # Fall back to default models
             for model in default_models:
                 models.append({
                     "id": model,
-                    "provider": "openrouter",
+                    "provider": PROVIDER_OPENROUTER,
                     "name": model,
                     "api_key": openrouter_api_key,
-                    "api_url": "https://openrouter.ai/api/v1/chat/completions"
+                    "api_url": "https://openrouter.ai/api/v1/chat/completions",
+                    "project_id": None,
+                    "region": None
                 })
         
+        
         # Add local models by fetching from the models endpoint
-        if use_local_endpoint and OPENROUTER_AVAILABLE:
+        if use_local_endpoint and REQUESTS_AVAILABLE:
             try:
                 print(f"Fetching models from local server at {LOCAL_ENDPOINT_URL}...")
                 
@@ -132,10 +167,12 @@ class LiarsDice:
                         for model in data["data"]:
                             models.append({
                                 "id": f"{model.get('id', 'unknown')}",
-                                "provider": "local",
+                                "provider": PROVIDER_LOCAL,
                                 "name": model.get('id', 'unknown'),
                                 "api_key": None,
-                                "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                                "project_id": None,
+                                "region": None
                             })
                     elif "models" in data:
                         # Alternative format
@@ -143,18 +180,22 @@ class LiarsDice:
                             if isinstance(model, str):
                                 models.append({
                                     "id": f"local/{model}",
-                                    "provider": "local",
+                                    "provider": PROVIDER_LOCAL,
                                     "name": model,
                                     "api_key": None,
-                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                                    "project_id": None,
+                                    "region": None
                                 })
                             elif isinstance(model, dict) and "id" in model:
                                 models.append({
                                     "id": f"local/{model['id']}",
-                                    "provider": "local",
+                                    "provider": PROVIDER_LOCAL,
                                     "name": model["id"],
                                     "api_key": None,
-                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                                    "project_id": None,
+                                    "region": None
                                 })
                     else:
                         # If no standard format, try to extract any model identifiers
@@ -164,18 +205,22 @@ class LiarsDice:
                                     if isinstance(item, str):
                                         models.append({
                                             "id": f"local/{item}",
-                                            "provider": "local",
+                                            "provider": PROVIDER_LOCAL,
                                             "name": item,
-                                            "api_key": None,
-                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                            "api_key": None, 
+                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                                            "project_id": None,
+                                            "region": None
                                         })
                                     elif isinstance(item, dict) and "id" in item:
                                         models.append({
                                             "id": f"local/{item['id']}",
-                                            "provider": "local",
+                                            "provider": PROVIDER_LOCAL,
                                             "name": item["id"],
                                             "api_key": None,
-                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                                            "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                                            "project_id": None,
+                                            "region": None
                                         })
                 
                 else:
@@ -183,10 +228,12 @@ class LiarsDice:
                     # Add a default local model
                     models.append({
                         "id": "local/default-model",
-                        "provider": "local",
+                        "provider": PROVIDER_LOCAL,
                         "name": "default-model",
                         "api_key": None,
-                        "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                        "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                        "project_id": None,
+                        "region": None
                     })
                     
             except Exception as e:
@@ -194,14 +241,16 @@ class LiarsDice:
                 # Add a default local model
                 models.append({
                     "id": "local/default-model",
-                    "provider": "local",
+                    "provider": PROVIDER_LOCAL,
                     "name": "default-model",
                     "api_key": None,
-                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions"
+                    "api_url": f"{LOCAL_ENDPOINT_URL}/v1/chat/completions",
+                    "project_id": None,
+                    "region": None
                 })
         
         # Sort models to group them by provider
-        models.sort(key=lambda x: x["id"])
+        models.sort(key=lambda x: x["provider"] + "/" + x["id"])
         
         return models
         
@@ -232,7 +281,7 @@ class LiarsDice:
         if game_mode == 1:  # Human only
             ai_count = 0
         elif game_mode == 2:  # Mix of human and AI
-            if OPENROUTER_AVAILABLE:
+            if REQUESTS_AVAILABLE:
                 try:
                     ai_count = int(input("How many AI players? "))
                     if ai_count > num_players:
@@ -245,7 +294,7 @@ class LiarsDice:
                 print("Requests package is not installed. Install with 'pip install requests'")
                 ai_count = 0
         elif game_mode == 3:  # AI only (model vs model)
-            if OPENROUTER_AVAILABLE:
+            if REQUESTS_AVAILABLE:
                 ai_count = num_players
                 all_ai_game = True
             else:
@@ -264,6 +313,7 @@ class LiarsDice:
         # Ask about local LLM server
         use_local_endpoint = input("\nDo you want to use a local LLM server at http://127.0.0.1:1234? (y/n): ").lower().strip() == 'y'
         
+        
         human_count = num_players - ai_count
         
         # Add human players
@@ -274,7 +324,7 @@ class LiarsDice:
         # Add AI players
         if ai_count > 0:
             # Get available models (including local models if enabled)
-            available_models = self.get_available_models(use_local_endpoint)
+            available_models = self.get_available_models(use_local_endpoint, False)
             
             if not available_models:
                 print("No models available. Check your API key and connection.")
@@ -284,7 +334,10 @@ class LiarsDice:
             for i, model in enumerate(available_models):
                 provider = model["provider"]
                 model_name = model["id"]
-                print(f"{i+1}. {model_name}{' (Local)' if provider == 'local' else ''}")
+                provider_label = ""
+                if provider == PROVIDER_LOCAL:
+                    provider_label = " (Local)"
+                print(f"{i+1}. {model_name}{provider_label}")
             
             if all_ai_game:
                 print("\nSetting up AI vs AI game...")
@@ -303,12 +356,13 @@ class LiarsDice:
                     
                     model_info = available_models[model_idx]
                     model_id = model_info["id"]
+                    provider = model_info["provider"]
                     
                     # Get a readable model name for the player name
                     model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
                     
                     # Name the AI based on the model
-                    if model_info["provider"] == "local":
+                    if provider == PROVIDER_LOCAL:
                         default_name = f"LOCAL-{model_short_name.upper()}-{i+1}"
                     else:
                         default_name = f"{model_short_name.upper()}-{i+1}"
@@ -321,8 +375,11 @@ class LiarsDice:
                     self.add_ai_player(
                         name=name,
                         model=model_id,
+                        provider=model_info["provider"],
                         api_key=model_info["api_key"],
-                        api_url=model_info["api_url"]
+                        api_url=model_info["api_url"],
+                        project_id=model_info["project_id"],
+                        region=model_info["region"]
                     )
                     print(f"Added AI player '{name}' using model: {model_id}")
             else:
@@ -340,12 +397,13 @@ class LiarsDice:
                     
                     model_info = available_models[model_idx]
                     model_id = model_info["id"]
+                    provider = model_info["provider"]
                     
                     # Get a readable model name for the player name
                     model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
                     
                     # Name the AI
-                    if model_info["provider"] == "local":
+                    if provider == PROVIDER_LOCAL:
                         default_name = f"LOCAL-{model_short_name}-{i+1}"
                     else:
                         default_name = f"{model_short_name}-{i+1}"
@@ -358,8 +416,11 @@ class LiarsDice:
                     self.add_ai_player(
                         name=name,
                         model=model_id,
+                        provider=model_info["provider"],
                         api_key=model_info["api_key"],
-                        api_url=model_info["api_url"]
+                        api_url=model_info["api_url"],
+                        project_id=model_info["project_id"],
+                        region=model_info["region"]
                     )
                     print(f"Added AI player '{name}' using model: {model_id}")
         
@@ -420,6 +481,194 @@ class LiarsDice:
             "round_number": self.round_number
         }
     
+    def get_ai_decisions_parallel(self, players, max_workers=10):
+        """Get AI decisions for multiple players in parallel"""
+        if not players:
+            return {}
+            
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Prepare the futures - don't make actual API calls yet
+            futures = {}
+            for player in players:
+                if isinstance(player, AIPlayer):
+                    # Create game state for this player
+                    game_state = self.create_game_state_for_ai(self.players.index(player))
+                    
+                    # Get request parameters without making API call
+                    request_params = player.get_prompt_and_params(game_state)
+                    
+                    # Submit API call to the thread pool
+                    future = executor.submit(
+                        requests.post,
+                        request_params["endpoint_url"],
+                        headers=request_params["headers"],
+                        json=request_params["data"]
+                    )
+                    futures[player] = {
+                        "future": future,
+                        "game_state": game_state, 
+                        "start_time": time.time()
+                    }
+                    
+            # Collect the results
+            results = {}
+            for player, future_data in futures.items():
+                try:
+                    future = future_data["future"]
+                    game_state = future_data["game_state"]
+                    start_time = future_data["start_time"]
+                    
+                    # Get the response
+                    response = future.result()
+                    response_time = time.time() - start_time
+                    
+                    # Process the response
+                    decision = player.process_api_response(response, response_time, game_state)
+                    results[player] = decision
+                except Exception as e:
+                    print(f"Error getting AI decision for {player.name}: {e}")
+                    results[player] = None
+                    
+            return results
+    
+    def _process_ai_liar_call(self, player, decision):
+        """Process an AI player's decision to call liar"""
+        if not self.last_bid:
+            # AI shouldn't call liar on first turn, make a bid instead
+            print(f"{player.name} decides to make a bid.")
+            self.last_bid = (1, random.randint(3, 6))
+            print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
+            
+            # Record rule adherence issue - called liar when not allowed
+            if isinstance(player, AIPlayer):
+                self.metrics.record_rule_adherence(player.model, False)
+                
+            return False
+        
+        # Check if calling liar is optimal
+        is_optimal_call = BidAnalyzer.should_call_liar(
+            player.dice, 
+            player.get_dice_count(), 
+            self.total_dice_in_game, 
+            self.last_bid
+        )
+        
+        # Record bid optimality
+        if isinstance(player, AIPlayer):
+            self.metrics.record_bid_optimality(player.model, is_optimal_call)
+        
+        # Record liar call in history
+        move_data = {
+            "round": len(self.move_history) + 1,
+            "player": player.name,
+            "action": "liar",
+            "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name,
+            "is_optimal": is_optimal_call
+        }
+        self.move_history.append(move_data)
+        
+        # Track in player history
+        self.player_history[player.name].append(move_data)
+        
+        print(f"{player.name} calls 'Liar!' on the previous bid.")
+        
+        # Record rule adherence - valid move
+        if isinstance(player, AIPlayer):
+            self.metrics.record_rule_adherence(player.model, True)
+            
+        return True
+        
+    def _process_ai_bid(self, player, decision):
+        """Process an AI player's decision to make a bid"""
+        quantity = decision["quantity"]
+        value = decision["value"]
+        
+        # Validate the bid
+        valid_bid = True
+        if quantity < 1 or value < 1 or value > 6:
+            valid_bid = False
+        
+        # Check if bid is higher than the last bid
+        if self.last_bid and valid_bid:
+            last_quantity, last_value = self.last_bid
+            
+            # Bid must be higher
+            if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
+                valid_bid = False
+        
+        # Check if this bid is mathematically optimal
+        is_optimal_bid = BidAnalyzer.is_bid_optimal(
+            player.dice, 
+            player.get_dice_count(), 
+            self.total_dice_in_game, 
+            self.last_bid, 
+            (quantity, value)
+        ) if valid_bid else False
+        
+        # Record rule adherence
+        if isinstance(player, AIPlayer):
+            self.metrics.record_rule_adherence(player.model, valid_bid)
+        
+        # Is this likely a bluff?
+        player_dice_count = player.dice.count(value)
+        is_bluff = player_dice_count < quantity / 2
+        
+        if valid_bid:
+            self.last_bid = (quantity, value)
+            
+            # Record bid optimality
+            if isinstance(player, AIPlayer):
+                self.metrics.record_bid_optimality(player.model, is_optimal_bid)
+                
+            # Record move in history with bluff info
+            move_data = {
+                "round": len(self.move_history) + 1,
+                "player": player.name,
+                "action": "bid",
+                "quantity": quantity,
+                "value": value,
+                "bluff": is_bluff,
+                "is_optimal": is_optimal_bid
+            }
+            self.move_history.append(move_data)
+            
+            # Track in player history
+            self.player_history[player.name].append(move_data)
+            
+            print(f"{player.name} bids {quantity} {value}'s")
+            return False
+        else:
+            # If AI made an invalid bid, make a safe valid bid
+            if self.last_bid:
+                last_quantity, last_value = self.last_bid
+                if last_value < 6:
+                    self.last_bid = (last_quantity, last_value + 1)
+                else:
+                    self.last_bid = (last_quantity + 1, 1)
+            else:
+                self.last_bid = (1, random.randint(3, 6))
+            
+            # Record in metrics that AI made an invalid bid
+            if isinstance(player, AIPlayer):
+                self.metrics.record_rule_adherence(player.model, False)
+            
+            # Record move in history
+            move_data = {
+                "round": len(self.move_history) + 1,
+                "player": player.name,
+                "action": "bid",
+                "quantity": self.last_bid[0],
+                "value": self.last_bid[1],
+                "invalid_bid_corrected": True
+            }
+            self.move_history.append(move_data)
+            
+            # Track in player history
+            self.player_history[player.name].append(move_data)
+            
+            print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
+            return False
+    
     def get_player_bid(self, player_idx):
         player = self.players[player_idx]
         
@@ -436,6 +685,20 @@ class LiarsDice:
             try:
                 # Get AI decision
                 decision = player.get_ai_decision(game_state)
+                
+                # Record API response time if available
+                if isinstance(player, AIPlayer) and 'response_time' in game_state:
+                    self.metrics.record_api_response_time(player.model, game_state['response_time'])
+                    
+                # Record token usage if available
+                if isinstance(player, AIPlayer) and 'token_usage' in game_state:
+                    usage = game_state['token_usage']
+                    self.metrics.record_token_usage(
+                        player.model,
+                        usage.get('prompt_tokens', 0),
+                        usage.get('completion_tokens', 0),
+                        usage.get('total_tokens', 0)
+                    )
                 
                 if decision["action"] == "liar":
                     if not self.last_bid:
@@ -608,73 +871,57 @@ class LiarsDice:
                 print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
                 return False
         
-        # Human player logic
-        while True:
-            print("\nOptions:")
-            print("1. Make a bid")
-            print("2. Call 'Liar!' on the previous bid")
-            
-            choice = input("Enter your choice (1 or 2): ").strip()
-            
-            if choice == "1":
-                try:
-                    quantity = int(input("How many dice? "))
-                    value = int(input("What value (1-6)? "))
-                    
-                    if quantity < 1 or value < 1 or value > 6:
-                        print("Invalid bid. Quantity must be positive and value must be between 1 and 6.")
-                        continue
-                    
-                    # Check if bid is higher than the last bid
-                    if self.last_bid:
-                        last_quantity, last_value = self.last_bid
-                        
-                        # Bid must be higher
-                        if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
-                            print("Your bid must be higher than the previous bid.")
-                            continue
-                    
-                    self.last_bid = (quantity, value)
-                    
-                    # Record move in history
-                    self.move_history.append({
-                        "round": len(self.move_history) + 1,
-                        "player": player.name,
-                        "action": "bid",
-                        "quantity": quantity,
-                        "value": value
-                    })
-                    
-                    return False  # Not calling liar
-                except ValueError:
-                    print("Please enter valid numbers.")
-            
-            elif choice == "2":
-                if not self.last_bid:
-                    print("There is no previous bid to call 'Liar!' on.")
-                    continue
-
-                # Determine the actual previous player who made the last bid
-                previous_bidder = None
-                for move in reversed(self.move_history):
-                    if move["action"] == "bid":
-                        previous_bidder = move["player"]
-                        break
+        # Human player logic - now handled directly in play_round
+        # This is only reached if we're showing command options in play_round
+        if not self.last_bid:
+            print("You're making the first bid.")
+        else:
+            last_quantity, last_value = self.last_bid
+            print(f"Previous bid: {last_quantity} {last_value}'s")
         
-                previous_player = next(p for p in self.players if p.name == previous_bidder)
-                
-                # Record liar call in history
-                self.move_history.append({
-                    "round": len(self.move_history) + 1,
-                    "player": player.name,
-                    "action": "liar",
-                    "target_player": previous_player
-                })
-                
-                return True  # Calling liar2
+        try:
+            quantity = int(input("How many dice? "))
+            value = int(input("What value (1-6)? "))
             
-            else:
-                print("Invalid choice. Please enter 1 or 2.")
+            if quantity < 1 or value < 1 or value > 6:
+                print("Invalid bid. Quantity must be positive and value must be between 1 and 6.")
+                return False
+            
+            # Check if bid is higher than the last bid
+            if self.last_bid:
+                last_quantity, last_value = self.last_bid
+                
+                # Bid must be higher
+                if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
+                    print("Your bid must be higher than the previous bid.")
+                    return False
+            
+            self.last_bid = (quantity, value)
+            
+            # Record move in history
+            self.move_history.append({
+                "round": len(self.move_history) + 1,
+                "player": player.name,
+                "action": "bid",
+                "quantity": quantity,
+                "value": value
+            })
+            
+            # Add to player history
+            if player.name not in self.player_history:
+                self.player_history[player.name] = []
+            self.player_history[player.name].append({
+                "round": len(self.move_history),
+                "player": player.name,
+                "action": "bid",
+                "quantity": quantity,
+                "value": value
+            })
+            
+            return False  # Not calling liar
+        except ValueError:
+            print("Please enter valid numbers.")
+            return False
     
     def count_dice(self, value):
         count = 0
@@ -843,12 +1090,67 @@ class LiarsDice:
         # Start by rolling all dice and display round number
         self.roll_all_dice()
         print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
-
+        
         while not self.game_over:
             current_player = self.players[self.current_player_idx]
             self.show_dice_to_player(self.current_player_idx)
             
-            is_calling_liar = self.get_player_bid(self.current_player_idx)
+            is_calling_liar = False
+            
+            # Offer pause option for human players only (not in auto mode)
+            if not auto_mode and not isinstance(current_player, AIPlayer):
+                print("\nOptions:")
+                print("1. Make a bid")
+                print("2. Call 'Liar!' on the previous bid")
+                print("3. Pause game")
+                
+                choice = input("Enter your choice (1, 2, or 3): ").strip()
+                
+                if choice == "3":
+                    save_path = self.save_game_state()
+                    print(f"\nGame paused and saved to {save_path}")
+                    print("You can resume this game later by running:")
+                    print(f"python main.py --load {save_path}")
+                    return "paused"
+                elif choice == "1":
+                    # Player is making a bid, proceed to get_player_bid
+                    is_calling_liar = False
+                elif choice == "2":
+                    # Player is calling liar
+                    if not self.last_bid:
+                        print("There is no previous bid to call 'Liar!' on.")
+                        continue
+                        
+                    # Determine the actual previous player who made the last bid
+                    previous_bidder = None
+                    for move in reversed(self.move_history):
+                        if move["action"] == "bid":
+                            previous_bidder = move["player"]
+                            break
+                    
+                    previous_player = next(p for p in self.players if p.name == previous_bidder)
+                    
+                    # Record liar call in history
+                    liar_call = {
+                        "round": len(self.move_history) + 1,
+                        "player": current_player.name,
+                        "action": "liar",
+                        "target_player": previous_player.name
+                    }
+                    self.move_history.append(liar_call)
+                    
+                    # Add to player history
+                    if current_player.name not in self.player_history:
+                        self.player_history[current_player.name] = []
+                    self.player_history[current_player.name].append(liar_call)
+                    
+                    is_calling_liar = True
+                else:
+                    print("Invalid choice. Please enter 1, 2, or 3.")
+                    continue
+            else:
+                # For AI players, get decision
+                is_calling_liar = self.get_player_bid(self.current_player_idx)
             
             if is_calling_liar:
                 self.handle_liar_call(auto_continue=auto_mode)
@@ -862,6 +1164,7 @@ class LiarsDice:
                 self.roll_all_dice()
                 continue
             
+            # Advance to next player
             self.next_player()
     
     def display_game_summary(self):
@@ -899,6 +1202,28 @@ class LiarsDice:
                     successful_bluffs[player] = successful_bluffs.get(player, 0) + 1
         
         # Display player statistics
+        # Calculate token usage summary
+        total_prompt_tokens = 0
+        total_completion_tokens = 0
+        total_tokens = 0
+        total_ai_actions = 0
+        
+        for model_id in self.metrics.token_usage:
+            data = self.metrics.token_usage[model_id]
+            total_prompt_tokens += data["prompt_tokens"]
+            total_completion_tokens += data["completion_tokens"]
+            total_tokens += data["total_tokens"]
+            total_ai_actions += data["actions"]
+            
+        # Display token usage summary if any
+        if total_tokens > 0:
+            print("\nToken Usage Summary:")
+            print(f"  Total Tokens: {total_tokens}")
+            print(f"  Prompt Tokens: {total_prompt_tokens}")
+            print(f"  Completion Tokens: {total_completion_tokens}")
+            print(f"  Total AI Actions: {total_ai_actions}")
+            print(f"  Avg Tokens per Action: {(total_tokens / total_ai_actions) if total_ai_actions > 0 else 0:.1f}")
+            
         print("\nPlayer Statistics:")
         for player in self.players:
             name = player.name
@@ -924,6 +1249,14 @@ class LiarsDice:
                     print(f"    - Bid optimality: {all_metrics['bid_optimality']:.1f}%")
                     print(f"    - Adaptation score: {all_metrics['adaptation_score']:.1f}%")
                     print(f"    - Rule adherence rate: {all_metrics['rule_adherence_rate']:.1f}%")
+                    print(f"    - Avg API response time: {all_metrics['avg_api_response_time']:.2f} seconds")
+                    
+                    # Print token usage if available
+                    if 'token_usage' in all_metrics:
+                        token_usage = all_metrics['token_usage']
+                        print(f"    - Token usage:")
+                        print(f"      - Total tokens: {token_usage['total_tokens']}")
+                        print(f"      - Avg tokens per action: {token_usage['avg_tokens_per_action']:.1f}")
             print(f"    - Total moves: {total_moves}")
             print(f"    - Liar calls: {liar_calls} (Success rate: {call_success_rate:.1f}%)")
             print(f"    - Bluffs: {bluffs} (Success rate: {bluff_success_rate:.1f}%)")
@@ -933,9 +1266,164 @@ class LiarsDice:
     def get_metrics(self):
         """Return all collected metrics"""
         return self.metrics.get_all_metrics()
+        
+    def _serialize_player(self, player):
+        """Convert a Player object to a serializable dictionary"""
+        if player is None:
+            return None
+            
+        data = {
+            "name": player.name,
+            "dice": player.dice,
+            "num_dice": player.get_dice_count()
+        }
+        
+        # Add AI-specific data if it's an AI player
+        if isinstance(player, AIPlayer):
+            data.update({
+                "is_ai": True,
+                "model": player.model,
+                "provider": player.provider,
+                "api_key": player.api_key,
+                "api_url": player.api_url,
+                "project_id": player.project_id,
+                "region": player.region
+            })
+        else:
+            data["is_ai"] = False
+            
+        return data
     
-    def play_game(self):
-        self.setup_game()
+    def _deserialize_player(self, data):
+        """Create a Player object from serialized data"""
+        if data is None:
+            return None
+            
+        if data.get("is_ai", False):
+            player = AIPlayer(
+                name=data["name"],
+                model=data["model"],
+                provider=data["provider"],
+                api_key=data["api_key"],
+                api_url=data["api_url"],
+                project_id=data["project_id"],
+                region=data["region"]
+            )
+        else:
+            player = Player(data["name"])
+            
+        player.dice = data["dice"]
+        return player
+    
+    def save_game_state(self, filepath=None):
+        """Save the current game state to a file"""
+        if filepath is None:
+            if hasattr(self, 'save_file') and self.save_file:
+                filepath = self.save_file
+            else:
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                filepath = f"liars_dice_save_{timestamp}.json"
+                self.save_file = filepath
+        
+        print(f"\nSaving game state to {filepath}...")
+        
+        # Prepare serializable game state
+        game_state = {
+            "players": [self._serialize_player(p) for p in self.players],
+            "current_player_idx": self.current_player_idx,
+            "last_bid": self.last_bid,
+            "total_dice_in_game": self.total_dice_in_game,
+            "game_over": self.game_over,
+            "winner": self._serialize_player(self.winner) if self.winner else None,
+            "move_history": self.move_history,
+            "round_number": self.round_number,
+            "player_history": self.player_history,
+            # Save metrics data
+            "metrics": {
+                "elo_ratings": self.metrics.elo_ratings,
+                "bluff_stats": self.metrics.bluff_data,
+                "lie_detection_stats": self.metrics.lie_detection_data,
+                "final_bids": self.metrics.final_bids,
+                "bid_optimality_stats": self.metrics.bid_optimality,
+                "rule_adherence_stats": self.metrics.rule_adherence,
+                "adaptation_stats": self.metrics.adaptation_scores,
+                "api_response_times": self.metrics.api_response_times,
+                "token_usage": self.metrics.token_usage
+            }
+        }
+        
+        with open(filepath, 'w') as f:
+            json.dump(game_state, f, indent=2)
+        
+        print(f"Game saved successfully to {filepath}")
+        return filepath
+    
+    def load_game_state(self, filepath):
+        """Load game state from a file"""
+        print(f"\nLoading game from {filepath}...")
+        
+        try:
+            with open(filepath, 'r') as f:
+                game_state = json.load(f)
+            
+            # Reconstruct the players
+            self.players = [self._deserialize_player(p) for p in game_state["players"]]
+            
+            # Restore game state
+            self.current_player_idx = game_state["current_player_idx"]
+            self.last_bid = game_state["last_bid"]
+            self.total_dice_in_game = game_state["total_dice_in_game"]
+            self.game_over = game_state["game_over"]
+            self.move_history = game_state["move_history"]
+            self.round_number = game_state["round_number"]
+            self.player_history = game_state["player_history"]
+            self.save_file = filepath
+            
+            # Reconstruct the winner if exists
+            if game_state["winner"]:
+                winner_name = game_state["winner"]["name"]
+                self.winner = next((p for p in self.players if p.name == winner_name), None)
+            else:
+                self.winner = None
+            
+            # Reconstruct metrics
+            metrics_data = game_state.get("metrics", {})
+            self.metrics = GameMetrics()
+            self.metrics.elo_ratings = metrics_data.get("elo_ratings", {})
+            self.metrics.bluff_data = metrics_data.get("bluff_stats", {})
+            self.metrics.lie_detection_data = metrics_data.get("lie_detection_stats", {})
+            self.metrics.final_bids = metrics_data.get("final_bids", {})
+            self.metrics.bid_optimality = metrics_data.get("bid_optimality_stats", {})
+            self.metrics.rule_adherence = metrics_data.get("rule_adherence_stats", {})
+            self.metrics.adaptation_scores = metrics_data.get("adaptation_stats", {})
+            self.metrics.api_response_times = metrics_data.get("api_response_times", {})
+            self.metrics.token_usage = metrics_data.get("token_usage", {})
+            
+            # Initialize the BidAnalyzer
+            self.bid_analyzer = BidAnalyzer()
+            
+            print("Game loaded successfully!")
+            return True
+        except Exception as e:
+            print(f"Error loading game: {e}")
+            return False
+    
+    def _signal_handler(self, sig, frame):
+        """Handle Ctrl+C by saving the game and exiting gracefully"""
+        print("\n\nInterrupt received! Saving game before exit...")
+        if not self.game_over:
+            save_path = self.save_game_state()
+            print(f"\nGame was saved to {save_path}")
+            print("You can resume this game later by running:")
+            print(f"python main.py --load {save_path}")
+        print("Exiting...")
+        sys.exit(0)
+    
+    def play_game(self, load_from=None):
+        if not load_from:
+            self.setup_game()
+        else:
+            print(f"Resuming saved game from {load_from}...")
         
         # Check if this is an all-AI game
         all_ai_game = all(isinstance(player, AIPlayer) for player in self.players)
@@ -951,11 +1439,40 @@ class LiarsDice:
                 print("Press Ctrl+C at any time to interrupt.")
                 time.sleep(2)
         
+        # Setup regular autosave
+        should_autosave = True
+        autosave_interval = 2  # Autosave every 2 rounds
+        
+        if not self.game_over:
+            print("\nGame controls:")
+            print("- At your turn, you can choose option 3 to pause the game")
+            print("- Press Ctrl+C at any time to save and exit")
+            print(f"- The game will autosave every {autosave_interval} rounds\n")
+            time.sleep(1)
+        
         while not self.game_over:
-            self.play_round(auto_mode=auto_mode, game_num=0)
+            # Autosave at regular intervals
+            if should_autosave and self.round_number % autosave_interval == 0:
+                self.save_game_state()
+                
+            result = self.play_round(auto_mode=auto_mode, game_num=0)
+            
+            # Check if the game was paused
+            if result == "paused":
+                return "paused"
         
         self.clear_screen()
         print(f"\nGame over! {self.winner.name} is the winner!")
         
         # Display game summary
         self.display_game_summary()
+        
+        # Delete save file when game completes successfully
+        if hasattr(self, 'save_file') and self.save_file and os.path.exists(self.save_file):
+            try:
+                os.remove(self.save_file)
+                print(f"\nSave file {self.save_file} has been deleted as the game is complete.")
+            except Exception as e:
+                print(f"Could not delete save file: {e}")
+                
+        return "completed"

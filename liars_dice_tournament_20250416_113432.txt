@@ -1,0 +1,838 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-16 11:34:32
+Total Games: 100
+Models per Game: 6
+
+Providers Used: meta-llama
+
+LEADERBOARD
+================================================================================
+Rank  Model                         Elo       Win Rate       Wins      Games     
+--------------------------------------------------------------------------------
+1     meta-llama/llama-3.2-1b-i...  984.0     66.0%          66        100       
+2     meta-llama/llama-3.2-3b-i...  1016.0    28.0%          28        100       
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-3.2-1b-instruct
+   Provider: meta-llama
+   Win Rate: 66.0%
+   Games Won: 66 / 100
+   Avg. Rounds per Game: 7.2
+   Elo Rating: 984.0
+   Bluff Success Rate: 3.2%
+   Lie Detection (Precision): 89.7%
+   Lie Detection (Recall): 71.9%
+   Lie Detection (F1): 74.8%
+   Average Final Bid: 6.05
+   Bid Optimality: 25.2%
+   Adaptation Score: 33.0%
+   Rule Adherence Rate: 28.2%
+   Avg API Response Time: 3.72 seconds
+   Token Usage:
+     - Total Tokens: 24848.07
+     - Prompt Tokens: 22655.17
+     - Completion Tokens: 2192.9
+     - Avg Tokens Per Action: 1137.0
+   Liar Call Success Rate: 96.1%
+   Liar Calls: 220 successful, 9 unsuccessful
+   Playing Style: 2097 bids, 229 liar calls (9.8% liar calls)
+   Wins by Game Length: 66 early, 0 mid, 0 long
+
+2. meta-llama/llama-3.2-3b-instruct
+   Provider: meta-llama
+   Win Rate: 28.0%
+   Games Won: 28 / 100
+   Avg. Rounds per Game: 7.2
+   Elo Rating: 1016.0
+   Bluff Success Rate: 1.6%
+   Lie Detection (Precision): 87.4%
+   Lie Detection (Recall): 46.9%
+   Lie Detection (F1): 55.8%
+   Average Final Bid: 6.48
+   Bid Optimality: 31.0%
+   Adaptation Score: 32.0%
+   Rule Adherence Rate: 37.5%
+   Avg API Response Time: 1.12 seconds
+   Token Usage:
+     - Total Tokens: 27362.43
+     - Prompt Tokens: 25585.71
+     - Completion Tokens: 1776.72
+     - Avg Tokens Per Action: 1092.8
+   Liar Call Success Rate: 93.0%
+   Liar Calls: 254 successful, 19 unsuccessful
+   Playing Style: 2131 bids, 273 liar calls (11.4% liar calls)
+   Wins by Game Length: 28 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 72:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 27
+
+Game 80:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 32
+
+Game 24:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 33
+
+Game 78:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 28
+
+Game 69:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 32
+
+Game 98:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 35
+
+Game 23:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 33
+
+Game 15:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 30
+
+Game 51:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 38
+
+Game 5:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 44
+
+Game 33:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 42
+
+Game 30:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 46
+
+Game 100:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 41
+
+Game 28:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 47
+
+Game 16:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 40
+
+Game 89:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 36
+
+Game 32:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 31
+
+Game 37:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 44
+
+Game 8:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 36
+
+Game 21:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 37
+
+Game 91:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 46
+
+Game 12:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 38
+
+Game 17:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 42
+
+Game 54:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 48
+
+Game 70:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 5
+  Total Moves: 43
+
+Game 55:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 43
+
+Game 48:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 37
+
+Game 56:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 36
+
+Game 81:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 47
+
+Game 20:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 38
+
+Game 60:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 49
+
+Game 18:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 41
+
+Game 35:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 42
+
+Game 41:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 39
+
+Game 52:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 37
+
+Game 83:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 44
+
+Game 38:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 5
+  Total Moves: 50
+
+Game 47:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 47
+
+Game 62:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 39
+
+Game 66:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 64
+
+Game 92:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 45
+
+Game 94:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 47
+
+Game 53:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 36
+
+Game 74:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 47
+
+Game 88:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 59
+
+Game 9:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 52
+
+Game 61:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 47
+
+Game 67:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 59
+
+Game 87:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 54
+
+Game 11:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 55
+
+Game 82:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 57
+
+Game 86:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 58
+
+Game 71:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 57
+
+Game 43:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 47
+
+Game 77:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 8
+  Total Moves: 57
+
+Game 25:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 52
+
+Game 4:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 57
+
+Game 75:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 58
+
+Game 26:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 53
+
+Game 50:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 59
+
+Game 36:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 52
+
+Game 65:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 53
+
+Game 2:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 57
+
+Game 64:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 61
+
+Game 6:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 6
+  Total Moves: 63
+
+Game 7:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 48
+
+Game 58:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 65
+
+Game 93:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 57
+
+Game 99:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 55
+
+Game 63:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 6
+  Total Moves: 41
+
+Game 76:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 47
+
+Game 68:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 63
+
+Game 13:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 75
+
+Game 45:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 62
+
+Game 57:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 62
+
+Game 90:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 64
+
+Game 40:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 51
+
+Game 79:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 60
+
+Game 34:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 56
+
+Game 46:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 9
+  Total Moves: 64
+
+Game 27:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 70
+
+Game 44:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 71
+
+Game 96:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 66
+
+Game 1:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 64
+
+Game 42:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 59
+
+Game 14:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 78
+
+Game 84:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 69
+
+Game 73:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 58
+
+Game 19:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 8
+  Total Moves: 49
+
+Game 95:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 91
+
+Game 22:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 69
+
+Game 39:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 7
+  Total Moves: 47
+
+Game 59:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+  Rounds: 9
+  Total Moves: 62
+
+Game 31:
+  Players:
+    - LLAMA-3.2-1B-INSTRUCT-1 (meta-llama/llama-3.2-1b-instruct)
+    - LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Winner: LLAMA-3.2-3B-INSTRUCT-2 (meta-llama/llama-3.2-3b-instruct)
+  Rounds: 7
+  Total Moves: 63
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: meta-llama/llama-3.2-3b-instruct
+Most Cautious Model: meta-llama/llama-3.2-1b-instruct
+Most Accurate Liar Detector: meta-llama/llama-3.2-1b-instruct (96.1% success rate)
+Model with Shortest Games: meta-llama/llama-3.2-1b-instruct (7.2 rounds avg)
+Model with Longest Games: meta-llama/llama-3.2-1b-instruct (7.2 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: meta-llama/llama-3.2-1b-instruct (3.2% success rate)
+Best Lie Detector: meta-llama/llama-3.2-1b-instruct (F1 score: 74.8%)
+Most Optimal Bidder: meta-llama/llama-3.2-3b-instruct (31.0% optimal bids)
+Most Adaptive Player: meta-llama/llama-3.2-1b-instruct (33.0% adaptation score)
+Most Rule Adherent: meta-llama/llama-3.2-3b-instruct (37.5% adherence rate)

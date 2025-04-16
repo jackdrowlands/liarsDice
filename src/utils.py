@@ -55,5 +55,38 @@ def print_main_menu():
     print("=" * 70)
     print("1. Play a single game")
     print("2. Run a model tournament")
-    print("3. Exit")
-    return input("\nSelect an option (1-3): ").strip()
+    print("3. Load a saved game")
+    print("4. Exit")
+    return input("\nSelect an option (1-4): ").strip()
+    
+def find_saved_games():
+    """Find all saved game files in the current directory"""
+    import glob
+    saves = glob.glob("liars_dice_save_*.json")
+    saves.sort(reverse=True)  # Most recent first
+    return saves
+    
+def select_saved_game():
+    """Let user select a saved game from available saves"""
+    saves = find_saved_games()
+    
+    if not saves:
+        print("No saved games found.")
+        return None
+    
+    print("\nAvailable saved games:")
+    for i, save in enumerate(saves):
+        print(f"{i+1}. {save}")
+    
+    try:
+        choice = int(input("\nSelect a game to load (number) or 0 to cancel: "))
+        if choice == 0:
+            return None
+        elif 1 <= choice <= len(saves):
+            return saves[choice-1]
+        else:
+            print("Invalid selection.")
+            return None
+    except ValueError:
+        print("Invalid input.")
+        return None

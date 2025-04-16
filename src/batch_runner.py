@@ -4,12 +4,17 @@ import time
 import json
 import sys
 import csv
+import signal
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
+import concurrent.futures
 
 from .liars_dice import LiarsDice
-from .ai_player import AIPlayer, OPENROUTER_AVAILABLE
+from .ai_player import (
+    AIPlayer, REQUESTS_AVAILABLE,
+    PROVIDER_OPENROUTER, PROVIDER_LOCAL
+)
 from .metrics import GameMetrics
 
 class GameBatchRunner:
@@ -24,8 +29,8 @@ class GameBatchRunner:
     
     def setup_batch(self):
         """Setup a batch of games to run"""
-        if not OPENROUTER_AVAILABLE:
-            print("OpenRouter integration is not available.")
+        if not REQUESTS_AVAILABLE:
+            print("API requests are not available.")
             print("Install the required package with: pip install requests")
             return False
         
@@ -36,13 +41,13 @@ class GameBatchRunner:
         # Ask if user wants to use a local LLM server
         self.use_local_endpoint = input("Do you want to use a local LLM server at http://127.0.0.1:1234? (y/n): ").lower().strip() == 'y'
         
-        # Get OpenRouter API key (still needed for OpenRouter models)
-        self.api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        if not self.api_key and not self.use_local_endpoint:
-            self.api_key = input("Enter your OpenRouter API key: ")
-            os.environ["OPENROUTER_API_KEY"] = self.api_key
-        elif not self.api_key and self.use_local_endpoint:
-            print("No OpenRouter API key provided. Will only use local models.")
+        # Get OpenRouter API key (for OpenRouter models)
+        self.openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
+        if not self.openrouter_api_key and not self.use_local_endpoint:
+            self.openrouter_api_key = input("Enter your OpenRouter API key: ")
+            os.environ["OPENROUTER_API_KEY"] = self.openrouter_api_key
+        elif not self.openrouter_api_key and self.use_local_endpoint:
+            print("No OpenRouter API key provided. Will use local models.")
         
         # Get the number of games to run
         while True:
@@ -68,7 +73,7 @@ class GameBatchRunner:
         
         # Get available models (including local models if enabled)
         game = LiarsDice()
-        self.available_models = game.get_available_models(self.use_local_endpoint)
+        self.available_models = game.get_available_models(self.use_local_endpoint, False)
         
         if not self.available_models:
             print("No models available. Check your API key and connection.")
@@ -81,7 +86,10 @@ class GameBatchRunner:
         for i, model in enumerate(self.available_models):
             provider = model["provider"]
             model_id = model["id"]
-            print(f"{i+1}. {model_id}{' (Local)' if provider == 'local' else ''}")
+            provider_label = ""
+            if provider == PROVIDER_LOCAL:
+                provider_label = " (Local)"
+            print(f"{i+1}. {model_id}{provider_label}")
         
         # Select models to include
         print("\nSelect models to include (enter model numbers separated by spaces, or 'all'):")
@@ -143,8 +151,8 @@ class GameBatchRunner:
         
         return True
     
-    def run_single_game(self, game_num):
-        """Run a single game with the selected models"""
+    def setup_game(self, game_num):
+        """Set up a single game with selected models but don't run it yet"""
         game = LiarsDice()
         
         # Randomly select models for this game
@@ -171,8 +179,11 @@ class GameBatchRunner:
             game.add_ai_player(
                 name=player_name, 
                 model=model_id,
+                provider=model_info["provider"],
                 api_key=model_info["api_key"],
-                api_url=model_info["api_url"]
+                api_url=model_info["api_url"],
+                project_id=model_info["project_id"],
+                region=model_info["region"]
             )
             
             # Update games played in leaderboard
@@ -180,6 +191,12 @@ class GameBatchRunner:
         
         # Start the game without setup (we already added the players)
         game.current_player_idx = random.randint(0, len(game_models) - 1)
+        
+        return game, game_models
+
+    def run_single_game(self, game_num):
+        """Run a single game with the selected models"""
+        game, game_models = self.setup_game(game_num)
         
         # Hide output if not verbose
         original_stdout = sys.stdout
@@ -272,6 +289,105 @@ class GameBatchRunner:
                 sys.stdout = original_stdout
             print(f"Error in game {game_num}: {e}")
             return None
+            
+    def run_multiple_games_batch(self, game_nums, batch_size=10):
+        """Run multiple games in parallel using ThreadPoolExecutor"""
+        
+        # Determine optimal batch size based on CPU count and available memory
+        cpu_count = os.cpu_count() or 4
+        optimal_workers = min(max(cpu_count * 2, batch_size), 32)  # Scale by CPU count, but set reasonable limits
+        
+        print(f"Running with {optimal_workers} parallel workers")
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+            # Submit all games in this batch
+            futures = {}
+            for game_num in game_nums:
+                future = executor.submit(self.run_single_game, game_num)
+                futures[future] = game_num
+            
+            # Collect results as they complete
+            results = []
+            completed = 0
+            total = len(game_nums)
+            
+            for future in concurrent.futures.as_completed(futures):
+                game_num = futures[future]
+                try:
+                    result = future.result()
+                    results.append(result)
+                    completed += 1
+                    
+                    # Print progress as a percentage
+                    print(f"Completed game {game_num} in batch ({completed}/{total}, {completed/total*100:.1f}%)")
+                    
+                    # Autosave tournament state periodically
+                    if completed % max(1, total // 10) == 0:  # Save at 10% intervals
+                        self.save_tournament_state()
+                        
+                except Exception as e:
+                    print(f"Error in game {game_num}: {e}")
+                    results.append(None)
+            
+        return results
+        
+    def save_tournament_state(self, filepath=None):
+        """Save the current tournament state to a file"""
+        if filepath is None:
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            filepath = f"tournament_autosave_{timestamp}.json"
+            
+        print(f"Saving tournament state to {filepath}...")
+        
+        # Create serializable tournament state without game objects
+        serializable_game_results = []
+        for result in self.game_results:
+            # Create a copy without the non-serializable game object
+            serializable_result = result.copy()
+            if 'game_obj' in serializable_result:
+                # Remove the game object which isn't JSON serializable
+                del serializable_result['game_obj']
+            serializable_game_results.append(serializable_result)
+        
+        tournament_state = {
+            "leaderboard": self.leaderboard,
+            "game_results": serializable_game_results,
+            "total_games": self.total_games,
+            "model_stats": self.model_stats,
+            "completed_games": len(self.game_results),
+            "models_per_game": self.models_per_game,
+            "selected_models": self.selected_models,
+            "use_local_endpoint": self.use_local_endpoint
+        }
+        
+        with open(filepath, 'w') as f:
+            json.dump(tournament_state, f, indent=2)
+            
+        print(f"Tournament state saved to {filepath}")
+        return filepath
+        
+    def load_tournament_state(self, filepath):
+        """Load tournament state from a file"""
+        print(f"Loading tournament state from {filepath}...")
+        
+        try:
+            with open(filepath, 'r') as f:
+                tournament_state = json.load(f)
+                
+            self.leaderboard = tournament_state.get("leaderboard", {})
+            self.game_results = tournament_state.get("game_results", [])
+            self.total_games = tournament_state.get("total_games", 0)
+            self.model_stats = tournament_state.get("model_stats", {})
+            self.models_per_game = tournament_state.get("models_per_game", 2)
+            self.selected_models = tournament_state.get("selected_models", [])
+            self.use_local_endpoint = tournament_state.get("use_local_endpoint", False)
+            
+            completed_games = tournament_state.get("completed_games", 0)
+            print(f"Successfully loaded tournament with {completed_games} completed games")
+            return completed_games
+        except Exception as e:
+            print(f"Error loading tournament state: {e}")
+            return 0
     
     def update_leaderboard(self):
         """Update win rates and statistics"""
@@ -345,6 +461,17 @@ class GameBatchRunner:
             print(f"   Playing Style: {model_stats['total_bids']} bids, {model_stats['total_liar_calls']} liar calls ({liar_call_pct:.1f}% liar calls)")
             
             print(f"   Wins by Game Length: {model_stats['early_game_wins']} early, {model_stats['mid_game_wins']} mid, {model_stats['long_game_wins']} long")
+            
+            api_times = []
+            for game in self.game_results:
+                game_obj = game.get("game_obj")
+                if game_obj:
+                    metrics = game_obj.get_metrics()
+                    if model in metrics and "avg_api_response_time" in metrics[model]:
+                        api_times.append(metrics[model]["avg_api_response_time"])
+            if api_times:
+                avg_api_time = sum(api_times) / len(api_times)
+                print(f"   Avg API Response Time: {avg_api_time:.2f} seconds")
     
     def save_results(self):
         """Save the tournament results to a file"""
@@ -465,6 +592,16 @@ class GameBatchRunner:
                     f.write(f"   Bid Optimality: {metrics['bid_optimality']:.1f}%\n")
                     f.write(f"   Adaptation Score: {metrics['adaptation_score']:.1f}%\n")
                     f.write(f"   Rule Adherence Rate: {metrics['rule_adherence_rate']:.1f}%\n")
+                    f.write(f"   Avg API Response Time: {metrics['avg_api_response_time']:.2f} seconds\n")
+                    
+                    # Add token usage metrics if available
+                    if 'token_usage' in metrics:
+                        token_usage = metrics['token_usage']
+                        f.write(f"   Token Usage:\n")
+                        f.write(f"     - Total Tokens: {token_usage['total_tokens']}\n")
+                        f.write(f"     - Prompt Tokens: {token_usage['total_prompt_tokens']}\n")
+                        f.write(f"     - Completion Tokens: {token_usage['total_completion_tokens']}\n")
+                        f.write(f"     - Avg Tokens Per Action: {token_usage['avg_tokens_per_action']:.1f}\n")
                 
                 # Original metrics
                 liar_call_success_rate = model_stats['liar_success_rate']
@@ -616,7 +753,7 @@ class GameBatchRunner:
                 "Model", "Provider", "Elo", "Win Rate", "Wins", "Games", 
                 "Bluff Success Rate", "Lie Detection Precision", "Lie Detection Recall", "Lie Detection F1",
                 "Average Final Bid", "Bid Optimality", "Adaptation Score", "Rule Adherence Rate",
-                "Avg Rounds per Game", "Early Game Wins", "Mid Game Wins", "Long Game Wins"
+                "Avg API Response Time", "Avg Rounds per Game", "Early Game Wins", "Mid Game Wins", "Long Game Wins"
             ]
             writer.writerow(header)
             
@@ -635,6 +772,7 @@ class GameBatchRunner:
                 bid_optimality = 0
                 adaptation = 0
                 rule_adherence = 0
+                avg_api_response_time = 0
                 
                 if model in all_advanced_metrics:
                     metrics = all_advanced_metrics[model]
@@ -647,13 +785,14 @@ class GameBatchRunner:
                     bid_optimality = metrics["bid_optimality"]
                     adaptation = metrics["adaptation_score"]
                     rule_adherence = metrics["rule_adherence_rate"]
+                    avg_api_response_time = metrics["avg_api_response_time"]
                 
                 # Create data row
                 row = [
                     model, provider, elo, stats["win_rate"], stats["wins"], stats["games_played"],
                     bluff_success, lie_precision, lie_recall, lie_f1,
                     avg_final_bid, bid_optimality, adaptation, rule_adherence,
-                    model_stats["avg_rounds_per_game"], model_stats["early_game_wins"], 
+                    avg_api_response_time, model_stats["avg_rounds_per_game"], model_stats["early_game_wins"], 
                     model_stats["mid_game_wins"], model_stats["long_game_wins"]
                 ]
                 writer.writerow(row)
@@ -776,22 +915,84 @@ class GameBatchRunner:
         
         print(f"Visualizations saved to {vis_dir}/")
     
-    def run_tournament(self):
-        """Run a tournament of multiple games"""
-        if not self.setup_batch():
-            return
+    def run_tournament(self, resume_from=None):
+        """Run a tournament of multiple games with optimized parallelism"""
+        completed_games = 0
+        
+        if resume_from:
+            completed_games = self.load_tournament_state(resume_from)
+            print(f"Resuming tournament with {completed_games} completed games")
+        else:
+            if not self.setup_batch():
+                return
         
         print("\nStarting tournament...")
+
+        # Determine optimal parallelism for this system
+        cpu_count = os.cpu_count() or 4
+        # For network/API-bound workloads, we can go much higher than CPU count
+        max_workers = 10000 # min(cpu_count * 8, 64)  # Higher parallelism for API calls
         
-        for i in range(self.total_games):
-            print(f"\nRunning game {i+1} of {self.total_games}...")
-            self.run_single_game(i+1)
-            self.update_leaderboard()
+        # Each thread manages one game independently
+        print(f"Running with {max_workers} concurrent games for maximum throughput")
+        
+        # Calculate remaining games
+        remaining_games = self.total_games - completed_games
+        total = self.total_games
+        
+        # We'll handle keyboard interrupts in the try/except block instead of using
+        # signal handlers, which only work in the main thread
+        
+        try:
+            # Create a pool of workers that directly run individual games
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Submit all remaining games at once, letting the executor manage concurrency
+                future_to_game = {
+                    executor.submit(self.run_single_game, game_num): game_num 
+                    for game_num in range(completed_games + 1, self.total_games + 1)
+                }
+                
+                # Process results as they complete
+                for i, future in enumerate(concurrent.futures.as_completed(future_to_game)):
+                    game_num = future_to_game[future]
+                    try:
+                        winner_model = future.result()
+                        completed_games += 1
+                        
+                        # Show progress
+                        progress_pct = (completed_games / total) * 100
+                        print(f"Game {game_num} completed. Progress: {completed_games}/{total} games ({progress_pct:.1f}%)")
+                        
+                        # Autosave progress at regular intervals
+                        if completed_games % max(1, min(10, total // 10)) == 0:  # Save every ~10% or every 10 games
+                            self.save_tournament_state()
+                            self.update_leaderboard()
+                            self.display_leaderboard()
+                    
+                    except Exception as e:
+                        print(f"Error in game {game_num}: {e}")
+        
+        except KeyboardInterrupt:
+            # Handle manual interruption 
+            print("\n\nTournament interrupted! Saving current state...")
+            save_path = self.save_tournament_state()
+            print(f"Tournament state saved to {save_path}")
+            print("You can resume this tournament later by running:")
+            print(f"python main.py --resume-tournament {save_path}")
+            return
             
-            # Show current standings every 5 games
-            if (i+1) % 5 == 0 or i+1 == self.total_games:
-                self.display_leaderboard()
-        
-        print("\nTournament complete!")
-        self.display_leaderboard()
-        self.save_results()
+        finally:
+            # Final update and save if not interrupted
+            print("\nTournament complete!")
+            self.update_leaderboard() 
+            self.display_leaderboard()
+            self.save_results()
+            
+            # Clean up any autosaves since we have completed successfully
+            try:
+                for f in os.listdir('.'):
+                    if f.startswith('tournament_autosave_') and f.endswith('.json'):
+                        os.remove(f)
+                        print(f"Cleaned up autosave file: {f}")
+            except Exception as e:
+                print(f"Error cleaning up autosave files: {e}")

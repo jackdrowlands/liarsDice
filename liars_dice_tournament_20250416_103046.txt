@@ -1,0 +1,48 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-16 10:30:46
+Total Games: 100
+Models per Game: 6
+
+Providers Used: meta-llama
+
+LEADERBOARD
+================================================================================
+Rank  Model                         Elo       Win Rate       Wins      Games     
+--------------------------------------------------------------------------------
+1     meta-llama/llama-3.2-1b-i...  N/A       0.0%          0         0         
+2     meta-llama/llama-3.2-3b-i...  N/A       0.0%          0         0         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-3.2-1b-instruct
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+2. meta-llama/llama-3.2-3b-instruct
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: meta-llama/llama-3.2-1b-instruct
+Most Cautious Model: meta-llama/llama-3.2-1b-instruct
+Most Accurate Liar Detector: meta-llama/llama-3.2-1b-instruct (0.0% success rate)
+Model with Shortest Games: meta-llama/llama-3.2-1b-instruct (0.0 rounds avg)
+Model with Longest Games: meta-llama/llama-3.2-1b-instruct (0.0 rounds avg)

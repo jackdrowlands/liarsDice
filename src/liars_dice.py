@@ -481,10 +481,15 @@ class LiarsDice:
             "round_number": self.round_number
         }
     
-    def get_ai_decisions_parallel(self, players, max_workers=10):
+    def get_ai_decisions_parallel(self, players, max_workers=None):
         """Get AI decisions for multiple players in parallel"""
         if not players:
             return {}
+            
+        # Set a reasonable number of workers if not specified
+        if max_workers is None:
+            cpu_count = os.cpu_count() or 4
+            max_workers = min(cpu_count * 2, 16)
             
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Prepare the futures - don't make actual API calls yet

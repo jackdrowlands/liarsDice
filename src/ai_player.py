@@ -52,18 +52,10 @@ class AIPlayer(Player):
         
         Rules for making decisions:
         1. You can either make a higher bid or call the previous player a liar
-        2. A bid consists of a quantity and a value (e.g., "three 4's" means "three dice with value 4")
+        2. A bid consists of a quantity and a value (e.g., "3 4's" means "three dice with value 4")
         3. A bid must increase either the quantity or the value of the previous bid
         4. Be strategic - consider probability and bluffing
         5. Return your decision in JSON format as specified
-        
-        Strategy tips:
-        1. Calculate probability distributions for each value based on visible dice
-        2. Track each player's behavior patterns over time
-        3. Use strategic bluffing when appropriate
-        4. Consider the risk/reward of calling "Liar" vs making a higher bid
-        5. Use the move history to understand each player's tendencies
-        6. Consider how many dice are left in the game when calculating probabilities
         
         Think step by step about your decision.
         """

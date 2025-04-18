@@ -1,5 +1,6 @@
 import random
 import os
+import threading
 import time
 import json
 import sys
@@ -9,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 import concurrent.futures
+import asyncio
+import httpx
 
 from .liars_dice import LiarsDice
 from .ai_player import (
@@ -16,6 +19,348 @@ from .ai_player import (
     PROVIDER_OPENROUTER, PROVIDER_LOCAL
 )
 from .metrics import GameMetrics
+
+class AsyncGameRunner:
+    """
+    Runs multiple games concurrently using asyncio.
+    Each game runs as a separate task, with its moves executed sequentially.
+    """
+    def __init__(self, batch_runner):
+        self.batch_runner = batch_runner
+        self.client = httpx.AsyncClient(timeout=30.0)  # Single client for all API calls
+        
+    async def close(self):
+        """Close the HTTP client"""
+        await self.client.aclose()
+    
+    async def make_api_request(self, request_params):
+        """Make an async API request and return the response"""
+        endpoint_url = request_params["endpoint_url"]
+        headers = request_params["headers"]
+        data = request_params["data"]
+        
+        start_time = time.time()
+        response = await self.client.post(
+            endpoint_url,
+            headers=headers,
+            json=data
+        )
+        response_time = time.time() - start_time
+        
+        if response.status_code != 200:
+            raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
+        
+        return response, response_time
+    
+    async def get_ai_decision_async(self, player, game_state):
+        """Async version of get_ai_decision"""
+        request_params = player.get_prompt_and_params(game_state)
+        game_state['provider'] = request_params["provider"]
+        
+        try:
+            response, response_time = await self.make_api_request(request_params)
+            
+            # Process response just like the original method
+            result = response.json()
+            content = result["choices"][0]["message"]["content"].strip()
+            
+            # Extract token usage if available
+            prompt_tokens = completion_tokens = total_tokens = 0
+            
+            if "usage" in result:
+                usage = result["usage"]
+                prompt_tokens = usage.get("prompt_tokens", 0)
+                completion_tokens = usage.get("completion_tokens", 0)
+                total_tokens = usage.get("total_tokens", 0)
+                
+                game_state['token_usage'] = {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": total_tokens
+                }
+            
+            # Log the response
+            with open("llm_responses.json", "a") as f:
+                json.dump({
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "response_text": content,
+                    "model": player.model,
+                    "provider": game_state['provider'],
+                    "response_time": response_time,
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": total_tokens
+                }, f)
+                f.write("\n")
+            
+            game_state['response_time'] = response_time
+            return player.process_api_response(response, response_time, game_state)
+            
+        except Exception as e:
+            error_info = {
+                "model": player.model,
+                "provider": game_state.get('provider', player.provider),
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "error": str(e),
+            }
+            
+            # Add response if available
+            if 'response' in locals():
+                try:
+                    error_info["response"] = response.json()
+                except:
+                    error_info["response"] = "Could not parse response as JSON"
+            
+            # Log the error
+            with open("invalid_responses.json", "a") as f:
+                json.dump(error_info, f)
+                f.write("\n")
+            
+            raise RuntimeError(f"Error getting AI decision: {e}")
+    
+    async def play_single_game_async(self, game_num):
+        """Run a single game with asynchronous API calls"""
+        game, game_models = self.batch_runner.setup_game(game_num)
+        
+        # Hide output if not verbose
+        original_stdout = sys.stdout
+        if not self.batch_runner.verbose_output:
+            sys.stdout = open(os.devnull, 'w')
+        
+        # Set start time for timeout tracking
+        start_time = time.time()
+        max_duration = 1800  # 30 minutes in seconds
+        
+        try:
+            # Play the game in auto mode
+            while not game.game_over:
+                # Check if we've exceeded the time limit
+                if time.time() - start_time > max_duration:
+                    raise asyncio.TimeoutError(f"Game {game_num} exceeded the 30-minute time limit")
+                
+                await self.play_round_async(game, auto_mode=True, game_num=game_num)
+            
+            # Record the winner and update leaderboard
+            winner_model = None
+            
+            for player in game.players:
+                if isinstance(player, AIPlayer) and player.name == game.winner.name:
+                    winner_model = player.model
+                    
+                    # Update wins
+                    self.batch_runner.leaderboard[winner_model]["wins"] += 1
+                    
+                    # Track game length categorized wins
+                    if game.round_number < 10:
+                        self.batch_runner.model_stats[winner_model]["early_game_wins"] += 1
+                    elif game.round_number < 20:
+                        self.batch_runner.model_stats[winner_model]["mid_game_wins"] += 1
+                    else:
+                        self.batch_runner.model_stats[winner_model]["long_game_wins"] += 1
+                    
+                    break
+            
+            # Collect detailed statistics for each model
+            for player in game.players:
+                if isinstance(player, AIPlayer):
+                    model = player.model
+                    
+                    # Count bids and liar calls
+                    bids = 0
+                    liar_calls = 0
+                    successful_liar_calls = 0
+                    unsuccessful_liar_calls = 0
+                    
+                    for move in game.move_history:
+                        if move["player"] == player.name:
+                            if move["action"] == "bid":
+                                bids += 1
+                            elif move["action"] == "liar":
+                                liar_calls += 1
+                                if move.get("outcome") == "success":
+                                    successful_liar_calls += 1
+                                elif move.get("outcome") == "failure":
+                                    unsuccessful_liar_calls += 1
+                    
+                    # Update model statistics
+                    self.batch_runner.model_stats[model]["total_bids"] += bids
+                    self.batch_runner.model_stats[model]["total_liar_calls"] += liar_calls
+                    self.batch_runner.model_stats[model]["successful_liar_calls"] += successful_liar_calls
+                    self.batch_runner.model_stats[model]["unsuccessful_liar_calls"] += unsuccessful_liar_calls
+                    self.batch_runner.model_stats[model]["total_rounds_played"] += game.round_number
+            
+            # Record game result with detailed stats and game object for metrics access
+            result = {
+                "game_number": game_num,
+                "players": [
+                    {
+                        "name": p.name, 
+                        "model": p.model
+                    } for p in game.players if isinstance(p, AIPlayer)
+                ],
+                "winner": game.winner.name,
+                "winner_model": winner_model,
+                "rounds": game.round_number,
+                "move_history": [move.copy() for move in game.move_history],
+                "game_obj": game  # Store the game object to access metrics
+            }
+            self.batch_runner.game_results.append(result)
+            
+            # Restore output
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            
+            # Print game result
+            print(f"Game {game_num}: Winner is {game.winner.name} ({winner_model}) after {game.round_number} rounds")
+            
+            return winner_model
+        
+        except asyncio.TimeoutError:
+            # Restore output in case of timeout
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Game {game_num} timed out after 30 minutes and was terminated")
+            return None
+        except Exception as e:
+            # Restore output in case of error
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Error in game {game_num}: {e}")
+            return None
+    
+    async def get_player_bid_async(self, game, player_idx):
+        """Asynchronous version of get_player_bid"""
+        player = game.players[player_idx]
+        
+        # If the player is an AI
+        if isinstance(player, AIPlayer):
+            print(f"\n{player.name} (AI) is thinking...")
+            
+            # Create game state for AI
+            game_state = game.create_game_state_for_ai(player_idx)
+            
+            # Add a short delay to make it feel more natural
+            await asyncio.sleep(random.uniform(0.5, 1.0))
+            
+            try:
+                # Get AI decision asynchronously
+                decision = await self.get_ai_decision_async(player, game_state)
+                
+                # Record API response time if available
+                if 'response_time' in game_state:
+                    game.metrics.record_api_response_time(player.model, game_state['response_time'])
+                    
+                # Record token usage if available
+                if 'token_usage' in game_state:
+                    usage = game_state['token_usage']
+                    game.metrics.record_token_usage(
+                        player.model,
+                        usage.get('prompt_tokens', 0),
+                        usage.get('completion_tokens', 0),
+                        usage.get('total_tokens', 0)
+                    )
+                
+                if decision["action"] == "liar":
+                    return game._process_ai_liar_call(player, decision)
+                else:
+                    return game._process_ai_bid(player, decision)
+                    
+            except Exception as e:
+                print(f"Error with AI decision: {e}")
+                # Fallback to a simple bid
+                if game.last_bid:
+                    last_quantity, last_value = game.last_bid
+                    if last_quantity > game.total_dice_in_game:
+                        # Change decision to call liar due to invalid bid
+                        return True
+                    if last_value < 6:
+                        game.last_bid = (last_quantity, last_value + 1)
+                    else:
+                        game.last_bid = (last_quantity + 1, 1)
+                else:
+                    game.last_bid = (1, random.randint(3, 6))
+                
+                # Record in metrics that there was an error
+                if isinstance(player, AIPlayer):
+                    game.metrics.record_rule_adherence(player.model, False)
+                
+                # Record move in history
+                move_data = {
+                    "round": len(game.move_history) + 1,
+                    "player": player.name,
+                    "action": "bid",
+                    "quantity": game.last_bid[0],
+                    "value": game.last_bid[1],
+                    "error_fallback": True
+                }
+                game.move_history.append(move_data)
+                
+                # Track in player history
+                game.player_history[player.name].append(move_data)
+                
+                print(f"{player.name} bids {game.last_bid[0]} {game.last_bid[1]}'s")
+                return False
+        
+        # Human player logic (not used in AsyncGameRunner)
+        raise ValueError("AsyncGameRunner only supports AI players")
+    
+    async def play_round_async(self, game, auto_mode=True, game_num=0):
+        """Asynchronous version of play_round"""
+        # Start by rolling all dice and display round number
+        game.roll_all_dice()
+        print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
+        
+        while not game.game_over:
+            current_player = game.players[game.current_player_idx]
+            game.show_dice_to_player(game.current_player_idx)
+            
+            # For AI players, get decision asynchronously
+            is_calling_liar = await self.get_player_bid_async(game, game.current_player_idx)
+            
+            if is_calling_liar:
+                game.handle_liar_call(auto_continue=auto_mode)
+                
+                if game.check_game_over():
+                    break
+                
+                # Start new round
+                game.round_number += 1
+                print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
+                game.roll_all_dice()
+                continue
+            
+            # Advance to next player
+            game.next_player()
+    
+    async def run_games_async(self, game_nums):
+        """Run multiple games concurrently using asyncio"""
+        tasks = []
+        for game_num in game_nums:
+            # Wrap each game with a timeout of 30 minutes (1800 seconds)
+            task = asyncio.create_task(
+                asyncio.wait_for(
+                    self.play_single_game_async(game_num),
+                    timeout=1800
+                )
+            )
+            tasks.append(task)
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Process results to handle exceptions
+        processed_results = []
+        for i, result in enumerate(results):
+            game_num = game_nums[i]
+            if isinstance(result, Exception):
+                if isinstance(result, asyncio.TimeoutError):
+                    print(f"Game {game_num} timed out after 30 minutes and was terminated")
+                else:
+                    print(f"Error in game {game_num}: {result}")
+                processed_results.append(None)
+            else:
+                processed_results.append(result)
+        
+        return processed_results
 
 class GameBatchRunner:
     def __init__(self):
@@ -26,6 +371,7 @@ class GameBatchRunner:
         self.use_local_endpoint = False
         self.local_endpoint_url = None
         self.local_models = []
+        self.enable_autosaves = True  # Default to enabled
     
     def setup_batch(self):
         """Setup a batch of games to run"""
@@ -149,11 +495,35 @@ class GameBatchRunner:
         # Ask about detailed output
         self.verbose_output = input("Show detailed output for each game? (y/n): ").lower().strip() == 'y'
         
+        # Ask about execution mode
+        self.use_async = input("\nUse asynchronous game execution? (y/n): ").lower().strip() == 'y'
+        if self.use_async:
+            print("Using asynchronous execution for improved performance.")
+            try:
+                import httpx
+            except ImportError:
+                print("httpx package not installed. Installing it is required for async execution.")
+                print("Install with: pip install httpx")
+                self.use_async = False
+                print("Falling back to threaded execution.")
+        
+        # Ask about enabling autosaves
+        self.enable_autosaves = input("Enable periodic autosaves? (y/n): ").lower().strip() == 'y'
+        if self.enable_autosaves:
+            print("Autosaves enabled - tournament state will be saved periodically.")
+        else:
+            print("Autosaves disabled - tournament state will not be saved until completion.")
+        
         return True
     
     def setup_game(self, game_num):
         """Set up a single game with selected models but don't run it yet"""
         game = LiarsDice()
+        
+        # List of distinct human names for AI players (20 names)
+        human_names = [
+        "John", "Sarah", "Michael", "Emily", "David", "Jessica", "James", "Amanda", "Daniel", "Ashley", "Matthew", "Jennifer", "Andrew", "Megan", "Brian", "Laura", "Kevin", "Nicole", "Thomas", "Rachel"
+        ]
         
         # Randomly select models for this game
         if len(self.selected_models) <= self.models_per_game:
@@ -166,14 +536,14 @@ class GameBatchRunner:
             model_id = model_info["id"]
             provider = model_info["provider"]
             
-            # Get a readable model name for the player name
-            model_short_name = model_id.split('/')[-1] if '/' in model_id else model_id
+            # Assign a random human name, but keep consistency by hashing the model ID
+            # This way, the same model always gets the same name within a tournament
+            name_index = hash(model_id) % len(human_names)
+            player_name = human_names[name_index]
             
-            # Generate player name based on model
-            if provider == "local":
-                player_name = f"LOCAL-{model_short_name.upper()}-{i+1}"
-            else:
-                player_name = f"{model_short_name.upper()}-{i+1}"
+            # Make names unique by adding numbers if needed
+            if i > 0 and player_name in [game.players[j].name for j in range(len(game.players))]:
+                player_name = f"{player_name}-{i+1}"
             
             # Add the AI player with the appropriate configuration
             game.add_ai_player(
@@ -203,9 +573,17 @@ class GameBatchRunner:
         if not self.verbose_output:
             sys.stdout = open(os.devnull, 'w')
         
+        # Set start time for timeout tracking
+        start_time = time.time()
+        max_duration = 1800  # 30 minutes in seconds
+        
         try:
             # Play the game in auto mode
             while not game.game_over:
+                # Check if we've exceeded the time limit
+                if time.time() - start_time > max_duration:
+                    raise TimeoutError(f"Game {game_num} exceeded the 30-minute time limit")
+                
                 game.play_round(auto_mode=True, game_num=game_num)
             
             # Record the winner and update leaderboard
@@ -283,6 +661,12 @@ class GameBatchRunner:
             
             return winner_model
         
+        except TimeoutError as e:
+            # Restore output in case of timeout
+            if not self.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Game {game_num} timed out after 30 minutes and was terminated")
+            return None
         except Exception as e:
             # Restore output in case of error
             if not self.verbose_output:
@@ -321,15 +705,60 @@ class GameBatchRunner:
                     # Print progress as a percentage
                     print(f"Completed game {game_num} in batch ({completed}/{total}, {completed/total*100:.1f}%)")
                     
-                    # Autosave tournament state periodically
-                    if completed % max(1, total // 10) == 0:  # Save at 10% intervals
-                        self.save_tournament_state()
+                    # Autosave tournament state periodically but less frequently (if enabled)
+                    if self.enable_autosaves and completed % max(50, total // 5) == 0:  # Save at 20% intervals or every 50 games
+                        # Start the autosave in a non-blocking way
+                        print(f"Starting autosave at {completed}/{total}")
+                        threading.Thread(target=self.save_tournament_state).start()
                         
                 except Exception as e:
                     print(f"Error in game {game_num}: {e}")
                     results.append(None)
             
         return results
+        
+    def run_games_with_asyncio(self, game_nums):
+        """Run games concurrently using asyncio"""
+        # Create the async game runner
+        async_runner = AsyncGameRunner(self)
+        
+        # Set up asyncio event loop
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            # Run games and collect results
+            results = loop.run_until_complete(async_runner.run_games_async(game_nums))
+            loop.run_until_complete(async_runner.close())
+            
+            # Process results and track progress
+            processed_results = []
+            completed = 0
+            total = len(game_nums)
+            
+            for i, result in enumerate(results):
+                game_num = game_nums[i]
+                processed_results.append(result)
+                completed += 1
+                
+                # Print progress
+                print(f"Processed game {game_num} ({completed}/{total}, {completed/total*100:.1f}%)")
+                
+                # Autosave tournament state periodically
+                if self.enable_autosaves and completed % max(50, total // 5) == 0:
+                    print(f"Starting autosave at {completed}/{total}")
+                    threading.Thread(target=self.save_tournament_state).start()
+            
+            # Make sure we processed all games
+            print(f"Completed all {len(processed_results)} games in async mode")
+            return processed_results
+        
+        finally:
+            # Clean up event loop
+            loop.close()
         
     def save_tournament_state(self, filepath=None):
         """Save the current tournament state to a file"""
@@ -339,31 +768,44 @@ class GameBatchRunner:
             
         print(f"Saving tournament state to {filepath}...")
         
-        # Create serializable tournament state without game objects
-        serializable_game_results = []
-        for result in self.game_results:
-            # Create a copy without the non-serializable game object
-            serializable_result = result.copy()
-            if 'game_obj' in serializable_result:
-                # Remove the game object which isn't JSON serializable
-                del serializable_result['game_obj']
-            serializable_game_results.append(serializable_result)
+        # Create a minimal version of tournament state to save disk space and improve performance
+        # We'll only store essential information for resuming
         
+        # Store minimal game result data
+        minimal_game_results = []
+        for result in self.game_results:
+            # Only keep essential fields for each game
+            minimal_result = {
+                "game_number": result["game_number"],
+                "winner": result["winner"],
+                "winner_model": result["winner_model"],
+                "rounds": result["rounds"]
+            }
+            minimal_game_results.append(minimal_result)
+        
+        # Create minimal tournament state
         tournament_state = {
             "leaderboard": self.leaderboard,
-            "game_results": serializable_game_results,
+            "game_results": minimal_game_results,
             "total_games": self.total_games,
             "model_stats": self.model_stats,
             "completed_games": len(self.game_results),
             "models_per_game": self.models_per_game,
             "selected_models": self.selected_models,
-            "use_local_endpoint": self.use_local_endpoint
+            "use_local_endpoint": self.use_local_endpoint,
+            "enable_autosaves": self.enable_autosaves,
+            "use_async": self.use_async
         }
         
-        with open(filepath, 'w') as f:
-            json.dump(tournament_state, f, indent=2)
+        # Use a separate thread for file I/O to avoid blocking
+        def write_to_file():
+            with open(filepath, 'w') as f:
+                json.dump(tournament_state, f)
+        
+        # Start file writing in background thread
+        threading.Thread(target=write_to_file).start()
             
-        print(f"Tournament state saved to {filepath}")
+        print(f"Tournament state saving initiated to {filepath}")
         return filepath
         
     def load_tournament_state(self, filepath):
@@ -381,6 +823,19 @@ class GameBatchRunner:
             self.models_per_game = tournament_state.get("models_per_game", 2)
             self.selected_models = tournament_state.get("selected_models", [])
             self.use_local_endpoint = tournament_state.get("use_local_endpoint", False)
+            self.use_async = tournament_state.get("use_async", False)
+            
+            # Preserve the autosave setting or ask for it when resuming
+            autosave_choice = input("Enable autosaves for this resumed tournament? (y/n): ").lower().strip()
+            self.enable_autosaves = autosave_choice == 'y'
+            
+            # Restore the minimal game results format we saved
+            for result in self.game_results:
+                # Add empty fields for any data that wasn't saved but might be accessed
+                if 'move_history' not in result:
+                    result['move_history'] = []
+                if 'players' not in result:
+                    result['players'] = []
             
             completed_games = tournament_state.get("completed_games", 0)
             print(f"Successfully loaded tournament with {completed_games} completed games")
@@ -423,17 +878,23 @@ class GameBatchRunner:
             reverse=True
         )
         
+        # Get mapping of model IDs to the human names used
+        model_to_human_name = self._get_model_to_human_name_mapping()
+        
         # Basic leaderboard
-        print(f"{'Rank':<6}{'Model':<42}{'Win Rate':<15}{'Wins':<10}{'Games':<10}")
-        print("-" * 80)
+        print(f"{'Rank':<6}{'Model':<42}{'Human Name':<20}{'Win Rate':<15}{'Wins':<10}{'Games':<10}")
+        print("-" * 100)
         
         for i, (model, stats) in enumerate(sorted_models):
             # Shorten model name if too long
             model_name = model
             if len(model_name) > 40:
                 model_name = model_name[:37] + "..."
+            
+            # Get human name used for this model
+            human_name = model_to_human_name.get(model, "Unknown")
                 
-            print(f"{i+1:<6}{model_name:<42}{stats['win_rate']:.1f}%{' ':<10}{stats['wins']:<10}{stats['games_played']:<10}")
+            print(f"{i+1:<6}{model_name:<42}{human_name:<20}{stats['win_rate']:.1f}%{' ':<10}{stats['wins']:<10}{stats['games_played']:<10}")
             
         # Detailed statistics
         print("\n" + "=" * 80)
@@ -448,7 +909,10 @@ class GameBatchRunner:
             if "/" in model:
                 provider = model.split("/")[0]
             
-            print(f"\n{i+1}. {model}")
+            # Get human name used for this model
+            human_name = model_to_human_name.get(model, "Unknown")
+            
+            print(f"\n{i+1}. {model} (as '{human_name}')")
             print(f"   Provider: {provider}")
             print(f"   Win Rate: {stats['win_rate']:.1f}%")
             print(f"   Games Won: {stats['wins']} / {stats['games_played']}")
@@ -472,6 +936,39 @@ class GameBatchRunner:
             if api_times:
                 avg_api_time = sum(api_times) / len(api_times)
                 print(f"   Avg API Response Time: {avg_api_time:.2f} seconds")
+                
+    def _get_model_to_human_name_mapping(self):
+        """Get a mapping from model IDs to the human names used in games"""
+        model_to_human_name = {}
+        
+        # List of human names used for mapping
+        human_names = [
+            "Alex Morgan", "Blake Taylor", "Cameron Reed", "Devon Parker", 
+            "Ellis Jordan", "Finley Quinn", "Gray Wilson", "Harper Lee", 
+            "Indigo Carter", "Jordan Smith", "Kennedy Ross", "Logan Bailey", 
+            "Morgan Casey", "Nico Riley", "Parker Quinn", "Reese Johnson", 
+            "Sidney Shaw", "Taylor Wright", "Vaughn Miller", "Winter Stone"
+        ]
+        
+        # Go through game results to find player names
+        for game in self.game_results:
+            if "players" in game:
+                for player in game["players"]:
+                    if "name" in player and "model" in player:
+                        player_name = player["name"]
+                        model_id = player["model"]
+                        
+                        # If this is a human name (not containing model-specific patterns)
+                        if not any(x in player_name for x in ["-", "GPT", "Claude", "Llama", "Mistral"]):
+                            model_to_human_name[model_id] = player_name
+            
+        # For any models without a mapping, create one based on the hash function
+        for model in self.leaderboard:
+            if model not in model_to_human_name:
+                name_index = hash(model) % len(human_names)
+                model_to_human_name[model] = human_names[name_index]
+                
+        return model_to_human_name
     
     def save_results(self):
         """Save the tournament results to a file"""
@@ -496,11 +993,14 @@ class GameBatchRunner:
             
             f.write(f"Providers Used: {', '.join(providers)}\n\n")
             
+            # Get mapping of model IDs to the human names used
+            model_to_human_name = self._get_model_to_human_name_mapping()
+                
             # Basic leaderboard
             f.write("LEADERBOARD\n")
-            f.write("=" * 80 + "\n")
-            f.write(f"{'Rank':<6}{'Model':<30}{'Elo':<10}{'Win Rate':<15}{'Wins':<10}{'Games':<10}\n")
-            f.write("-" * 80 + "\n")
+            f.write("=" * 100 + "\n")
+            f.write(f"{'Rank':<6}{'Model':<30}{'Human Name':<20}{'Elo':<10}{'Win Rate':<15}{'Wins':<10}{'Games':<10}\n")
+            f.write("-" * 100 + "\n")
             
             # Sort models by win rate
             sorted_models = sorted(
@@ -515,6 +1015,9 @@ class GameBatchRunner:
                 if len(model_name) > 28:
                     model_name = model_name[:25] + "..."
                 
+                # Get human name for this model
+                human_name = model_to_human_name.get(model, "Unknown")
+                
                 # Get Elo rating
                 elo = "N/A"
                 for game in self.game_results:
@@ -527,7 +1030,7 @@ class GameBatchRunner:
                                     elo = f"{metrics[model]['elo_rating']:.1f}"
                                     break
                 
-                f.write(f"{i+1:<6}{model_name:<30}{elo:<10}{stats['win_rate']:.1f}%{' ':<10}{stats['wins']:<10}{stats['games_played']:<10}\n")
+                f.write(f"{i+1:<6}{model_name:<30}{human_name:<20}{elo:<10}{stats['win_rate']:.1f}%{' ':<10}{stats['wins']:<10}{stats['games_played']:<10}\n")
             
             # Detailed statistics
             f.write("\nDETAILED MODEL STATISTICS\n")
@@ -574,7 +1077,10 @@ class GameBatchRunner:
                 if "/" in model:
                     provider = model.split("/")[0]
                 
-                f.write(f"\n{i+1}. {model}\n")
+                # Get human name for this model
+                human_name = model_to_human_name.get(model, "Unknown")
+                
+                f.write(f"\n{i+1}. {model} (as '{human_name}')\n")
                 f.write(f"   Provider: {provider}\n")
                 f.write(f"   Win Rate: {stats['win_rate']:.1f}%\n")
                 f.write(f"   Games Won: {stats['wins']} / {stats['games_played']}\n")
@@ -744,13 +1250,16 @@ class GameBatchRunner:
                     metrics = stats["metrics"]
                     f.write(f"{provider:<15}{metrics['bluff_success_rate']:.1f}%{' ':<10}{metrics['lie_detection_f1']:.1f}%{' ':<10}{metrics['bid_optimality']:.1f}%{' ':<10}{metrics['adaptation_score']:.1f}%{' ':<10}{metrics['rule_adherence_rate']:.1f}%\n")
         
+        # Get mapping of model IDs to the human names used
+        model_to_human_name = self._get_model_to_human_name_mapping()
+        
         # Also save results in CSV format for easier analysis
         with open(csv_filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             
             # Write header row
             header = [
-                "Model", "Provider", "Elo", "Win Rate", "Wins", "Games", 
+                "Model", "Human Name", "Provider", "Elo", "Win Rate", "Wins", "Games", 
                 "Bluff Success Rate", "Lie Detection Precision", "Lie Detection Recall", "Lie Detection F1",
                 "Average Final Bid", "Bid Optimality", "Adaptation Score", "Rule Adherence Rate",
                 "Avg API Response Time", "Avg Rounds per Game", "Early Game Wins", "Mid Game Wins", "Long Game Wins"
@@ -761,6 +1270,9 @@ class GameBatchRunner:
             for model, stats in sorted_models:
                 provider = model.split('/')[0] if '/' in model else "unknown"
                 model_stats = self.model_stats[model]
+                
+                # Get human name used for this model
+                human_name = model_to_human_name.get(model, "Unknown")
                 
                 # Get advanced metrics if available
                 elo = 1000
@@ -789,7 +1301,7 @@ class GameBatchRunner:
                 
                 # Create data row
                 row = [
-                    model, provider, elo, stats["win_rate"], stats["wins"], stats["games_played"],
+                    model, human_name, provider, elo, stats["win_rate"], stats["wins"], stats["games_played"],
                     bluff_success, lie_precision, lie_recall, lie_f1,
                     avg_final_bid, bid_optimality, adaptation, rule_adherence,
                     avg_api_response_time, model_stats["avg_rounds_per_game"], model_stats["early_game_wins"], 
@@ -928,49 +1440,62 @@ class GameBatchRunner:
         
         print("\nStarting tournament...")
 
-        # Determine optimal parallelism for this system
-        cpu_count = os.cpu_count() or 4
-        # For network/API-bound workloads, we can go much higher than CPU count
-        max_workers = 10000 # min(cpu_count * 8, 64)  # Higher parallelism for API calls
-        
-        # Each thread manages one game independently
-        print(f"Running with {max_workers} concurrent games for maximum throughput")
-        
         # Calculate remaining games
         remaining_games = self.total_games - completed_games
         total = self.total_games
         
-        # We'll handle keyboard interrupts in the try/except block instead of using
-        # signal handlers, which only work in the main thread
-        
         try:
-            # Create a pool of workers that directly run individual games
-            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # Submit all remaining games at once, letting the executor manage concurrency
-                future_to_game = {
-                    executor.submit(self.run_single_game, game_num): game_num 
-                    for game_num in range(completed_games + 1, self.total_games + 1)
-                }
-                
-                # Process results as they complete
-                for i, future in enumerate(concurrent.futures.as_completed(future_to_game)):
-                    game_num = future_to_game[future]
-                    try:
-                        winner_model = future.result()
-                        completed_games += 1
-                        
-                        # Show progress
-                        progress_pct = (completed_games / total) * 100
-                        print(f"Game {game_num} completed. Progress: {completed_games}/{total} games ({progress_pct:.1f}%)")
-                        
-                        # Autosave progress at regular intervals
-                        if completed_games % max(1, min(10, total // 10)) == 0:  # Save every ~10% or every 10 games
-                            self.save_tournament_state()
-                            self.update_leaderboard()
-                            self.display_leaderboard()
+            # Check execution mode
+            if self.use_async:
+                # Import httpx if not already imported
+                try:
+                    import httpx
+                    print(f"Using asynchronous execution with httpx")
                     
-                    except Exception as e:
-                        print(f"Error in game {game_num}: {e}")
+                    # Run all games with asyncio
+                    game_nums = list(range(completed_games + 1, self.total_games + 1))
+                    results = self.run_games_with_asyncio(game_nums)
+                    
+                    # Verify all games were processed
+                    if len(results) != len(game_nums):
+                        print(f"Warning: Expected {len(game_nums)} results but got {len(results)}")
+                    
+                except ImportError:
+                    print("httpx package not installed. Falling back to threaded execution.")
+                    self.use_async = False
+                    
+                    # Run with thread pool executor with completion tracking
+                    completed_count = 0
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
+                        future_to_game = {
+                            executor.submit(self.run_single_game, game_num): game_num 
+                            for game_num in range(completed_games + 1, self.total_games + 1)
+                        }
+                        
+                        # Process all futures to ensure completion
+                        for future in concurrent.futures.as_completed(future_to_game):
+                            game_num = future_to_game[future]
+                            self._process_completed_game(future, game_num, total)
+                            completed_count += 1
+                        
+                        print(f"Processed {completed_count} out of {len(future_to_game)} games")
+            else:
+                # Create a pool of workers with explicit completion tracking
+                completed_count = 0
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
+                    # Submit all remaining games at once
+                    future_to_game = {
+                        executor.submit(self.run_single_game, game_num): game_num 
+                        for game_num in range(completed_games + 1, self.total_games + 1)
+                    }
+                    
+                    # Process all futures to ensure completion
+                    for future in concurrent.futures.as_completed(future_to_game):
+                        game_num = future_to_game[future]
+                        self._process_completed_game(future, game_num, total)
+                        completed_count += 1
+                    
+                    print(f"Processed {completed_count} out of {len(future_to_game)} games")
         
         except KeyboardInterrupt:
             # Handle manual interruption 
@@ -982,7 +1507,14 @@ class GameBatchRunner:
             return
             
         finally:
-            # Final update and save if not interrupted
+            # Verify the final number of completed games
+            actual_completed = len(self.game_results)
+            print(f"\nTournament finished with {actual_completed} completed games out of {total} total")
+            
+            if actual_completed < total:
+                print(f"Warning: {total - actual_completed} games did not complete")
+            
+            # Final update and save
             print("\nTournament complete!")
             self.update_leaderboard() 
             self.display_leaderboard()
@@ -996,3 +1528,27 @@ class GameBatchRunner:
                         print(f"Cleaned up autosave file: {f}")
             except Exception as e:
                 print(f"Error cleaning up autosave files: {e}")
+    
+    def _process_completed_game(self, future, game_num, total):
+        """Process a completed game future"""
+        try:
+            winner_model = future.result()
+            completed_games = len(self.game_results)
+            
+            # Show progress
+            progress_pct = (completed_games / total) * 100
+            print(f"Game {game_num} completed. Progress: {completed_games}/{total} games ({progress_pct:.1f}%)")
+            
+            # Always update the leaderboard periodically to show progress
+            if completed_games % max(50, total // 5) == 0:  # Every 20% or every 50 games, whichever is more
+                self.update_leaderboard()
+                self.display_leaderboard()
+                
+                # Only save state if autosaves are enabled
+                if self.enable_autosaves and completed_games > 0 and completed_games < total:
+                    print(f"Initiating autosave at {completed_games}/{total} games...")
+                    # Save in background thread to avoid blocking
+                    threading.Thread(target=self.save_tournament_state).start()
+        
+        except Exception as e:
+            print(f"Error in game {game_num}: {e}")

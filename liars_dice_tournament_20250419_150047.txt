@@ -1,0 +1,929 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-19 15:00:47
+Total Games: 100
+Models per Game: 6
+
+Providers Used: meta-llama, mistralai, mistral, cohere, openai, google, deepseek
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     cohere/command-r-08-2024      Kevin               1073.0    12.0%          3         25        
+2     meta-llama/llama-3.3-70b-...  Ashley              1073.0    9.5%          2         21        
+3     google/gemini-2.0-flash-l...  Kevin               1073.0    8.7%          2         23        
+4     mistralai/mistral-tiny        Ashley              1073.0    6.2%          1         16        
+5     google/gemini-2.5-flash-p...  Megan               1073.0    5.3%          1         19        
+6     cohere/command-r              Kevin               1073.0    5.0%          1         20        
+7     meta-llama/llama-4-maverick   Brian               1073.0    4.2%          1         24        
+8     mistralai/ministral-3b        Sarah               984.0     0.0%          0         28        
+9     cohere/command-r7b-12-2024    Daniel              984.0     0.0%          0         16        
+10    google/gemini-flash-1.5-8b    Brian               986.7     0.0%          0         14        
+11    google/gemini-flash-1.5       Matthew             986.7     0.0%          0         30        
+12    mistral/ministral-8b          Sarah               986.7     0.0%          0         21        
+13    mistralai/ministral-8b        Nicole              986.1     0.0%          0         19        
+14    meta-llama/llama-3.1-8b-i...  Sarah               985.4     0.0%          0         23        
+15    mistralai/mistral-small-3...  Rachel              985.4     0.0%          0         18        
+16    mistralai/mistral-small-2...  Devon Parker        N/A       0.0%          0         14        
+17    google/gemini-2.0-flash-001   James               984.0     0.0%          0         19        
+18    deepseek/deepseek-r1-dist...  Rachel              985.4     0.0%          0         18        
+19    mistralai/pixtral-12b         Michael             984.7     0.0%          0         22        
+20    mistralai/mistral-nemo        Brian               986.1     0.0%          0         17        
+21    google/gemini-2.5-flash-p...  Laura               984.0     0.0%          0         34        
+22    meta-llama/llama-4-scout      James               985.4     0.0%          0         23        
+23    openai/gpt-4o-mini            David               984.7     0.0%          0         17        
+24    openai/gpt-4o-mini-2024-0...  John                986.1     0.0%          0         20        
+25    mistralai/mistral-saba        Daniel              984.7     0.0%          0         21        
+26    mistralai/mistral-small       Reese Johnson       986.7     0.0%          0         18        
+27    mistralai/codestral-2501      Nicole              985.4     0.0%          0         21        
+28    cohere/command-r-03-2024      Michael             986.1     0.0%          0         17        
+29    deepseek/deepseek-r1          Matthew             985.4     0.0%          0         22        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. cohere/command-r-08-2024 (as 'Kevin')
+   Provider: cohere
+   Win Rate: 12.0%
+   Games Won: 3 / 25
+   Avg. Rounds per Game: 4.5
+   Elo Rating: 1073.0
+   Bluff Success Rate: 2.8%
+   Lie Detection (Precision): 11.6%
+   Lie Detection (Recall): 12.0%
+   Lie Detection (F1): 11.8%
+   Average Final Bid: 0.44
+   Bid Optimality: 10.2%
+   Adaptation Score: 4.0%
+   Rule Adherence Rate: 5.8%
+   Avg API Response Time: 2.97 seconds
+   Token Usage:
+     - Total Tokens: 5509.88
+     - Prompt Tokens: 5304.04
+     - Completion Tokens: 205.84
+     - Avg Tokens Per Action: 376.8
+   Liar Call Success Rate: 72.7%
+   Liar Calls: 8 successful, 3 unsuccessful
+   Playing Style: 71 bids, 11 liar calls (13.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+2. meta-llama/llama-3.3-70b-instruct (as 'Ashley')
+   Provider: meta-llama
+   Win Rate: 9.5%
+   Games Won: 2 / 21
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 1073.0
+   Bluff Success Rate: 7.9%
+   Lie Detection (Precision): 11.6%
+   Lie Detection (Recall): 11.3%
+   Lie Detection (F1): 11.4%
+   Average Final Bid: 0.48
+   Bid Optimality: 10.6%
+   Adaptation Score: 14.3%
+   Rule Adherence Rate: 10.0%
+   Avg API Response Time: 2.84 seconds
+   Token Usage:
+     - Total Tokens: 9858.047619047618
+     - Prompt Tokens: 9571.142857142857
+     - Completion Tokens: 286.9047619047619
+     - Avg Tokens Per Action: 414.5
+   Liar Call Success Rate: 79.2%
+   Liar Calls: 19 successful, 5 unsuccessful
+   Playing Style: 44 bids, 24 liar calls (35.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+3. google/gemini-2.0-flash-lite-001 (as 'Kevin')
+   Provider: google
+   Win Rate: 8.7%
+   Games Won: 2 / 23
+   Avg. Rounds per Game: 3.8
+   Elo Rating: 1073.0
+   Bluff Success Rate: 4.3%
+   Lie Detection (Precision): 6.5%
+   Lie Detection (Recall): 9.4%
+   Lie Detection (F1): 7.6%
+   Average Final Bid: 0.17
+   Bid Optimality: 7.5%
+   Adaptation Score: 8.7%
+   Rule Adherence Rate: 9.1%
+   Avg API Response Time: 2.02 seconds
+   Token Usage:
+     - Total Tokens: 6198.695652173913
+     - Prompt Tokens: 5990.130434782609
+     - Completion Tokens: 208.56521739130434
+     - Avg Tokens Per Action: 319.0
+   Liar Call Success Rate: 55.6%
+   Liar Calls: 15 successful, 12 unsuccessful
+   Playing Style: 15 bids, 27 liar calls (64.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+4. mistralai/mistral-tiny (as 'Ashley')
+   Provider: mistralai
+   Win Rate: 6.2%
+   Games Won: 1 / 16
+   Avg. Rounds per Game: 1.8
+   Elo Rating: 1073.0
+   Bluff Success Rate: 6.2%
+   Lie Detection (Precision): 4.7%
+   Lie Detection (Recall): 6.2%
+   Lie Detection (F1): 5.4%
+   Average Final Bid: 0.25
+   Bid Optimality: 2.9%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 3.5%
+   Avg API Response Time: 0.76 seconds
+   Token Usage:
+     - Total Tokens: 5540.9375
+     - Prompt Tokens: 5347.75
+     - Completion Tokens: 193.1875
+     - Avg Tokens Per Action: 205.2
+   Liar Call Success Rate: 75.0%
+   Liar Calls: 9 successful, 3 unsuccessful
+   Playing Style: 8 bids, 12 liar calls (60.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+5. google/gemini-2.5-flash-preview:thinking (as 'Megan')
+   Provider: google
+   Win Rate: 5.3%
+   Games Won: 1 / 19
+   Avg. Rounds per Game: 1.3
+   Elo Rating: 1073.0
+   Bluff Success Rate: 5.3%
+   Lie Detection (Precision): 5.3%
+   Lie Detection (Recall): 5.3%
+   Lie Detection (F1): 5.3%
+   Average Final Bid: 0.05
+   Bid Optimality: 5.3%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 3.5%
+   Avg API Response Time: 0.96 seconds
+   Token Usage:
+     - Total Tokens: 5607.0526315789475
+     - Prompt Tokens: 4269.1578947368425
+     - Completion Tokens: 1337.8947368421052
+     - Avg Tokens Per Action: 200.3
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 14 successful, 0 unsuccessful
+   Playing Style: 8 bids, 14 liar calls (63.6% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+6. cohere/command-r (as 'Kevin')
+   Provider: cohere
+   Win Rate: 5.0%
+   Games Won: 1 / 20
+   Avg. Rounds per Game: 1.2
+   Elo Rating: 1073.0
+   Bluff Success Rate: 5.0%
+   Lie Detection (Precision): 5.0%
+   Lie Detection (Recall): 5.0%
+   Lie Detection (F1): 5.0%
+   Average Final Bid: 0.20
+   Bid Optimality: 4.3%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 0.6%
+   Avg API Response Time: 0.96 seconds
+   Token Usage:
+     - Total Tokens: 1336.9
+     - Prompt Tokens: 1284.8
+     - Completion Tokens: 52.1
+     - Avg Tokens Per Action: 121.5
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 51 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+7. meta-llama/llama-4-maverick (as 'Brian')
+   Provider: meta-llama
+   Win Rate: 4.2%
+   Games Won: 1 / 24
+   Avg. Rounds per Game: 2.5
+   Elo Rating: 986.7
+   Bluff Success Rate: 3.2%
+   Lie Detection (Precision): 4.2%
+   Lie Detection (Recall): 4.2%
+   Lie Detection (F1): 4.2%
+   Average Final Bid: 0.27
+   Bid Optimality: 4.2%
+   Adaptation Score: 4.2%
+   Rule Adherence Rate: 8.0%
+   Avg API Response Time: 0.76 seconds
+   Token Usage:
+     - Total Tokens: 14847.916666666666
+     - Prompt Tokens: 14479.208333333334
+     - Completion Tokens: 368.7083333333333
+     - Avg Tokens Per Action: 342.9
+   Liar Call Success Rate: 77.8%
+   Liar Calls: 7 successful, 2 unsuccessful
+   Playing Style: 57 bids, 9 liar calls (13.6% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+8. mistralai/ministral-3b (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 28
+   Avg. Rounds per Game: 4.1
+   Elo Rating: 986.7
+   Bluff Success Rate: 3.6%
+   Lie Detection (Precision): 8.2%
+   Lie Detection (Recall): 2.7%
+   Lie Detection (F1): 3.9%
+   Average Final Bid: 0.62
+   Bid Optimality: 9.6%
+   Adaptation Score: 7.1%
+   Rule Adherence Rate: 5.2%
+   Avg API Response Time: 1.40 seconds
+   Token Usage:
+     - Total Tokens: 17051.178571428572
+     - Prompt Tokens: 16721.428571428572
+     - Completion Tokens: 329.75
+     - Avg Tokens Per Action: 459.5
+   Liar Call Success Rate: 71.4%
+   Liar Calls: 15 successful, 6 unsuccessful
+   Playing Style: 80 bids, 21 liar calls (20.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+9. cohere/command-r7b-12-2024 (as 'Daniel')
+   Provider: cohere
+   Win Rate: 0.0%
+   Games Won: 0 / 16
+   Avg. Rounds per Game: 1.8
+   Elo Rating: 984.0
+   Bluff Success Rate: 1.2%
+   Lie Detection (Precision): 4.2%
+   Lie Detection (Recall): 1.6%
+   Lie Detection (F1): 2.3%
+   Average Final Bid: 0.27
+   Bid Optimality: 1.7%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 3.6%
+   Avg API Response Time: 0.40 seconds
+   Token Usage:
+     - Total Tokens: 4218.0625
+     - Prompt Tokens: 4077.875
+     - Completion Tokens: 140.1875
+     - Avg Tokens Per Action: 210.9
+   Liar Call Success Rate: 66.7%
+   Liar Calls: 2 successful, 1 unsuccessful
+   Playing Style: 18 bids, 3 liar calls (14.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+10. google/gemini-flash-1.5-8b (as 'Brian')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 14
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 984.7
+   Bluff Success Rate: 3.2%
+   Lie Detection (Precision): 7.1%
+   Lie Detection (Recall): 1.2%
+   Lie Detection (F1): 2.0%
+   Average Final Bid: 0.84
+   Bid Optimality: 9.8%
+   Adaptation Score: 7.1%
+   Rule Adherence Rate: 2.2%
+   Avg API Response Time: 1.48 seconds
+   Token Usage:
+     - Total Tokens: 12827.5
+     - Prompt Tokens: 12608.0
+     - Completion Tokens: 219.5
+     - Avg Tokens Per Action: 517.9
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 1 successful, 0 unsuccessful
+   Playing Style: 45 bids, 1 liar calls (2.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+11. google/gemini-flash-1.5 (as 'Matthew')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 30
+   Avg. Rounds per Game: 0.9
+   Elo Rating: 986.7
+   Bluff Success Rate: 0.7%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 0.12
+   Bid Optimality: 2.2%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 1.8%
+   Avg API Response Time: 0.50 seconds
+   Token Usage:
+     - Total Tokens: 1639.7333333333333
+     - Prompt Tokens: 1595.5333333333333
+     - Completion Tokens: 44.2
+     - Avg Tokens Per Action: 96.5
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 1 unsuccessful
+   Playing Style: 16 bids, 1 liar calls (5.9% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+12. mistral/ministral-8b (as 'Sarah')
+   Provider: mistral
+   Win Rate: 0.0%
+   Games Won: 0 / 21
+   Avg. Rounds per Game: 5.3
+   Elo Rating: 985.4
+   Bluff Success Rate: 8.7%
+   Lie Detection (Precision): 7.5%
+   Lie Detection (Recall): 5.6%
+   Lie Detection (F1): 6.4%
+   Average Final Bid: 0.78
+   Bid Optimality: 10.2%
+   Adaptation Score: 4.8%
+   Rule Adherence Rate: 10.8%
+   Avg API Response Time: 2.68 seconds
+   Token Usage:
+     - Total Tokens: 10274.380952380952
+     - Prompt Tokens: 9944.42857142857
+     - Completion Tokens: 329.95238095238096
+     - Avg Tokens Per Action: 476.3
+   Liar Call Success Rate: 48.1%
+   Liar Calls: 13 successful, 14 unsuccessful
+   Playing Style: 38 bids, 27 liar calls (41.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+13. mistralai/ministral-8b (as 'Nicole')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 19
+   Avg. Rounds per Game: 1.5
+   Elo Rating: 986.1
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 0.00
+   Bid Optimality: 1.5%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 2.8%
+   Avg API Response Time: 1.63 seconds
+   Token Usage:
+     - Total Tokens: 1108.0526315789473
+     - Prompt Tokens: 1050.9473684210527
+     - Completion Tokens: 57.10526315789474
+     - Avg Tokens Per Action: 92.3
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 5 unsuccessful
+   Playing Style: 3 bids, 5 liar calls (62.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+14. meta-llama/llama-3.1-8b-instruct (as 'Sarah')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 23
+   Avg. Rounds per Game: 2.2
+   Elo Rating: 984.7
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 4.3%
+   Lie Detection (Recall): 1.9%
+   Lie Detection (F1): 2.7%
+   Average Final Bid: 0.84
+   Bid Optimality: 3.8%
+   Adaptation Score: 4.3%
+   Rule Adherence Rate: 2.5%
+   Avg API Response Time: 1.11 seconds
+   Token Usage:
+     - Total Tokens: 15204.217391304348
+     - Prompt Tokens: 14952.0
+     - Completion Tokens: 252.2173913043478
+     - Avg Tokens Per Action: 348.8
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 4 successful, 0 unsuccessful
+   Playing Style: 62 bids, 4 liar calls (6.1% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+15. mistralai/mistral-small-3.1-24b-instruct (as 'Rachel')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 18
+   Avg. Rounds per Game: 4.8
+   Elo Rating: 984.0
+   Bluff Success Rate: 6.7%
+   Lie Detection (Precision): 5.6%
+   Lie Detection (Recall): 4.6%
+   Lie Detection (F1): 5.1%
+   Average Final Bid: 0.50
+   Bid Optimality: 10.2%
+   Adaptation Score: 5.6%
+   Rule Adherence Rate: 11.5%
+   Avg API Response Time: 3.87 seconds
+   Token Usage:
+     - Total Tokens: 4512.111111111111
+     - Prompt Tokens: 4317.666666666667
+     - Completion Tokens: 194.44444444444446
+     - Avg Tokens Per Action: 363.9
+   Liar Call Success Rate: 55.6%
+   Liar Calls: 5 successful, 4 unsuccessful
+   Playing Style: 26 bids, 9 liar calls (25.7% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+16. mistralai/mistral-small-24b-instruct-2501 (as 'Devon Parker')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 14
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+17. google/gemini-2.0-flash-001 (as 'James')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 19
+   Avg. Rounds per Game: 8.4
+   Elo Rating: 986.7
+   Bluff Success Rate: 7.4%
+   Lie Detection (Precision): 26.3%
+   Lie Detection (Recall): 8.2%
+   Lie Detection (F1): 10.3%
+   Average Final Bid: 1.45
+   Bid Optimality: 14.7%
+   Adaptation Score: 5.3%
+   Rule Adherence Rate: 29.7%
+   Avg API Response Time: 4.70 seconds
+   Token Usage:
+     - Total Tokens: 14571.578947368422
+     - Prompt Tokens: 14101.526315789473
+     - Completion Tokens: 470.05263157894734
+     - Avg Tokens Per Action: 918.5
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 9 successful, 0 unsuccessful
+   Playing Style: 89 bids, 9 liar calls (9.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+18. deepseek/deepseek-r1-distill-llama-70b (as 'Rachel')
+   Provider: deepseek
+   Win Rate: 0.0%
+   Games Won: 0 / 18
+   Avg. Rounds per Game: 2.9
+   Elo Rating: 986.7
+   Bluff Success Rate: 2.5%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 0.58
+   Bid Optimality: 5.6%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 0.3%
+   Avg API Response Time: 3.39 seconds
+   Token Usage:
+     - Total Tokens: 7772.222222222223
+     - Prompt Tokens: 7772.222222222223
+     - Completion Tokens: 0.0
+     - Avg Tokens Per Action: 325.6
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 40 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+19. mistralai/pixtral-12b (as 'Michael')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 22
+   Avg. Rounds per Game: 2.5
+   Elo Rating: 984.0
+   Bluff Success Rate: 1.9%
+   Lie Detection (Precision): 5.7%
+   Lie Detection (Recall): 2.1%
+   Lie Detection (F1): 3.1%
+   Average Final Bid: 0.60
+   Bid Optimality: 4.4%
+   Adaptation Score: 9.1%
+   Rule Adherence Rate: 3.6%
+   Avg API Response Time: 0.90 seconds
+   Token Usage:
+     - Total Tokens: 13596.227272727272
+     - Prompt Tokens: 13359.772727272728
+     - Completion Tokens: 236.45454545454547
+     - Avg Tokens Per Action: 370.1
+   Liar Call Success Rate: 66.7%
+   Liar Calls: 4 successful, 2 unsuccessful
+   Playing Style: 59 bids, 6 liar calls (9.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+20. mistralai/mistral-nemo (as 'Brian')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 17
+   Avg. Rounds per Game: 6.1
+   Elo Rating: 986.7
+   Bluff Success Rate: 4.1%
+   Lie Detection (Precision): 11.8%
+   Lie Detection (Recall): 6.1%
+   Lie Detection (F1): 6.2%
+   Average Final Bid: 1.35
+   Bid Optimality: 12.2%
+   Adaptation Score: 5.9%
+   Rule Adherence Rate: 9.1%
+   Avg API Response Time: 3.52 seconds
+   Token Usage:
+     - Total Tokens: 12787.411764705883
+     - Prompt Tokens: 12464.823529411764
+     - Completion Tokens: 322.5882352941176
+     - Avg Tokens Per Action: 648.8
+   Liar Call Success Rate: 66.7%
+   Liar Calls: 2 successful, 1 unsuccessful
+   Playing Style: 63 bids, 3 liar calls (4.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+21. google/gemini-2.5-flash-preview (as 'Laura')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 34
+   Avg. Rounds per Game: 2.3
+   Elo Rating: 986.7
+   Bluff Success Rate: 4.0%
+   Lie Detection (Precision): 4.7%
+   Lie Detection (Recall): 2.8%
+   Lie Detection (F1): 3.3%
+   Average Final Bid: 0.29
+   Bid Optimality: 6.4%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 8.3%
+   Avg API Response Time: 1.16 seconds
+   Token Usage:
+     - Total Tokens: 5892.14705882353
+     - Prompt Tokens: 5712.588235294118
+     - Completion Tokens: 179.55882352941177
+     - Avg Tokens Per Action: 271.8
+   Liar Call Success Rate: 61.1%
+   Liar Calls: 11 successful, 7 unsuccessful
+   Playing Style: 46 bids, 18 liar calls (28.1% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+22. meta-llama/llama-4-scout (as 'James')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 23
+   Avg. Rounds per Game: 1.2
+   Elo Rating: 985.4
+   Bluff Success Rate: 2.2%
+   Lie Detection (Precision): 1.4%
+   Lie Detection (Recall): 2.2%
+   Lie Detection (F1): 1.7%
+   Average Final Bid: 0.22
+   Bid Optimality: 1.1%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 3.9%
+   Avg API Response Time: 0.66 seconds
+   Token Usage:
+     - Total Tokens: 646.5652173913044
+     - Prompt Tokens: 605.1739130434783
+     - Completion Tokens: 41.391304347826086
+     - Avg Tokens Per Action: 71.8
+   Liar Call Success Rate: 33.3%
+   Liar Calls: 1 successful, 2 unsuccessful
+   Playing Style: 5 bids, 3 liar calls (37.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+23. openai/gpt-4o-mini (as 'David')
+   Provider: openai
+   Win Rate: 0.0%
+   Games Won: 0 / 17
+   Avg. Rounds per Game: 3.2
+   Elo Rating: 986.7
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 6.0%
+   Lie Detection (Recall): 3.9%
+   Lie Detection (F1): 4.3%
+   Average Final Bid: 0.76
+   Bid Optimality: 6.5%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 7.5%
+   Avg API Response Time: 1.85 seconds
+   Token Usage:
+     - Total Tokens: 13001.64705882353
+     - Prompt Tokens: 12702.35294117647
+     - Completion Tokens: 299.29411764705884
+     - Avg Tokens Per Action: 371.0
+   Liar Call Success Rate: 57.9%
+   Liar Calls: 11 successful, 8 unsuccessful
+   Playing Style: 33 bids, 19 liar calls (36.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+24. openai/gpt-4o-mini-2024-07-18 (as 'John')
+   Provider: openai
+   Win Rate: 0.0%
+   Games Won: 0 / 20
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 984.7
+   Bluff Success Rate: 2.2%
+   Lie Detection (Precision): 6.0%
+   Lie Detection (Recall): 6.7%
+   Lie Detection (F1): 4.2%
+   Average Final Bid: 0.40
+   Bid Optimality: 8.7%
+   Adaptation Score: 10.0%
+   Rule Adherence Rate: 9.2%
+   Avg API Response Time: 2.24 seconds
+   Token Usage:
+     - Total Tokens: 6378.45
+     - Prompt Tokens: 6158.25
+     - Completion Tokens: 220.2
+     - Avg Tokens Per Action: 371.5
+   Liar Call Success Rate: 30.8%
+   Liar Calls: 4 successful, 9 unsuccessful
+   Playing Style: 33 bids, 13 liar calls (28.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+25. mistralai/mistral-saba (as 'Daniel')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 21
+   Avg. Rounds per Game: 1.3
+   Elo Rating: 984.7
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 1.4%
+   Lie Detection (Recall): 1.6%
+   Lie Detection (F1): 1.5%
+   Average Final Bid: 0.00
+   Bid Optimality: 1.4%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 2.3%
+   Avg API Response Time: 0.80 seconds
+   Token Usage:
+     - Total Tokens: 1966.952380952381
+     - Prompt Tokens: 1893.8095238095239
+     - Completion Tokens: 73.14285714285714
+     - Avg Tokens Per Action: 109.3
+   Liar Call Success Rate: 28.6%
+   Liar Calls: 2 successful, 5 unsuccessful
+   Playing Style: 6 bids, 7 liar calls (53.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+26. mistralai/mistral-small (as 'Reese Johnson')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 18
+   Avg. Rounds per Game: 1.6
+   Elo Rating: 986.7
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 2.8%
+   Lie Detection (Recall): 2.3%
+   Lie Detection (F1): 2.5%
+   Average Final Bid: 0.00
+   Bid Optimality: 2.5%
+   Adaptation Score: 5.6%
+   Rule Adherence Rate: 3.3%
+   Avg API Response Time: 0.69 seconds
+   Token Usage:
+     - Total Tokens: 4970.722222222223
+     - Prompt Tokens: 4846.111111111111
+     - Completion Tokens: 124.61111111111111
+     - Avg Tokens Per Action: 191.2
+   Liar Call Success Rate: 50.0%
+   Liar Calls: 5 successful, 5 unsuccessful
+   Playing Style: 12 bids, 10 liar calls (45.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+27. mistralai/codestral-2501 (as 'Nicole')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 21
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 986.1
+   Bluff Success Rate: 1.6%
+   Lie Detection (Precision): 2.4%
+   Lie Detection (Recall): 0.8%
+   Lie Detection (F1): 1.2%
+   Average Final Bid: 0.79
+   Bid Optimality: 3.4%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 11.6%
+   Avg API Response Time: 2.81 seconds
+   Token Usage:
+     - Total Tokens: 2954.285714285714
+     - Prompt Tokens: 2836.095238095238
+     - Completion Tokens: 118.19047619047619
+     - Avg Tokens Per Action: 277.7
+   Liar Call Success Rate: 20.0%
+   Liar Calls: 1 successful, 4 unsuccessful
+   Playing Style: 24 bids, 5 liar calls (17.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+28. cohere/command-r-03-2024 (as 'Michael')
+   Provider: cohere
+   Win Rate: 0.0%
+   Games Won: 0 / 17
+   Avg. Rounds per Game: 3.1
+   Elo Rating: 986.1
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 5.9%
+   Lie Detection (Recall): 2.0%
+   Lie Detection (F1): 2.9%
+   Average Final Bid: 0.72
+   Bid Optimality: 7.4%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 4.6%
+   Avg API Response Time: 1.49 seconds
+   Token Usage:
+     - Total Tokens: 3698.9411764705883
+     - Prompt Tokens: 3562.176470588235
+     - Completion Tokens: 136.76470588235293
+     - Avg Tokens Per Action: 281.9
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 2 successful, 0 unsuccessful
+   Playing Style: 25 bids, 2 liar calls (7.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+29. deepseek/deepseek-r1 (as 'Matthew')
+   Provider: deepseek
+   Win Rate: 0.0%
+   Games Won: 0 / 22
+   Avg. Rounds per Game: 3.8
+   Elo Rating: 984.7
+   Bluff Success Rate: 2.3%
+   Lie Detection (Precision): 8.4%
+   Lie Detection (Recall): 9.7%
+   Lie Detection (F1): 9.0%
+   Average Final Bid: 0.42
+   Bid Optimality: 6.8%
+   Adaptation Score: 4.5%
+   Rule Adherence Rate: 9.2%
+   Avg API Response Time: 3.10 seconds
+   Token Usage:
+     - Total Tokens: 8338.0
+     - Prompt Tokens: 7429.136363636364
+     - Completion Tokens: 908.8636363636364
+     - Avg Tokens Per Action: 364.2
+   Liar Call Success Rate: 64.5%
+   Liar Calls: 20 successful, 11 unsuccessful
+   Playing Style: 15 bids, 31 liar calls (67.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 77:
+  Players:
+    - Rachel (mistralai/mistral-small-3.1-24b-instruct)
+    - Matthew (deepseek/deepseek-r1)
+    - James (meta-llama/llama-4-scout)
+    - Kevin (google/gemini-2.0-flash-lite-001)
+    - Nicole (mistralai/codestral-2501)
+    - Sarah (mistralai/ministral-3b)
+  Winner: Kevin (google/gemini-2.0-flash-lite-001)
+  Rounds: 28
+  Total Moves: 57
+
+Game 42:
+  Players:
+    - Sarah (mistralai/ministral-3b)
+    - Kevin (google/gemini-2.0-flash-lite-001)
+    - Nicole (mistralai/codestral-2501)
+    - Rachel (mistralai/mistral-small-3.1-24b-instruct)
+    - Ashley (mistralai/mistral-tiny)
+    - Matthew (google/gemini-flash-1.5)
+  Winner: Ashley (mistralai/mistral-tiny)
+  Rounds: 28
+  Total Moves: 85
+
+Game 55:
+  Players:
+    - Daniel (cohere/command-r7b-12-2024)
+    - John (openai/gpt-4o-mini-2024-07-18)
+    - Sarah (mistral/ministral-8b)
+    - Nicole (mistralai/ministral-8b)
+    - James (google/gemini-2.0-flash-001)
+    - Kevin (cohere/command-r-08-2024)
+  Winner: Kevin (cohere/command-r-08-2024)
+  Rounds: 28
+  Total Moves: 93
+
+Game 7:
+  Players:
+    - James (google/gemini-2.0-flash-001)
+    - Sarah (meta-llama/llama-3.1-8b-instruct)
+    - Nicole (mistralai/codestral-2501)
+    - Megan (google/gemini-2.5-flash-preview:thinking)
+    - John (openai/gpt-4o-mini-2024-07-18)
+    - Brian (mistralai/mistral-nemo)
+  Winner: Megan (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 25
+  Total Moves: 88
+
+Game 96:
+  Players:
+    - Kevin (cohere/command-r-08-2024)
+    - Kevin-2 (google/gemini-2.0-flash-lite-001)
+    - Sarah (mistral/ministral-8b)
+    - Rachel (mistralai/mistral-small-3.1-24b-instruct)
+    - Matthew (deepseek/deepseek-r1)
+    - Brian (meta-llama/llama-4-maverick)
+  Winner: Kevin-2 (google/gemini-2.0-flash-lite-001)
+  Rounds: 31
+  Total Moves: 85
+
+Game 74:
+  Players:
+    - James (google/gemini-2.0-flash-001)
+    - Brian (mistralai/mistral-nemo)
+    - Matthew (deepseek/deepseek-r1)
+    - John (openai/gpt-4o-mini-2024-07-18)
+    - Ashley (meta-llama/llama-3.3-70b-instruct)
+    - Laura (google/gemini-2.5-flash-preview)
+  Winner: Ashley (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 25
+  Total Moves: 90
+
+Game 32:
+  Players:
+    - Kevin (cohere/command-r-08-2024)
+    - Michael (mistralai/pixtral-12b)
+    - Ashley (meta-llama/llama-3.3-70b-instruct)
+    - Sarah (mistralai/ministral-3b)
+    - Laura (google/gemini-2.5-flash-preview)
+    - Laura-6 (mistralai/mistral-small)
+  Winner: Kevin (cohere/command-r-08-2024)
+  Rounds: 29
+  Total Moves: 113
+
+Game 51:
+  Players:
+    - Sarah (mistral/ministral-8b)
+    - Daniel (mistralai/mistral-saba)
+    - James (google/gemini-2.0-flash-001)
+    - Michael (cohere/command-r-03-2024)
+    - Rachel (deepseek/deepseek-r1-distill-llama-70b)
+    - Ashley (meta-llama/llama-3.3-70b-instruct)
+  Winner: Ashley (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 28
+  Total Moves: 97
+
+Game 33:
+  Players:
+    - Sarah (mistralai/ministral-3b)
+    - Brian (google/gemini-flash-1.5-8b)
+    - Brian-3 (meta-llama/llama-4-maverick)
+    - Brian-4 (mistralai/mistral-nemo)
+    - James (google/gemini-2.0-flash-001)
+    - David (openai/gpt-4o-mini)
+  Winner: Brian-3 (meta-llama/llama-4-maverick)
+  Rounds: 29
+  Total Moves: 204
+
+Game 73:
+  Players:
+    - Laura (google/gemini-2.5-flash-preview)
+    - Michael (mistralai/pixtral-12b)
+    - Sarah (meta-llama/llama-3.1-8b-instruct)
+    - Kevin (cohere/command-r)
+    - Brian (mistralai/mistral-nemo)
+    - Brian-6 (google/gemini-flash-1.5-8b)
+  Winner: Kevin (cohere/command-r)
+  Rounds: 25
+  Total Moves: 215
+
+Game 50:
+  Players:
+    - James (google/gemini-2.0-flash-001)
+    - David (openai/gpt-4o-mini)
+    - Kevin (cohere/command-r-08-2024)
+    - Rachel (deepseek/deepseek-r1-distill-llama-70b)
+    - Michael (cohere/command-r-03-2024)
+    - Sarah (mistral/ministral-8b)
+  Winner: Kevin (cohere/command-r-08-2024)
+  Rounds: 25
+  Total Moves: 159
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: deepseek/deepseek-r1
+Most Cautious Model: mistralai/mistral-small-24b-instruct-2501
+Most Accurate Liar Detector: google/gemini-flash-1.5-8b (100.0% success rate)
+Model with Shortest Games: google/gemini-flash-1.5 (0.9 rounds avg)
+Model with Longest Games: google/gemini-2.0-flash-001 (8.4 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: mistral/ministral-8b (8.7% success rate)
+Best Lie Detector: cohere/command-r-08-2024 (F1 score: 11.8%)
+Most Optimal Bidder: google/gemini-2.0-flash-001 (14.7% optimal bids)
+Most Adaptive Player: meta-llama/llama-3.3-70b-instruct (14.3% adaptation score)
+Most Rule Adherent: google/gemini-2.0-flash-001 (29.7% adherence rate)
+
+PROVIDER COMPARISON
+================================================================================
+Provider       Win Rate       Avg Elo        Wins      Games     
+-----------------------------------------------------------------
+cohere         5.1%          1029.0     4         78        
+meta-llama     3.3%          1007.5     3         91        
+google         2.2%          1015.2     3         139       
+mistralai      0.5%          995.3     1         194       
+mistral        0.0%          985.4     0         21        
+openai         0.0%          985.7     0         37        
+deepseek       0.0%          985.7     0         40        
+
+Provider Advanced Metrics Comparison:
+----------------------------------------------------------------------------------------------------
+Provider       Bluff Success  Lie Detection  Bid Optimality Adaptation     Rule Adherence 
+----------------------------------------------------------------------------------------------------
+cohere         2.3%          5.5%          5.9%          1.0%          3.7%
+meta-llama     3.3%          5.0%          4.9%          5.7%          6.1%
+google         4.1%          4.8%          7.7%          3.5%          9.1%
+mistralai      2.7%          3.2%          5.4%          3.7%          5.9%
+mistral        8.7%          6.4%          10.2%          4.8%          10.8%
+openai         1.1%          4.3%          7.6%          5.0%          8.4%
+deepseek       2.4%          4.5%          6.2%          2.3%          4.8%

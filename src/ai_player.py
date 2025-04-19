@@ -200,8 +200,7 @@ It is now your move. Return exactly one JSON object following the format describ
                 },
                 "face": {
                     "type": "integer",
-                    "minimum": 1,
-                    "maximum": 6,
+                    "enum": [1, 2, 3, 4, 5, 6],
                     "description": "The face value for your bid (1-6)"
                 },
                 "utterance": {
@@ -217,19 +216,47 @@ It is now your move. Return exactly one JSON object following the format describ
             "model": self.model,
             "messages": [system_message, user_message],
             "temperature": 0.7,  # Balanced temperature for creativity in utterances
-            "seed": random.randint(1, 10000)  # Add randomness across runs
         }
         
         # For OpenRouter, include structured output format 
         if not self.is_local_endpoint and self.provider == PROVIDER_OPENROUTER:
-            # OpenRouter format
+            # OpenRouter structured output configuration
             data["response_format"] = {
-                "type": "json_object",
-                "schema": schema
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "liars_dice_move",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "reasoning": {
+                                "type": "string",
+                                "description": "A brief explanation of your current thought process"
+                            },
+                            "action": {
+                                "type": "string",
+                                "enum": ["bid", "call"],
+                                "description": "Whether to make a bid or call the previous bid"
+                            },
+                            "quantity": {
+                                "type": "integer",
+                                "description": "The quantity of dice in your bid (set to 0 if calling)"
+                            },
+                            "face": {
+                                "type": "integer",
+                                "description": "The face value for your bid (1-6)"
+                            },
+                            "utterance": {
+                                "type": "string",
+                                "description": "What you'd say in-character (e.g., bluff, trash talk, etc.)"
+                            }
+                        },
+                        "required": ["reasoning", "action", "quantity", "face", "utterance"],
+                        "additionalProperties": False
+                    }
+                }
             }
-            data["provider"] = {
-                'require_parameters': True,
-            }
+            data["provider"] = {"require_parameters": True}
         
         # For local endpoints, let's add a fallback by not using structured output
         # Some local endpoints might not support this feature yet
@@ -304,8 +331,11 @@ It is now your move. Return exactly one JSON object following the format describ
                 # If we can't get the prompt, continue without it
                 pass
                     
+            # Create logs directory if it doesn't exist
+            os.makedirs("logs", exist_ok=True)
+            
             # Log the error
-            with open("invalid_responses.json", "a") as f:
+            with open("logs/invalid_responses.json", "a") as f:
                 json.dump(error_info, f)
                 f.write("\n")
                 

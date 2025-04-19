@@ -6,6 +6,8 @@ import json
 import sys
 import csv
 import signal
+import logging
+import traceback
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
@@ -20,6 +22,22 @@ from .ai_player import (
 )
 from .metrics import GameMetrics
 
+# Set up logging directories
+os.makedirs("logs", exist_ok=True)
+os.makedirs("diagnostics/timing_reports", exist_ok=True)
+os.makedirs("diagnostics/game_stats", exist_ok=True)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)d] - %(message)s',
+    handlers=[
+        logging.FileHandler("logs/timeout_diagnostics.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("liarsdice")
+
 class AsyncGameRunner:
     """
     Runs multiple games concurrently using asyncio.
@@ -29,37 +47,158 @@ class AsyncGameRunner:
         self.batch_runner = batch_runner
         limits = httpx.Limits(max_connections=1000, max_keepalive_connections=1000)
         self.client = httpx.AsyncClient(timeout=30.0, limits=limits)  # Single client for all API calls
+        # Track timing data for diagnostics
+        self.timing_data = defaultdict(list)
+        self.api_call_counts = defaultdict(int)
+        self.game_timing_stats = {}
         
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()
+        
+    def save_timing_report(self, game_num):
+        """Save detailed timing data to a report file"""
+        try:
+            # Only save timing data if we have collected some
+            if not self.timing_data:
+                return
+                
+            report_path = f"diagnostics/timing_reports/game_{game_num}_timing.json"
+            
+            # Calculate statistics
+            timing_stats = {}
+            for step, timings in self.timing_data.items():
+                if not timings:
+                    continue
+                if isinstance(timings, list) and all(isinstance(item, (int, float)) for item in timings):
+                    timing_stats[step] = {
+                        "avg": sum(timings) / len(timings),
+                        "max": max(timings),
+                        "min": min(timings),
+                        "total": sum(timings),
+                        "count": len(timings)
+                    }
+                else:
+                    # For non-numeric data, just count it
+                    timing_stats[step] = {
+                        "count": len(timings) if isinstance(timings, list) else 1
+                    }
+            
+            # Create report data
+            report_data = {
+                "game_number": game_num,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "timing_stats": timing_stats,
+                "api_call_counts": dict(self.api_call_counts),
+                "game_timing": self.game_timing_stats.get(game_num, {})
+            }
+            
+            # Include a subset of detailed timings (to avoid overwhelmingly large files)
+            detailed_data = {}
+            for key, value in self.timing_data.items():
+                # Only include important detailed data and limit large arrays
+                if key.startswith("api_") or key.startswith("model_") or "timeout" in key or "error" in key:
+                    if isinstance(value, list) and len(value) > 100:
+                        # For very large lists, include summary stats instead
+                        if all(isinstance(item, (int, float)) for item in value):
+                            detailed_data[key] = {
+                                "summary": {
+                                    "avg": sum(value) / len(value),
+                                    "max": max(value),
+                                    "min": min(value),
+                                    "count": len(value)
+                                },
+                                "sample": value[:50]  # Include first 50 items as a sample
+                            }
+                        else:
+                            detailed_data[key] = value[:50]  # Include first 50 items
+                    else:
+                        detailed_data[key] = value
+            
+            report_data["detailed_timings"] = detailed_data
+            
+            # Save to file
+            with open(report_path, 'w') as f:
+                json.dump(report_data, f, indent=2)
+                
+            logger.info(f"Saved timing report to {report_path}")
+            
+        except Exception as e:
+            logger.error(f"Error saving timing report: {e}")
+            logger.error(traceback.format_exc())
     
-    async def make_api_request(self, request_params):
+    async def make_api_request(self, request_params, player_name=None, model=None):
         """Make an async API request and return the response"""
         endpoint_url = request_params["endpoint_url"]
         headers = request_params["headers"]
         data = request_params["data"]
         
-        start_time = time.time()
-        response = await self.client.post(
-            endpoint_url,
-            headers=headers,
-            json=data
-        )
-        response_time = time.time() - start_time
+        api_start_time = time.time()
+        logger.debug(f"API request starting for {model} (Player: {player_name})")
         
-        if response.status_code != 200:
-            raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
+        # Track API call for this model
+        if model:
+            self.api_call_counts[model] += 1
         
-        return response, response_time
+        try:
+            response = await self.client.post(
+                endpoint_url,
+                headers=headers,
+                json=data
+            )
+            response_time = time.time() - api_start_time
+            
+            # Record timing data
+            if model:
+                self.timing_data[f"api_call_{model}"].append(response_time)
+                
+            logger.debug(f"API response received from {model} - time: {response_time:.2f}s, status: {response.status_code}")
+            
+            if response.status_code != 200:
+                logger.error(f"API Error for {model}: {response.status_code} - {response.text[:200]}")
+                raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
+            
+            return response, response_time
+            
+        except httpx.ReadTimeout:
+            elapsed = time.time() - api_start_time
+            logger.error(f"API Timeout for {model} after {elapsed:.2f}s")
+            raise
+        except Exception as e:
+            elapsed = time.time() - api_start_time
+            logger.error(f"API Exception for {model} after {elapsed:.2f}s: {str(e)}")
+            raise
     
     async def get_ai_decision_async(self, player, game_state):
         """Async version of get_ai_decision"""
+        model_id = player.model
+        player_name = player.name
+        
+        # Record start time for this operation
+        decision_start_time = time.time()
+        logger.debug(f"Starting AI decision for {player_name} (Model: {model_id})")
+        
+        # Prepare request
+        prep_start_time = time.time()
         request_params = player.get_prompt_and_params(game_state)
         game_state['provider'] = request_params["provider"]
+        prep_time = time.time() - prep_start_time
+        self.timing_data["prepare_request"].append(prep_time)
         
         try:
-            response, response_time = await self.make_api_request(request_params)
+            # Call API
+            logger.debug(f"Making API call for player {player_name} (Model: {model_id})")
+            response, response_time = await self.make_api_request(
+                request_params, 
+                player_name=player_name,
+                model=model_id
+            )
+            
+            # Record that a response was received
+            logger.debug(f"Processing API response for {player_name} (Model: {model_id})")
+            
+            # Process response timing
+            proc_start_time = time.time()
             
             # Process response just like the original method
             result = response.json()
@@ -79,13 +218,23 @@ class AsyncGameRunner:
                     "completion_tokens": completion_tokens,
                     "total_tokens": total_tokens
                 }
+                
+                # Log token usage
+                logger.debug(f"Token usage for {model_id}: {prompt_tokens} prompt + {completion_tokens} completion = {total_tokens} total")
+            
+            # Create logs directory if it doesn't exist
+            os.makedirs("logs", exist_ok=True)
             
             # Log the response with prompt information
-            with open("llm_responses.json", "a") as f:
-                # Create response log object
+            with open("logs/llm_responses.json", "a") as f:
+                # Create response log object with truncated content
+                response_content = content
+                if len(response_content) > 1000:
+                    response_content = response_content[:1000] + "... [truncated]"
+                    
                 response_log = {
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "response_text": content,
+                    "response_text": response_content,
                     "model": player.model,
                     "provider": game_state['provider'],
                     "response_time": response_time,
@@ -95,32 +244,78 @@ class AsyncGameRunner:
                     "system_prompt": result["choices"][0]["message"].get("system_fingerprint", "")
                 }
                 
-                # Add prompt directly from request_params
+                # Add truncated prompt information to save space
                 if "data" in request_params and "messages" in request_params["data"] and len(request_params["data"]["messages"]) >= 2:
-                    response_log["prompt"] = {
-                        "system": request_params["data"]["messages"][0]["content"],
-                        "user": request_params["data"]["messages"][1]["content"]
-                    }
+                    # Include system prompt (usually smaller)
+                    response_log["prompt_system"] = request_params["data"]["messages"][0]["content"]
+                    
+                    # Truncate user prompt if large
+                    user_prompt = request_params["data"]["messages"][1]["content"]
+                    if len(user_prompt) > 500:
+                        user_prompt = user_prompt[:500] + "... [truncated]"
+                    response_log["prompt_user"] = user_prompt 
                 # Alternatively, try to get it from the player
                 elif hasattr(player, 'get_prompt_for_game'):
                     try:
-                        response_log["prompt"] = player.get_prompt_for_game(game_state)
+                        prompt = player.get_prompt_for_game(game_state)
+                        if isinstance(prompt, dict) and "system" in prompt:
+                            response_log["prompt_system"] = prompt["system"]
                     except Exception:
                         pass
                         
                 json.dump(response_log, f)
                 f.write("\n")
             
+            # Process AI response
             game_state['response_time'] = response_time
-            return player.process_api_response(response, response_time, game_state)
+            ai_decision = player.process_api_response(response, response_time, game_state)
+            
+            # Record processing time
+            proc_time = time.time() - proc_start_time
+            self.timing_data["process_response"].append(proc_time)
+            
+            # Record overall decision time
+            total_decision_time = time.time() - decision_start_time
+            self.timing_data[f"total_decision_{model_id}"].append(total_decision_time)
+            logger.debug(f"Completed AI decision for {player_name} in {total_decision_time:.2f}s")
+            
+            # Log type of decision (bid or liar call)
+            if ai_decision and "action" in ai_decision:
+                logger.debug(f"Decision type: {ai_decision['action']} from {player_name}")
+            
+            return ai_decision
+            
+        except asyncio.TimeoutError as e:
+            elapsed = time.time() - decision_start_time
+            logger.error(f"TIMEOUT for {player_name} (Model: {model_id}) after {elapsed:.2f}s")
+            self.timing_data["timeout_incidents"].append({
+                "player": player_name,
+                "model": model_id,
+                "elapsed_time": elapsed
+            })
+            raise
             
         except Exception as e:
+            elapsed = time.time() - decision_start_time
+            logger.error(f"ERROR for {player_name} (Model: {model_id}) after {elapsed:.2f}s: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # Record error information
             error_info = {
                 "model": player.model,
                 "provider": game_state.get('provider', player.provider),
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "error": str(e),
+                "elapsed_time": elapsed
             }
+            
+            # Record error in timing data
+            self.timing_data["error_incidents"].append({
+                "player": player_name,
+                "model": model_id,
+                "elapsed_time": elapsed,
+                "error": str(e)
+            })
             
             # Add response if available
             if 'response' in locals():
@@ -142,8 +337,11 @@ class AsyncGameRunner:
                 except Exception:
                     pass
             
+            # Create logs directory if it doesn't exist
+            os.makedirs("logs", exist_ok=True)
+            
             # Log the error
-            with open("invalid_responses.json", "a") as f:
+            with open("logs/invalid_responses.json", "a") as f:
                 json.dump(error_info, f)
                 f.write("\n")
             
@@ -152,6 +350,25 @@ class AsyncGameRunner:
     async def play_single_game_async(self, game_num):
         """Run a single game with asynchronous API calls"""
         game, game_models = self.batch_runner.setup_game(game_num)
+        
+        # Reset timing data for this game
+        self.timing_data = defaultdict(list)
+        self.api_call_counts = defaultdict(int)
+        self.timing_data["round_times"] = []
+        
+        # Initialize model-specific timing data
+        for player in game.players:
+            if isinstance(player, AIPlayer):
+                self.timing_data[f"model_{player.model}_times"] = []
+                self.timing_data[f"player_{player.name}_times"] = []
+                
+        # Create a timeout report entry
+        self.game_timing_stats[game_num] = {
+            "start_time": time.time(),
+            "game_models": [model.get("id") for model in game_models],
+            "player_models": {p.name: p.model for p in game.players if isinstance(p, AIPlayer)},
+            "round_completion": {}
+        }
         
         # Hide output if not verbose
         original_stdout = sys.stdout
@@ -162,14 +379,54 @@ class AsyncGameRunner:
         start_time = time.time()
         max_duration = 1800  # 30 minutes in seconds
         
+        logger.info(f"Starting game {game_num} with models: " + 
+                   ", ".join([f"{p.name}: {p.model}" for p in game.players if isinstance(p, AIPlayer)]))
+        
         try:
             # Play the game in auto mode
+            round_number = 0
             while not game.game_over:
+                round_number += 1
+                round_start = time.time()
+                
                 # Check if we've exceeded the time limit
-                if time.time() - start_time > max_duration:
+                elapsed = time.time() - start_time
+                if elapsed > max_duration:
+                    logger.error(f"Game {game_num} timed out after {elapsed:.2f}s ({round_number-1} rounds completed)")
+                    self.game_timing_stats[game_num]["timeout"] = {
+                        "elapsed_time": elapsed,
+                        "rounds_completed": round_number - 1
+                    }
                     raise asyncio.TimeoutError(f"Game {game_num} exceeded the 30-minute time limit")
                 
+                # Play a round and track time
+                logger.debug(f"Game {game_num}: Starting round {round_number}")
                 await self.play_round_async(game, auto_mode=True, game_num=game_num)
+                
+                # Record round completion
+                round_time = time.time() - round_start
+                self.timing_data["round_times"].append(round_time)
+                self.game_timing_stats[game_num]["round_completion"][round_number] = {
+                    "time": round_time,
+                    "elapsed": time.time() - start_time,
+                    "total_moves": len(game.move_history)
+                }
+                
+                # Log round metrics
+                logger.debug(f"Game {game_num}: Completed round {round_number} in {round_time:.2f}s")
+                
+                # Check for extremely long rounds (potential sign of issues)
+                if round_time > 300:  # 5 minutes per round
+                    logger.warning(f"Game {game_num}: LONG ROUND DETECTED - Round {round_number} took {round_time:.2f}s")
+            
+            # Record total game time
+            game_time = time.time() - start_time
+            self.timing_data["total_game_time"] = game_time
+            self.game_timing_stats[game_num]["completion_time"] = game_time
+            self.game_timing_stats[game_num]["rounds_completed"] = round_number
+            
+            # Log game completion
+            logger.info(f"Game {game_num} completed in {game_time:.2f}s with {round_number} rounds")
             
             # Record the winner and update leaderboard
             winner_model = None
@@ -177,6 +434,7 @@ class AsyncGameRunner:
             for player in game.players:
                 if isinstance(player, AIPlayer) and player.name == game.winner.name:
                     winner_model = player.model
+                    logger.info(f"Game {game_num} winner: {player.name} using model {winner_model}")
                     
                     # Update wins
                     self.batch_runner.leaderboard[winner_model]["wins"] += 1
@@ -267,42 +525,105 @@ class AsyncGameRunner:
         if isinstance(player, AIPlayer):
             print(f"\n{player.name} (AI) is thinking...")
             
+            # Record timing for this specific player's turn
+            turn_start_time = time.time()
+            logger.debug(f"Starting turn for player {player.name} (Model: {player.model})")
+            
             # Create game state for AI
             game_state = game.create_game_state_for_ai(player_idx)
             
-            # Add a short delay to make it feel more natural
-            await asyncio.sleep(random.uniform(0.5, 1.0))
+            # Add a short delay to make it feel more natural (but track it)
+            delay_start = time.time()
+            await asyncio.sleep(random.uniform(0.2, 0.5))  # Reduced delay for diagnostics
+            delay_time = time.time() - delay_start
+            self.timing_data["artificial_delay"].append(delay_time)
+            
+            # Set a per-turn timeout (independent of the game timeout)
+            # This will prevent a single turn from hanging the entire game
+            turn_timeout = 300  # 5 minutes per turn is still generous
             
             try:
-                # Get AI decision asynchronously
-                decision = await self.get_ai_decision_async(player, game_state)
-                
-                # Record API response time if available
-                if 'response_time' in game_state:
-                    game.metrics.record_api_response_time(player.model, game_state['response_time'])
+                # Get AI decision asynchronously with turn timeout
+                decision_task = asyncio.create_task(self.get_ai_decision_async(player, game_state))
+                try:
+                    # Apply per-turn timeout
+                    decision = await asyncio.wait_for(decision_task, timeout=turn_timeout)
                     
-                # Record token usage if available
-                if 'token_usage' in game_state:
-                    usage = game_state['token_usage']
-                    game.metrics.record_token_usage(
-                        player.model,
-                        usage.get('prompt_tokens', 0),
-                        usage.get('completion_tokens', 0),
-                        usage.get('total_tokens', 0)
-                    )
-                
-                if decision["action"] == "liar":
-                    return game._process_ai_liar_call(player, decision)
-                else:
-                    return game._process_ai_bid(player, decision)
+                    # Record API response time if available
+                    if 'response_time' in game_state:
+                        game.metrics.record_api_response_time(player.model, game_state['response_time'])
+                        # Also record in our timing data
+                        self.timing_data[f"api_time_{player.model}"].append(game_state['response_time'])
+                        
+                    # Record token usage if available
+                    if 'token_usage' in game_state:
+                        usage = game_state['token_usage']
+                        game.metrics.record_token_usage(
+                            player.model,
+                            usage.get('prompt_tokens', 0),
+                            usage.get('completion_tokens', 0),
+                            usage.get('total_tokens', 0)
+                        )
+                    
+                    # Process decision time
+                    process_start = time.time()
+                    
+                    # Determine the action type and process
+                    if decision["action"] == "liar":
+                        is_liar_call = game._process_ai_liar_call(player, decision)
+                        action_type = "liar call" if is_liar_call else "bid (from liar)"
+                    else:
+                        is_liar_call = game._process_ai_bid(player, decision)
+                        action_type = "bid"
+                    
+                    # Record decision processing time
+                    process_time = time.time() - process_start
+                    self.timing_data["decision_processing"].append(process_time)
+                    
+                    # Record total turn time
+                    turn_time = time.time() - turn_start_time
+                    self.timing_data[f"player_{player.name}_times"].append(turn_time)
+                    self.timing_data[f"model_{player.model}_times"].append(turn_time)
+                    
+                    logger.debug(f"Player {player.name} completed turn in {turn_time:.2f}s with action: {action_type}")
+                    
+                    return is_liar_call
+                    
+                except asyncio.TimeoutError:
+                    # Per-turn timeout occurred
+                    elapsed = time.time() - turn_start_time
+                    logger.error(f"TURN TIMEOUT: Player {player.name} (Model: {player.model}) exceeded {turn_timeout}s turn limit")
+                    
+                    # Record timeout in statistics
+                    self.timing_data["turn_timeouts"].append({
+                        "player": player.name,
+                        "model": player.model,
+                        "elapsed_time": elapsed
+                    })
+                    
+                    # Cancel the task if it's still running
+                    if not decision_task.done():
+                        decision_task.cancel()
+                        
+                    # Let this fall through to the fallback logic
+                    raise asyncio.TimeoutError(f"Player turn timeout after {elapsed:.2f}s")
                     
             except Exception as e:
-                print(f"Error with AI decision: {e}")
-                # Fallback to a simple bid
+                # Record the error timing information
+                error_time = time.time() - turn_start_time
+                logger.error(f"Error during {player.name}'s turn after {error_time:.2f}s: {str(e)}")
+                
+                if isinstance(e, asyncio.TimeoutError):
+                    logger.error(f"Turn timed out for {player.name} (Model: {player.model})")
+                
+                # Fallback to a simple bid with detailed logging
+                logger.warning(f"Using fallback logic for {player.name} due to error: {str(e)}")
+                
                 if game.last_bid:
                     last_quantity, last_value = game.last_bid
                     if last_quantity > game.total_dice_in_game:
                         # Change decision to call liar due to invalid bid
+                        logger.info(f"Fallback: {player.name} calls liar (automatic) due to impossible bid")
                         return True
                     if last_value < 6:
                         game.last_bid = (last_quantity, last_value + 1)
@@ -322,14 +643,23 @@ class AsyncGameRunner:
                     "action": "bid",
                     "quantity": game.last_bid[0],
                     "value": game.last_bid[1],
-                    "error_fallback": True
+                    "error_fallback": True,
+                    "error_message": str(e)
                 }
                 game.move_history.append(move_data)
                 
                 # Track in player history
                 game.player_history[player.name].append(move_data)
                 
+                # Log the fallback bid
+                logger.info(f"Fallback bid for {player.name}: {game.last_bid[0]} {game.last_bid[1]}'s")
+                
                 print(f"{player.name} bids {game.last_bid[0]} {game.last_bid[1]}'s")
+                
+                # Record total turn time including error handling
+                turn_time = time.time() - turn_start_time
+                self.timing_data[f"player_{player.name}_error_times"].append(turn_time)
+                
                 return False
         
         # Human player logic (not used in AsyncGameRunner)
@@ -337,36 +667,125 @@ class AsyncGameRunner:
     
     async def play_round_async(self, game, auto_mode=True, game_num=0):
         """Asynchronous version of play_round"""
+        # Record time for round start
+        round_start = time.time()
+        
         # Start by rolling all dice and display round number
         game.roll_all_dice()
         print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
+        logger.debug(f"Game {game_num} Round {game.round_number} starting")
+        
+        # Track turns in this round
+        turn_count = 0
+        round_turns = []
         
         while not game.game_over:
+            # Track turn start time
+            turn_start = time.time()
+            
+            # Increment turn counter
+            turn_count += 1
             current_player = game.players[game.current_player_idx]
+            player_model = current_player.model if isinstance(current_player, AIPlayer) else "human"
+            
+            logger.debug(f"Game {game_num} Round {game.round_number} Turn {turn_count}: {current_player.name} ({player_model})")
+            
+            # Show dice to the player
             game.show_dice_to_player(game.current_player_idx)
             
             # For AI players, get decision asynchronously
+            turn_timer_start = time.time()
             is_calling_liar = await self.get_player_bid_async(game, game.current_player_idx)
+            turn_duration = time.time() - turn_timer_start
             
+            # Record turn information
+            turn_info = {
+                "player": current_player.name,
+                "model": player_model,
+                "turn_number": turn_count,
+                "action": "liar" if is_calling_liar else "bid",
+                "duration": turn_duration
+            }
+            round_turns.append(turn_info)
+            
+            # Log turn duration
+            if turn_duration > 60:  # Log turns taking more than 1 minute
+                logger.warning(f"LONG TURN: Game {game_num} Round {game.round_number} - {current_player.name} took {turn_duration:.2f}s")
+            
+            # Handle liar call
             if is_calling_liar:
-                game.handle_liar_call(auto_continue=auto_mode)
+                logger.debug(f"Game {game_num} Round {game.round_number}: {current_player.name} called liar")
                 
+                # Time the liar call handling
+                liar_call_start = time.time()
+                game.handle_liar_call(auto_continue=auto_mode)
+                liar_call_time = time.time() - liar_call_start
+                self.timing_data["liar_call_handling"].append(liar_call_time)
+                
+                # Check if game is over
                 if game.check_game_over():
+                    logger.info(f"Game {game_num} ended on round {game.round_number} after liar call")
                     break
                 
                 # Start new round
                 game.round_number += 1
+                
+                # Record round statistics
+                elapsed_round_time = time.time() - round_start
+                self.timing_data["completed_round_times"].append(elapsed_round_time)
+                
+                # Record detailed round information
+                self.timing_data["rounds"].append({
+                    "round_number": game.round_number - 1,  # The round we just finished
+                    "turns": turn_count,
+                    "duration": elapsed_round_time,
+                    "turn_details": round_turns
+                })
+                
+                # Log summary
+                logger.debug(f"Game {game_num} Round {game.round_number-1} ended after {elapsed_round_time:.2f}s with {turn_count} turns")
+                
+                # Reset for next round
                 print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
+                round_start = time.time()  # Reset for next round
+                turn_count = 0
+                round_turns = []
                 game.roll_all_dice()
+                logger.debug(f"Game {game_num} Round {game.round_number} starting")
                 continue
             
             # Advance to next player
+            logger.debug(f"Game {game_num} Round {game.round_number}: Advancing to next player after {current_player.name}")
             game.next_player()
     
     async def run_games_async(self, game_nums):
         """Run multiple games concurrently using asyncio"""
         tasks = []
+        run_stats = {}
+        
+        # Initialize global diagnostic stats
+        all_game_stats = {
+            "start_time": time.time(),
+            "total_games": len(game_nums),
+            "timeouts": 0,
+            "errors": 0,
+            "completed": 0,
+            "per_model_stats": defaultdict(lambda: {"timeouts": 0, "completions": 0, "time_spent": 0})
+        }
+        
+        # Ensure diagnostic directories exist
+        os.makedirs("diagnostics/timing_reports", exist_ok=True)
+        os.makedirs("diagnostics/game_stats", exist_ok=True)
+        
+        logger.info(f"Starting async game batch with {len(game_nums)} games")
+        
         for game_num in game_nums:
+            # Record stats for this game
+            run_stats[game_num] = {
+                "start_time": time.time(),
+                "status": "pending"
+            }
+            
             # Wrap each game with a timeout of 30 minutes (1800 seconds)
             task = asyncio.create_task(
                 asyncio.wait_for(
@@ -374,22 +793,170 @@ class AsyncGameRunner:
                     timeout=1800
                 )
             )
-            tasks.append(task)
+            tasks.append((game_num, task))
         
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Process games as they complete
+        processed_results = [None] * len(game_nums)
+        game_num_to_index = {game_num: i for i, game_num in enumerate(game_nums)}
+        completed_count = 0
         
-        # Process results to handle exceptions
-        processed_results = []
-        for i, result in enumerate(results):
-            game_num = game_nums[i]
-            if isinstance(result, Exception):
-                if isinstance(result, asyncio.TimeoutError):
-                    print(f"Game {game_num} timed out after 30 minutes and was terminated")
-                else:
-                    print(f"Error in game {game_num}: {result}")
-                processed_results.append(None)
-            else:
-                processed_results.append(result)
+        # Use as_completed to handle results as they arrive
+        for future in asyncio.as_completed([task for _, task in tasks]):
+            try:
+                result = await future
+                
+                # Find which game this is by checking results of finished tasks
+                game_num = None
+                for gnum, task in tasks:
+                    if task.done() and id(task) == id(future):
+                        game_num = gnum
+                        break
+                
+                if game_num is None:
+                    logger.error("Could not determine which game completed")
+                    continue
+                
+                # Save completion stats
+                run_stats[game_num]["status"] = "completed"
+                run_stats[game_num]["end_time"] = time.time()
+                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
+                
+                # Save the result
+                if game_num in game_num_to_index:
+                    processed_results[game_num_to_index[game_num]] = result
+                
+                # Track global stats
+                all_game_stats["completed"] += 1
+                completed_count += 1
+                
+                # Save the timing report for this game
+                self.save_timing_report(game_num)
+                
+                # Print progress
+                logger.info(f"Game {game_num} completed successfully - {completed_count}/{len(game_nums)} total")
+                
+                # Update per-model stats
+                for model_name, times in [(k, v) for k, v in self.timing_data.items() if k.startswith("model_")]:
+                    model = model_name.replace("model_", "").replace("_times", "")
+                    all_game_stats["per_model_stats"][model]["completions"] += 1
+                    all_game_stats["per_model_stats"][model]["time_spent"] += sum(times) if times else 0
+                
+            except asyncio.TimeoutError:
+                # Find which game timed out
+                game_num = None
+                for gnum, task in tasks:
+                    if task.done() and id(task) == id(future):
+                        game_num = gnum
+                        break
+                
+                if game_num is None:
+                    logger.error("Could not determine which game timed out")
+                    continue
+                
+                # Save timeout stats
+                run_stats[game_num]["status"] = "timeout"
+                run_stats[game_num]["end_time"] = time.time()
+                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
+                
+                # Clear result
+                if game_num in game_num_to_index:
+                    processed_results[game_num_to_index[game_num]] = None
+                
+                # Track global stats
+                all_game_stats["timeouts"] += 1
+                completed_count += 1
+                
+                # Save timing report for analysis (important for timeouts)
+                self.save_timing_report(game_num)
+                
+                # Log timeout
+                logger.error(f"Game {game_num} timed out after 30 minutes - {completed_count}/{len(game_nums)} processed")
+                print(f"Game {game_num} timed out after 30 minutes and was terminated")
+                
+                # Update per-model timeout stats
+                if game_num in self.game_timing_stats:
+                    for player_name, model in self.game_timing_stats[game_num].get("player_models", {}).items():
+                        all_game_stats["per_model_stats"][model]["timeouts"] += 1
+                
+            except Exception as e:
+                # Find which game had an error
+                game_num = None
+                for gnum, task in tasks:
+                    if task.done() and id(task) == id(future):
+                        game_num = gnum
+                        break
+                
+                if game_num is None:
+                    logger.error(f"Could not determine which game had error: {str(e)}")
+                    continue
+                
+                # Save error stats
+                run_stats[game_num]["status"] = "error"
+                run_stats[game_num]["end_time"] = time.time()
+                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
+                run_stats[game_num]["error"] = str(e)
+                
+                # Clear result
+                if game_num in game_num_to_index:
+                    processed_results[game_num_to_index[game_num]] = None
+                
+                # Track global stats
+                all_game_stats["errors"] += 1
+                completed_count += 1
+                
+                # Try to save timing report for analysis
+                try:
+                    self.save_timing_report(game_num)
+                except Exception:
+                    pass
+                
+                # Log error
+                logger.error(f"Game {game_num} error: {str(e)}")
+                print(f"Error in game {game_num}: {e}")
+        
+        # Save overall stats
+        all_game_stats["end_time"] = time.time()
+        all_game_stats["total_duration"] = all_game_stats["end_time"] - all_game_stats["start_time"]
+        
+        # Log summary
+        logger.info(f"Completed {all_game_stats['completed']} games, {all_game_stats['timeouts']} timeouts, {all_game_stats['errors']} errors")
+        
+        # Calculate per-model summary
+        if all_game_stats["per_model_stats"]:
+            model_summary = []
+            for model, stats in all_game_stats["per_model_stats"].items():
+                # Skip any models with no data
+                if stats["completions"] + stats["timeouts"] == 0:
+                    continue
+                    
+                timeout_rate = stats["timeouts"] / (stats["completions"] + stats["timeouts"]) * 100 if (stats["completions"] + stats["timeouts"]) > 0 else 0
+                model_summary.append(f"{model}: {timeout_rate:.1f}% timeout rate ({stats['timeouts']} of {stats['completions'] + stats['timeouts']} games)")
+            
+            if model_summary:
+                logger.info("Model timeout rates:")
+                for line in model_summary:
+                    logger.info(line)
+        
+        # Save complete run stats
+        summary_path = "diagnostics/run_summary.json"
+        with open(summary_path, "w") as f:
+            json.dump({
+                "run_stats": run_stats,
+                "overall_stats": all_game_stats
+            }, f, indent=2)
+        
+        logger.info(f"Saved run statistics to {summary_path}")
+        
+        # Save model-specific performance summary
+        model_summary_path = "diagnostics/model_performance.json"
+        with open(model_summary_path, "w") as f:
+            json.dump({
+                "models": all_game_stats["per_model_stats"],
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "total_games": all_game_stats["total_games"]
+            }, f, indent=2)
+            
+        logger.info(f"Saved model performance statistics to {model_summary_path}")
         
         return processed_results
 

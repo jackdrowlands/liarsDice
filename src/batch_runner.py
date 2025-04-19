@@ -27,7 +27,8 @@ class AsyncGameRunner:
     """
     def __init__(self, batch_runner):
         self.batch_runner = batch_runner
-        self.client = httpx.AsyncClient(timeout=30.0)  # Single client for all API calls
+        limits = httpx.Limits(max_connections=1000, max_keepalive_connections=1000)
+        self.client = httpx.AsyncClient(timeout=30.0, limits=limits)  # Single client for all API calls
         
     async def close(self):
         """Close the HTTP client"""
@@ -698,19 +699,23 @@ class GameBatchRunner:
             for future in concurrent.futures.as_completed(futures):
                 game_num = futures[future]
                 try:
-                    result = future.result()
+                    # Enforce a 30-minute timeout per thread
+                    result = future.result(timeout=1800)
                     results.append(result)
                     completed += 1
-                    
+
                     # Print progress as a percentage
                     print(f"Completed game {game_num} in batch ({completed}/{total}, {completed/total*100:.1f}%)")
-                    
+
                     # Autosave tournament state periodically but less frequently (if enabled)
                     if self.enable_autosaves and completed % max(50, total // 5) == 0:  # Save at 20% intervals or every 50 games
                         # Start the autosave in a non-blocking way
                         print(f"Starting autosave at {completed}/{total}")
                         threading.Thread(target=self.save_tournament_state).start()
-                        
+
+                except concurrent.futures.TimeoutError:
+                    print(f"Game {game_num} timed out after 30 minutes and was terminated")
+                    results.append(None)
                 except Exception as e:
                     print(f"Error in game {game_num}: {e}")
                     results.append(None)

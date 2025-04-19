@@ -1,131 +1,62 @@
 # Liar's Dice LLM Prompts Documentation
 
-## System Prompt
+## Updated Prompts (N-Player Format with Reasoning)
 
-The system prompt provides the core instructions and context for the AI model playing Liar's Dice. It defines the game rules, the AI's "personality" based on the model type, and how to format responses.
+The updated prompts implement a more structured format that includes explicit reasoning, supports n-player games, and changes some game dynamics like removing wild 1s.
 
-```
-You are playing Liar's Dice as model {model}. In this game, each player has dice that only they can see.
-Players take turns making bids about how many dice of a certain value exist among all players.
-Each bid must be higher than the previous one (either more dice, or same number but higher value).
-When a player thinks the previous bid is a lie, they can call "Liar".
+### System Prompt
 
-Your personality: You are {personality}.
-
-Rules for making decisions:
-1. You can either make a higher bid or call the previous player a liar
-2. A bid consists of a quantity and a value (e.g., "three 4's" means "three dice with value 4")
-3. A bid must increase either the quantity or the value of the previous bid
-4. Be strategic - consider probability and bluffing
-5. Return your decision in JSON format as specified
-
-{strategy_style}
-
-Think step by step about your decision.
+```json
+{
+  "role": "system",
+  "content": "**You are Player {{player_id}}** in an n-player game of Liar's Dice. The goal is to win by being the last player with dice remaining.\n\n### Game Rules\n1. Each player begins with 5 standard six-sided dice (1–6). Dice are private and rerolled at the start of each round.\n2. On your turn, you may **make a higher bid** or **call** the previous bid:\n   - A bid is a claim like \"four 3s\" (quantity and face value).\n   - Each new bid must either increase the quantity or keep the quantity the same and increase the face.\n3. If you **call**, all players reveal their dice.\n   - If the total count of dice showing the bid face is **less than the bid**, the last bidder loses one die.\n   - Otherwise, the caller loses one die.\n4. A player with no dice is eliminated. The game continues until one player remains.\n5. Ones (1s) are **not wild**.\n6. The dice are re-rolled each round; the player after the last round's loser starts the next round.\n\n### Output Format\nRespond with **a single JSON object** with these keys, in this exact order:\n1. **\"reasoning\"**: A brief explanation (max ~100 tokens) of your current thought process.\n2. **\"action\"**: Either \"bid\" or \"call\".\n3. **\"quantity\"**: An integer ≥ 0. If calling, set to 0.\n4. **\"face\"**: An integer from 1 to 6. Ignored if calling.\n5. **\"utterance\"**: Up to 50 tokens of what you'd say in-character (e.g., bluff, trash talk, etc.)\n\nExample output:\n```json\n{\n  \"reasoning\": \"There are still many dice in play, and it's likely someone has at least three 5s.\",\n  \"action\": \"bid\",\n  \"quantity\": 3,\n  \"face\": 5,\n  \"utterance\": \"I'm seeing triple fives — how about you all?\"\n}\n```\n\n**Important**: Do not include any explanation outside the JSON object. No Markdown, no comments, no extra text."
+}
 ```
 
-### Strategy Style Variants
+### User Prompt
 
-The system prompt includes different strategy style variants based on the model's capabilities:
-
-**Advanced Strategy (for Claude, GPT-4, and Gemini Pro):**
-```
-Advanced strategy tips:
-1. Calculate probability distributions for each value based on visible dice
-2. Track each player's behavior patterns over time
-3. Use strategic bluffing to mislead opponents about your actual dice
-4. Identify when a player is likely bluffing based on their past behavior
-5. Consider the risk/reward of calling "Liar" vs making a higher bid
+```json
+{
+  "role": "user",
+  "content": "### Your private dice (keep secret)\n{{list of 1–5 integers 1–6}}\n\n### Game state\nPlayers: {{list of player names or IDs}}\nDice counts: {{list of dice per player}}\nCurrent bid: {{quantity}} × {{face}}  (use 0 × 0 if no bid yet)\nEliminated players: {{list, if any}}\nTurns so far this round (latest last):\n{{history snippet of previous JSON actions and utterances}}\n\n### Your turn\nIt is now your move. Return exactly one JSON object following the format described above."
+}
 ```
 
-**Standard Strategy (for other models):**
-```
-Strategy tips:
-1. Use the move history to understand each player's tendencies
-2. Track which players have been caught bluffing in the past
-3. Consider how many dice are left in the game when calculating probabilities
-4. If a player has lost dice, they are less likely to have high quantities of any value
-5. Be more cautious when making high bids later in the game
-```
+## Design Changes Explained
 
-## User Prompt
+The updated prompt format introduces several key improvements:
 
-The user prompt provides the specific game state information for the current turn, including the AI's dice, total dice in the game, player dice counts, previous bid, and move history.
+1. **Reasoning Field**: Requires models to articulate their decision-making process, enabling deeper benchmarking of internal logic, planning, and probabilistic inference.
 
-```
-Current game state:
-- Current round: {round_number}
-- Your dice: {sorted_dice}
-- Total dice in game: {total_dice}
-- Players and their dice counts: {player_dice_counts}
+2. **N-Player Structure**: Supports games with arbitrary numbers of players, creating more complex social dynamics, long-horizon strategy, and alliance modeling opportunities.
 
-{previous_bid_text}
+3. **No Wild 1s**: Simplifies probability calculations and improves interpretability of reasoning steps by removing the special case handling.
 
-{move_history_text}
+4. **Graceful Error Handling**: Models making an invalid move don't automatically forfeit, making benchmarking more forgiving and realistic.
 
-Please decide:
-1. If you want to make a bid, respond with: {"action": "bid", "quantity": X, "value": Y}
-2. If you want to call "Liar" on the previous bid, respond with: {"action": "liar"}
+5. **Full State Transcript Input**: Provides complete game state history to support memory and long-form adaptation over many turns.
 
-Your decision:
-```
-
-### Previous Bid Text
-
-This section adapts based on whether there's a previous bid:
-- If there's a previous bid: `Previous bid: {quantity} dice showing {value}`
-- If it's the first bid: `You are making the first bid.`
-
-### Move History Text
-
-The move history provides context about all previous moves in the game, formatted as:
-```
-Move history:
-- Player1 bid 3 4's
-- Player2 bid 5 4's
-- Player3 called 'Liar!' on Player2 and was right! Player2 lost a die.
-```
-
-## Personality Assignment
-
-Each AI model is assigned a personality trait that influences its play style:
-
-- Claude: "thoughtful and careful"
-- GPT-4o: "calculated and adaptive"
-- GPT-4: "analytical and strategic"
-- GPT-3.5: "bold and unpredictable"
-- Gemini/Palm: "creative and unexpected"
-- Llama: "determined and focused"
-- Mistral: "resourceful and practical"
-- Command: "balanced and consistent"
-- Others: "balanced and versatile"
+6. **Utterance Field**: Adds a roleplay element that allows models to express their strategy and personality through in-character statements.
 
 ## Response Format
 
-The AI is instructed to respond with a JSON object in one of two formats:
+The AI is instructed to respond with a single JSON object containing these fields:
 
-1. For making a bid:
 ```json
-{"action": "bid", "quantity": X, "value": Y}
+{
+  "reasoning": "Explanation of the decision-making process",
+  "action": "bid|call",
+  "quantity": 3,
+  "face": 4,
+  "utterance": "In-character comment about the move"
+}
 ```
-
-2. For calling "liar":
-```json
-{"action": "liar"}
-```
-
-## Error Handling
-
-If the AI produces an invalid response, the game implements fallbacks:
-- If the AI attempts to call "liar" on the first turn, it's redirected to make a bid instead
-- If the AI makes an invalid bid (e.g., lower than previous bid), a valid bid is generated automatically
-- If there's an error in parsing the AI's response, a default bid is used (1 four)
 
 ## Response Parsing
 
-The code extracts JSON from the AI's response using the following approach:
-1. Find the first opening brace `{`
-2. Find the last closing brace `}`
-3. Extract the text between these braces
-4. Parse as JSON
-5. Fall back to a default bid if parsing fails
+The code extracts the complete JSON object from the AI's response and validates all required fields. If the response is invalid:
+
+1. For a missing or invalid action field, a default valid move is generated
+2. For a bid with invalid quantity/face values, values are corrected to be valid
+3. For attempt to call when not allowed, a default bid is generated instead
+4. Missing fields are populated with default values when possible

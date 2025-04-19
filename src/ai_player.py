@@ -42,59 +42,105 @@ class AIPlayer(Player):
         self.game_history.append(game_state)
     
     def get_prompt_for_game(self, game_state):
-        """Create a prompt for the AI model"""            
-        # Format the prompt with game information - same for all models
-        system_prompt = f"""
-        You are playing Liar's Dice. In this game, each player has dice that only they can see.
-        Players take turns making bids about how many dice of a certain value exist among all players.
-        Each bid must be higher than the previous one (either more dice, or same number but higher value).
-        When a player thinks the previous bid is a lie, they can call "Liar".
+        """Create a prompt for the AI model using the new format with exact JSON"""
+        # Use the player's name as player_id (for the system message)
+        player_id = self.name
         
-        Rules for making decisions:
-        1. You can either make a higher bid or call the previous player a liar
-        2. A bid consists of a quantity and a value (e.g., "3 4's" means "three dice with value 4")
-        3. A bid must increase either the quantity or the value of the previous bid
-        4. Be strategic - consider probability and bluffing
-        5. Return your decision in JSON format as specified
+        # Format the system prompt with strong emphasis on JSON output format
+        system_prompt = f"""**You are Player {player_id}** in an n-player game of Liar's Dice. The goal is to win by being the last player with dice remaining.
+
+### Game Rules
+1. Each player begins with 5 standard six-sided dice (1–6). Dice are private and rerolled at the start of each round.
+2. On your turn, you may **make a higher bid** or **call** the previous bid:
+   - A bid is a claim like "four 3s" (quantity and face value).
+   - Each new bid must either increase the quantity or keep the quantity the same and increase the face.
+3. If you **call**, all players reveal their dice.
+   - If the total count of dice showing the bid face is **less than the bid**, the last bidder loses one die.
+   - Otherwise, the caller loses one die.
+4. A player with no dice is eliminated. The game continues until one player remains.
+5. Ones (1s) are **not wild**.
+6. The dice are re-rolled each round; the player after the last round's loser starts the next round.
+
+### Output Format
+You MUST respond with ONLY a single JSON object with these keys, in this exact order:
+1. **"reasoning"**: A brief explanation (max ~100 tokens) of your current thought process.
+2. **"action"**: Either "bid" or "call".
+3. **"quantity"**: An integer ≥ 0. If calling, set to 0.
+4. **"face"**: An integer from 1 to 6. Ignored if calling.
+5. **"utterance"**: Up to 50 tokens of what you'd say in-character (e.g., bluff, trash talk, etc.)
+
+Example output:
+```json
+{{
+  "reasoning": "There are still many dice in play, and it's likely someone has at least three 5s.",
+  "action": "bid",
+  "quantity": 3,
+  "face": 5,
+  "utterance": "I'm seeing triple fives — how about you all?"
+}}
+```
+
+CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after the JSON object. No markdown formatting. No backticks. Just the raw JSON object."""
         
-        Think step by step about your decision.
-        """
-        
-        # Format move history for prompt
+        # Format move history for prompt in a format that shows previous JSON actions and utterances
         move_history_text = ""
         if game_state['move_history']:
-            move_history_text = "Move history:\n"
             for i, move in enumerate(game_state['move_history']):
+                player_name = move['player']
+                
                 if move["action"] == "bid":
-                    move_history_text += f"- {move['player']} bid {move['quantity']} {move['value']}'s\n"
+                    action_summary = f"{player_name}: {{\"action\": \"bid\", \"quantity\": {move['quantity']}, \"face\": {move['value']}"
+                    # Add utterance if available in the future
+                    if "utterance" in move:
+                        action_summary += f", \"utterance\": \"{move['utterance']}\""
+                    action_summary += "}\n"
+                    move_history_text += action_summary
+                    
                 elif move["action"] == "liar":
-                    move_history_text += f"- {move['player']} called 'Liar!' on {move['target_player']}"
+                    action_summary = f"{player_name}: {{\"action\": \"call\""
+                    # Add utterance if available
+                    if "utterance" in move:
+                        action_summary += f", \"utterance\": \"{move['utterance']}\""
+                    action_summary += "}\n"
+                    move_history_text += action_summary
+                    
+                    # Add outcome information
                     if "outcome" in move:
+                        target_player = move.get('target_player', 'previous player')
                         if move["outcome"] == "success":
-                            move_history_text += f" and was right! {move['target_player']} lost a die.\n"
+                            move_history_text += f"Outcome: {player_name} was right! {target_player} lost a die.\n"
                         else:
-                            move_history_text += f" and was wrong! {move['player']} lost a die.\n"
-                    else:
-                        move_history_text += "\n"
+                            move_history_text += f"Outcome: {player_name} was wrong! {player_name} lost a die.\n"
         
-        user_prompt = f"""
-        Current game state:
-        - Current round: {game_state.get('round_number', 1)}
-        - Your dice: {sorted(self.dice)}
-        - Total dice in game: {game_state['total_dice']}
-        - Players and their dice counts: {game_state['player_dice_counts']}
+        # Calculate player and dice information
+        player_names = list(game_state['player_dice_counts'].keys())
+        dice_counts = list(game_state['player_dice_counts'].values())
         
-        {f"Previous bid: {game_state['last_bid'][0]} dice showing {game_state['last_bid'][1]}" if game_state['last_bid'] else "You are making the first bid."}
+        # Get eliminated players
+        eliminated_players = [name for name, count in game_state['player_dice_counts'].items() if count == 0]
+        eliminated_text = ", ".join(eliminated_players) if eliminated_players else "None"
         
-        {move_history_text}
+        # Current bid info
+        current_bid = "0 × 0"
+        if game_state['last_bid']:
+            current_bid = f"{game_state['last_bid'][0]} × {game_state['last_bid'][1]}"
         
-        Please decide:
-        1. If you want to make a bid, respond with: {{"action": "bid", "quantity": X, "value": Y}}
-        2. If you want to call "Liar" on the previous bid, respond with: {{"action": "liar"}}
-        
-        Your decision:
-        """
-        
+        # Create the user prompt in the exact format from the request
+        user_prompt = f"""### Your private dice (keep secret)
+{sorted(self.dice)}
+
+### Game state
+Players: {player_names}
+Dice counts: {dice_counts}
+Current bid: {current_bid}
+Eliminated players: {eliminated_text}
+Turns so far this round (latest last):
+{move_history_text}
+
+### Your turn
+It is now your move. Return exactly one JSON object following the format described above."""
+
+        # Return the prompts to be used in the API request
         return {"system": system_prompt, "user": user_prompt}
     
     def get_prompt_and_params(self, game_state):
@@ -124,14 +170,70 @@ class AIPlayer(Player):
             headers["Authorization"] = f"Bearer {self.api_key}"
             headers["HTTP-Referer"] = ""
         
-        # Prepare request data
+        # Prepare request data with the new JSON format for messages
+        system_message = {
+            "role": "system",
+            "content": prompt["system"]
+        }
+        
+        user_message = {
+            "role": "user",
+            "content": prompt["user"]
+        }
+        
+        # Define the schema for structured output - used for all endpoints
+        schema = {
+            "type": "object",
+            "properties": {
+                "reasoning": {
+                    "type": "string",
+                    "description": "A brief explanation of your current thought process"
+                },
+                "action": {
+                    "type": "string",
+                    "enum": ["bid", "call"],
+                    "description": "Whether to make a bid or call the previous bid"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "description": "The quantity of dice in your bid (set to 0 if calling)"
+                },
+                "face": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6,
+                    "description": "The face value for your bid (1-6)"
+                },
+                "utterance": {
+                    "type": "string",
+                    "description": "What you'd say in-character (e.g., bluff, trash talk, etc.)"
+                }
+            },
+            "required": ["reasoning", "action", "quantity", "face", "utterance"]
+        }
+        
+        # Prepare the base request data
         data = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": prompt["system"]},
-                {"role": "user", "content": prompt["user"]},
-            ],
+            "messages": [system_message, user_message],
+            "temperature": 0.7,  # Balanced temperature for creativity in utterances
+            "seed": random.randint(1, 10000)  # Add randomness across runs
         }
+        
+        # For OpenRouter, include structured output format 
+        if not self.is_local_endpoint and self.provider == PROVIDER_OPENROUTER:
+            # OpenRouter format
+            data["response_format"] = {
+                "type": "json_object",
+                "schema": schema
+            }
+            data["provider"] = {
+                'require_parameters': True,
+            }
+        
+        # For local endpoints, let's add a fallback by not using structured output
+        # Some local endpoints might not support this feature yet
+        # Instead, we'll rely on our prompt to get a proper JSON response
         
         # Determine the correct endpoint URL
         if self.api_url:
@@ -192,6 +294,15 @@ class AIPlayer(Player):
                     error_info["response"] = response.json()
                 except:
                     error_info["response"] = "Could not parse response as JSON"
+            
+            # Add prompt information
+            try:
+                # Get prompt from game state
+                prompt = self.get_prompt_for_game(game_state)
+                error_info["prompt"] = prompt
+            except Exception:
+                # If we can't get the prompt, continue without it
+                pass
                     
             # Log the error
             with open("invalid_responses.json", "a") as f:
@@ -209,13 +320,12 @@ class AIPlayer(Player):
             
             
     def process_api_response(self, response, response_time, game_state):
-        """Process the API response and extract the decision"""
+        """Process the API response with structured output format"""
         # Get the provider from the request params
         provider = game_state.get('provider', self.provider)
         
         # OpenAI-compatible response format (OpenRouter/local)
         result = response.json()
-        content = result["choices"][0]["message"]["content"].strip()
         
         # Extract token usage if available
         prompt_tokens = completion_tokens = total_tokens = 0
@@ -233,10 +343,14 @@ class AIPlayer(Player):
                 "completion_tokens": completion_tokens,
                 "total_tokens": total_tokens
             }
+        
+        # Get the content from the response which should be a JSON object
+        content = result["choices"][0]["message"]["content"].strip()
             
-        # Log the response with token information
+        # Log the response with token information and prompt
         with open("llm_responses.json", "a") as f:
-                json.dump({
+                # Create response log object
+                response_log = {
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                     "response_text": content,
                     "model": self.model,
@@ -244,45 +358,133 @@ class AIPlayer(Player):
                     "response_time": response_time,
                     "prompt_tokens": prompt_tokens,
                     "completion_tokens": completion_tokens,
-                    "total_tokens": total_tokens
-                }, f)
+                    "total_tokens": total_tokens,
+                    "system_prompt": result["choices"][0]["message"].get("system_fingerprint", "")
+                }
+                
+                # Try to add prompt information if available in the request
+                try:
+                    # Get prompt from game state
+                    prompt = self.get_prompt_for_game(game_state)
+                    response_log["prompt"] = prompt
+                except Exception:
+                    # If we can't get the prompt, continue without it
+                    pass
+                    
+                json.dump(response_log, f)
                 f.write("\n")
         
         # Store response time in game state for metrics collection
         game_state['response_time'] = response_time
         
         try:
-            json_objects = re.findall(r'\{[^{}]*\}', content)
-            number_words = {
-                "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4,
-                "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
-                "ten": 10
-            }
-
-            for obj in json_objects:
+            # Enhanced JSON extraction for both structured and non-structured responses
+            
+            # First try: direct parse of the whole content (works with structured output)
+            try:
+                response_json = json.loads(content)
+            except json.JSONDecodeError:
+                # Second try: Remove any markdown backticks and try again
                 try:
-                    parsed = json.loads(obj)
-                    if isinstance(parsed, dict) and "action" in parsed:
-                        if parsed["action"] == "bid":
-                            # Convert number words to integers if needed
-                            for key in ["quantity", "value"]:
-                                if isinstance(parsed.get(key), str):
-                                    word = parsed[key].lower()
-                                    if word in number_words:
-                                        parsed[key] = number_words[word]
-                        return parsed
+                    # Remove markdown code block syntax if present
+                    clean_content = re.sub(r'```(?:json)?\s*|\s*```', '', content)
+                    response_json = json.loads(clean_content.strip())
                 except json.JSONDecodeError:
-                    continue
-            raise ValueError("No valid JSON with 'action' found.")
-        except Exception:
+                    # Third try: Extract the most promising JSON object with regex
+                    # This improved regex handles nested objects better
+                    json_objects = re.findall(r'\{(?:[^{}]|(?:\{[^{}]*\}))*\}', content)
+                    if not json_objects:
+                        raise ValueError("No JSON objects found in the response")
+                    
+                    # Try each JSON object, starting with the largest one
+                    json_objects.sort(key=len, reverse=True)
+                    for obj in json_objects:
+                        try:
+                            response_json = json.loads(obj)
+                            # If we get here, parsing succeeded
+                            break
+                        except json.JSONDecodeError:
+                            continue
+                    else:
+                        # If we get here, no objects parsed successfully
+                        raise ValueError("Could not parse any JSON objects in the response")
+            
+            # Convert action from "call" to "liar" for backward compatibility
+            if response_json.get("action") == "call":
+                response_json["action"] = "liar"
+            
+            # Make sure we have all required fields with proper values
+            # This should be less necessary with the schema validation, but we'll keep it as a safety check
+            
+            # Ensure action is valid
+            if "action" not in response_json or response_json["action"] not in ["bid", "liar"]:
+                response_json["action"] = "bid"  # Default to bid if missing or invalid
+                
+            # Handle the "liar" action case
+            if response_json["action"] == "liar":
+                response_json["quantity"] = 0
+                if "face" not in response_json or not isinstance(response_json["face"], int):
+                    response_json["face"] = 0
+            
+            # Handle the "bid" action case
+            else:
+                # Ensure quantity is an integer
+                if "quantity" not in response_json or not isinstance(response_json["quantity"], int):
+                    response_json["quantity"] = 1
+                elif response_json["quantity"] < 1:
+                    response_json["quantity"] = 1
+                
+                # Ensure face is an integer within bounds
+                if "face" not in response_json or not isinstance(response_json["face"], int):
+                    response_json["face"] = 4
+                elif response_json["face"] < 1 or response_json["face"] > 6:
+                    # Clamp to valid range
+                    response_json["face"] = max(1, min(response_json["face"], 6))
+            
+            # Ensure reasoning and utterance are present
+            if "reasoning" not in response_json or not response_json["reasoning"]:
+                response_json["reasoning"] = "Strategic decision based on the game state."
+                
+            if "utterance" not in response_json or not response_json["utterance"]:
+                if response_json["action"] == "bid":
+                    response_json["utterance"] = "I'll make this bid."
+                else:
+                    response_json["utterance"] = "I call liar!"
+            
+            return response_json
+            
+        except Exception as e:
+            print(f"Error processing response: {e}")
             print(content)
+            
+            # Log the error with prompt information
+            invalid_response = {
+                "model": self.model,
+                "provider": provider,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "response_text": content,
+                "error": str(e)
+            }
+            
+            # Try to add prompt information
+            try:
+                # Get prompt from game state
+                prompt = self.get_prompt_for_game(game_state)
+                invalid_response["prompt"] = prompt
+            except Exception:
+                # If we can't get the prompt, continue without it
+                pass
+                
             with open("invalid_llm_responses.json", "a") as f:
-                json.dump({
-                    "model": self.model,
-                    "provider": provider,
-                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "response_text": content
-                }, f)
+                json.dump(invalid_response, f)
                 f.write("\n")
-            raise ValueError("No valid JSON found in LLM response.")
+                
+            # Return a default response as fallback
+            return {
+                "action": "bid", 
+                "quantity": 1, 
+                "face": 4,
+                "reasoning": "Error processing response, using default bid.",
+                "utterance": "I'll make a simple bid."
+            }
             

@@ -538,9 +538,16 @@ class LiarsDice:
     
     def _process_ai_liar_call(self, player, decision):
         """Process an AI player's decision to call liar"""
+        # Get additional fields from the new format
+        reasoning = decision.get("reasoning", "No reasoning provided")
+        utterance = decision.get("utterance", "I call liar!")
+        
         if not self.last_bid:
             # AI shouldn't call liar on first turn, make a bid instead
-            print(f"{player.name} decides to make a bid.")
+            print(f"{player.name} decides to make a bid instead.")
+            print(f"Reasoning: {reasoning}")
+            print(f"{player.name} says: \"{utterance}\"")
+            
             self.last_bid = (1, random.randint(3, 6))
             print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
             
@@ -568,7 +575,9 @@ class LiarsDice:
             "player": player.name,
             "action": "liar",
             "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name,
-            "is_optimal": is_optimal_call
+            "is_optimal": is_optimal_call,
+            "reasoning": reasoning,
+            "utterance": utterance
         }
         self.move_history.append(move_data)
         
@@ -576,6 +585,8 @@ class LiarsDice:
         self.player_history[player.name].append(move_data)
         
         print(f"{player.name} calls 'Liar!' on the previous bid.")
+        print(f"Reasoning: {reasoning}")
+        print(f"{player.name} says: \"{utterance}\"")
         
         # Record rule adherence - valid move
         if isinstance(player, AIPlayer):
@@ -585,8 +596,13 @@ class LiarsDice:
         
     def _process_ai_bid(self, player, decision):
         """Process an AI player's decision to make a bid"""
+        # Get basic bid data
         quantity = decision["quantity"]
-        value = decision["value"]
+        value = decision["face"]  # Changed from "value" to "face" in new format
+        
+        # Get additional fields from the new format
+        reasoning = decision.get("reasoning", "No reasoning provided")
+        utterance = decision.get("utterance", "I make this bid.")
         
         # Validate the bid
         valid_bid = True
@@ -625,7 +641,7 @@ class LiarsDice:
             if isinstance(player, AIPlayer):
                 self.metrics.record_bid_optimality(player.model, is_optimal_bid)
                 
-            # Record move in history with bluff info
+            # Record move in history with bluff info and new fields
             move_data = {
                 "round": len(self.move_history) + 1,
                 "player": player.name,
@@ -633,7 +649,9 @@ class LiarsDice:
                 "quantity": quantity,
                 "value": value,
                 "bluff": is_bluff,
-                "is_optimal": is_optimal_bid
+                "is_optimal": is_optimal_bid,
+                "reasoning": reasoning,
+                "utterance": utterance
             }
             self.move_history.append(move_data)
             
@@ -641,6 +659,8 @@ class LiarsDice:
             self.player_history[player.name].append(move_data)
             
             print(f"{player.name} bids {quantity} {value}'s")
+            print(f"Reasoning: {reasoning}")
+            print(f"{player.name} says: \"{utterance}\"")
             return False
         else:
             # If AI made an invalid bid, make a safe valid bid
@@ -657,21 +677,27 @@ class LiarsDice:
             if isinstance(player, AIPlayer):
                 self.metrics.record_rule_adherence(player.model, False)
             
-            # Record move in history
+            # Record move in history with the invalid bid info
             move_data = {
                 "round": len(self.move_history) + 1,
                 "player": player.name,
                 "action": "bid",
                 "quantity": self.last_bid[0],
                 "value": self.last_bid[1],
-                "invalid_bid_corrected": True
+                "invalid_bid_corrected": True,
+                "original_quantity": quantity,
+                "original_value": value,
+                "reasoning": reasoning,
+                "utterance": utterance
             }
             self.move_history.append(move_data)
             
             # Track in player history
             self.player_history[player.name].append(move_data)
             
-            print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
+            print(f"{player.name} attempted invalid bid ({quantity} {value}'s), corrected to {self.last_bid[0]} {self.last_bid[1]}'s")
+            print(f"Reasoning: {reasoning}")
+            print(f"{player.name} says: \"{utterance}\"")
             return False
     
     def get_player_bid(self, player_idx):
@@ -688,7 +714,7 @@ class LiarsDice:
             time.sleep(random.uniform(1.5, 3.0))
             
             try:
-                # Get AI decision
+                # Get AI decision which now includes reasoning and utterance
                 decision = player.get_ai_decision(game_state)
                 
                 # Record API response time if available
@@ -705,141 +731,12 @@ class LiarsDice:
                         usage.get('total_tokens', 0)
                     )
                 
+                # Process the AI decision based on action type
                 if decision["action"] == "liar":
-                    if not self.last_bid:
-                        # AI shouldn't call liar on first turn, make a bid instead
-                        print(f"{player.name} decides to make a bid.")
-                        self.last_bid = (1, random.randint(3, 6))
-                        print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
-                        
-                        # Record rule adherence issue - called liar when not allowed
-                        if isinstance(player, AIPlayer):
-                            self.metrics.record_rule_adherence(player.model, False)
-                            
-                        return False
-                    
-                    # Check if calling liar is optimal
-                    is_optimal_call = BidAnalyzer.should_call_liar(
-                        player.dice, 
-                        player.get_dice_count(), 
-                        self.total_dice_in_game, 
-                        self.last_bid
-                    )
-                    
-                    # Record bid optimality
-                    if isinstance(player, AIPlayer):
-                        self.metrics.record_bid_optimality(player.model, is_optimal_call)
-                    
-                    # Record liar call in history
-                    move_data = {
-                        "round": len(self.move_history) + 1,
-                        "player": player.name,
-                        "action": "liar",
-                        "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name,
-                        "is_optimal": is_optimal_call
-                    }
-                    self.move_history.append(move_data)
-                    
-                    # Track in player history
-                    self.player_history[player.name].append(move_data)
-                    
-                    print(f"{player.name} calls 'Liar!' on the previous bid.")
-                    
-                    # Record rule adherence - valid move
-                    if isinstance(player, AIPlayer):
-                        self.metrics.record_rule_adherence(player.model, True)
-                        
-                    return True
+                    return self._process_ai_liar_call(player, decision)
                 else:
-                    # AI is making a bid
-                    quantity = decision["quantity"]
-                    value = decision["value"]
+                    return self._process_ai_bid(player, decision)
                     
-                    # Validate the bid
-                    valid_bid = True
-                    if quantity < 1 or value < 1 or value > 6:
-                        valid_bid = False
-                    
-                    # Check if bid is higher than the last bid
-                    if self.last_bid and valid_bid:
-                        last_quantity, last_value = self.last_bid
-                        
-                        # Bid must be higher
-                        if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
-                            valid_bid = False
-                    
-                    # Check if this bid is mathematically optimal
-                    is_optimal_bid = BidAnalyzer.is_bid_optimal(
-                        player.dice, 
-                        player.get_dice_count(), 
-                        self.total_dice_in_game, 
-                        self.last_bid, 
-                        (quantity, value)
-                    ) if valid_bid else False
-                    
-                    # Record rule adherence
-                    if isinstance(player, AIPlayer):
-                        self.metrics.record_rule_adherence(player.model, valid_bid)
-                    
-                    # Is this likely a bluff?
-                    player_dice_count = player.dice.count(value)
-                    is_bluff = player_dice_count < quantity / 2
-                    
-                    if valid_bid:
-                        self.last_bid = (quantity, value)
-                        
-                        # Record bid optimality
-                        if isinstance(player, AIPlayer):
-                            self.metrics.record_bid_optimality(player.model, is_optimal_bid)
-                            
-                        # Record move in history with bluff info
-                        move_data = {
-                            "round": len(self.move_history) + 1,
-                            "player": player.name,
-                            "action": "bid",
-                            "quantity": quantity,
-                            "value": value,
-                            "bluff": is_bluff,
-                            "is_optimal": is_optimal_bid
-                        }
-                        self.move_history.append(move_data)
-                        
-                        # Track in player history
-                        self.player_history[player.name].append(move_data)
-                        
-                        print(f"{player.name} bids {quantity} {value}'s")
-                        return False
-                    else:
-                        # If AI made an invalid bid, make a safe valid bid
-                        if self.last_bid:
-                            last_quantity, last_value = self.last_bid
-                            if last_value < 6:
-                                self.last_bid = (last_quantity, last_value + 1)
-                            else:
-                                self.last_bid = (last_quantity + 1, 1)
-                        else:
-                            self.last_bid = (1, random.randint(3, 6))
-                        
-                        # Record in metrics that AI made an invalid bid
-                        if isinstance(player, AIPlayer):
-                            self.metrics.record_rule_adherence(player.model, False)
-                        
-                        # Record move in history
-                        move_data = {
-                            "round": len(self.move_history) + 1,
-                            "player": player.name,
-                            "action": "bid",
-                            "quantity": self.last_bid[0],
-                            "value": self.last_bid[1],
-                            "invalid_bid_corrected": True
-                        }
-                        self.move_history.append(move_data)
-                        
-                        # Track in player history
-                        self.player_history[player.name].append(move_data)
-                        
-                        print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
-                        return False
             except Exception as e:
                 print(f"Error with AI decision: {e}")
                 # Fallback to a simple bid
@@ -847,7 +744,20 @@ class LiarsDice:
                     last_quantity, last_value = self.last_bid
                     if last_quantity > self.total_dice_in_game:
                         # Change decision to call liar due to invalid bid
+                        print(f"{player.name} calls 'Liar!' (automatic fallback)")
+                        move_data = {
+                            "round": len(self.move_history) + 1,
+                            "player": player.name,
+                            "action": "liar",
+                            "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name,
+                            "error_fallback": True,
+                            "reasoning": "Error processing response, making automatic decision.",
+                            "utterance": "I call."
+                        }
+                        self.move_history.append(move_data)
+                        self.player_history[player.name].append(move_data)
                         return True
+                        
                     if last_value < 6:
                         self.last_bid = (last_quantity, last_value + 1)
                     else:
@@ -859,21 +769,24 @@ class LiarsDice:
                 if isinstance(player, AIPlayer):
                     self.metrics.record_rule_adherence(player.model, False)
                 
-                # Record move in history
+                # Record move in history with fallback reasoning
                 move_data = {
                     "round": len(self.move_history) + 1,
                     "player": player.name,
                     "action": "bid",
                     "quantity": self.last_bid[0],
                     "value": self.last_bid[1],
-                    "error_fallback": True
+                    "error_fallback": True,
+                    "reasoning": "Error processing response, using default bid.",
+                    "utterance": "I'll make this bid."
                 }
                 self.move_history.append(move_data)
                 
                 # Track in player history
                 self.player_history[player.name].append(move_data)
                 
-                print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s")
+                print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s (fallback)")
+                print("Reasoning: Error processing model response, using default bid.")
                 return False
         
         # Human player logic - now handled directly in play_round
@@ -885,45 +798,88 @@ class LiarsDice:
             print(f"Previous bid: {last_quantity} {last_value}'s")
         
         try:
-            quantity = int(input("How many dice? "))
-            value = int(input("What value (1-6)? "))
+            # Ask if human player wants to bid or call
+            action_choice = input("Do you want to (1) make a bid or (2) call 'liar'? Enter 1 or 2: ")
             
-            if quantity < 1 or value < 1 or value > 6:
-                print("Invalid bid. Quantity must be positive and value must be between 1 and 6.")
-                return False
-            
-            # Check if bid is higher than the last bid
-            if self.last_bid:
-                last_quantity, last_value = self.last_bid
-                
-                # Bid must be higher
-                if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
-                    print("Your bid must be higher than the previous bid.")
+            if action_choice == "2":
+                # Player chooses to call liar
+                if not self.last_bid:
+                    print("There is no previous bid to call 'Liar!' on.")
                     return False
-            
-            self.last_bid = (quantity, value)
-            
-            # Record move in history
-            self.move_history.append({
-                "round": len(self.move_history) + 1,
-                "player": player.name,
-                "action": "bid",
-                "quantity": quantity,
-                "value": value
-            })
-            
-            # Add to player history
-            if player.name not in self.player_history:
-                self.player_history[player.name] = []
-            self.player_history[player.name].append({
-                "round": len(self.move_history),
-                "player": player.name,
-                "action": "bid",
-                "quantity": quantity,
-                "value": value
-            })
-            
-            return False  # Not calling liar
+                
+                # Get the target player (previous bidder)
+                previous_bidder = None
+                for move in reversed(self.move_history):
+                    if move["action"] == "bid":
+                        previous_bidder = move["player"]
+                        break
+                
+                target_player = next(p for p in self.players if p.name == previous_bidder)
+                
+                # Optional reasoning and utterance for human player
+                reasoning = input("Your reasoning (optional): ")
+                utterance = input("What would you say (optional): ")
+                
+                # Record liar call in history with new fields
+                move_data = {
+                    "round": len(self.move_history) + 1,
+                    "player": player.name,
+                    "action": "liar",
+                    "target_player": target_player.name,
+                    "reasoning": reasoning if reasoning else "Human player called liar.",
+                    "utterance": utterance if utterance else "I call liar!"
+                }
+                self.move_history.append(move_data)
+                
+                # Add to player history
+                if player.name not in self.player_history:
+                    self.player_history[player.name] = []
+                self.player_history[player.name].append(move_data)
+                
+                return True
+                
+            else:
+                # Player is making a bid
+                quantity = int(input("How many dice? "))
+                value = int(input("What value (1-6)? "))
+                
+                # Get optional reasoning and utterance
+                reasoning = input("Your reasoning (optional): ")
+                utterance = input("What would you say (optional): ")
+                
+                if quantity < 1 or value < 1 or value > 6:
+                    print("Invalid bid. Quantity must be positive and value must be between 1 and 6.")
+                    return False
+                
+                # Check if bid is higher than the last bid
+                if self.last_bid:
+                    last_quantity, last_value = self.last_bid
+                    
+                    # Bid must be higher
+                    if quantity < last_quantity or (quantity == last_quantity and value <= last_value):
+                        print("Your bid must be higher than the previous bid.")
+                        return False
+                
+                self.last_bid = (quantity, value)
+                
+                # Record move in history with new fields
+                move_data = {
+                    "round": len(self.move_history) + 1,
+                    "player": player.name,
+                    "action": "bid",
+                    "quantity": quantity,
+                    "value": value,
+                    "reasoning": reasoning if reasoning else "Human player bid.",
+                    "utterance": utterance if utterance else "I make this bid."
+                }
+                self.move_history.append(move_data)
+                
+                # Add to player history
+                if player.name not in self.player_history:
+                    self.player_history[player.name] = []
+                self.player_history[player.name].append(move_data)
+                
+                return False  # Not calling liar
         except ValueError:
             print("Please enter valid numbers.")
             return False
@@ -935,7 +891,7 @@ class LiarsDice:
         return count
     
     def display_move_history(self):
-        """Display the history of moves in the game"""
+        """Display the history of moves in the game with reasoning and utterance"""
         if not self.move_history:
             print("\nNo moves recorded yet.")
             return
@@ -944,8 +900,19 @@ class LiarsDice:
         for i, move in enumerate(self.move_history):
             if move["action"] == "bid":
                 print(f"{i+1}. {move['player']} bid {move['quantity']} {move['value']}'s")
+                
+                # Show utterance if available (shorter display for history)
+                if "utterance" in move:
+                    print(f"   Said: \"{move['utterance']}\"")
+                
             elif move["action"] == "liar":
                 print(f"{i+1}. {move['player']} called 'Liar!' on {move['target_player']}")
+                
+                # Show utterance if available (shorter display for history)
+                if "utterance" in move:
+                    print(f"   Said: \"{move['utterance']}\"")
+                
+                # Show outcome if available
                 if "outcome" in move:
                     if move["outcome"] == "success":
                         print(f"   Result: {move['player']} was right! {move['target_player']} lost a die.")
@@ -958,12 +925,21 @@ class LiarsDice:
         
         # Determine the actual previous player who made the last bid
         previous_bidder = None
+        last_bid_move = None
         for move in reversed(self.move_history):
             if move["action"] == "bid":
                 previous_bidder = move["player"]
+                last_bid_move = move
                 break
         
         previous_player = next(p for p in self.players if p.name == previous_bidder)
+        
+        # Find the liar call move to get reasoning and utterance
+        liar_call_move = None
+        for move in reversed(self.move_history):
+            if move["action"] == "liar":
+                liar_call_move = move
+                break
         
         quantity, value = self.last_bid
         actual_count = self.count_dice(value)
@@ -971,6 +947,13 @@ class LiarsDice:
         self.clear_screen()
         print(f"\n{calling_player.name} called 'Liar!' on {previous_player.name}'s bid of {quantity} {value}'s")
         
+        # Display reasoning and utterance if available
+        if liar_call_move and "reasoning" in liar_call_move:
+            print(f"Reasoning: {liar_call_move['reasoning']}")
+        
+        if liar_call_move and "utterance" in liar_call_move:
+            print(f"{calling_player.name} says: \"{liar_call_move['utterance']}\"")
+            
         # Show all dice
         for player in self.players:
             if player.get_dice_count() > 0:
@@ -980,6 +963,10 @@ class LiarsDice:
         
         # Was the previous bid a bluff?
         previous_bid_was_bluff = previous_player.dice.count(value) < quantity
+        
+        # Display previous player's reasoning for their bid if available
+        if last_bid_move and "reasoning" in last_bid_move:
+            print(f"\n{previous_player.name}'s reasoning for the bid: {last_bid_move['reasoning']}")
         
         if actual_count >= quantity:
             # Bid was valid, calling player loses a die
@@ -1024,14 +1011,14 @@ class LiarsDice:
                 move["was_bluff"] = previous_bid_was_bluff
                 break
                 
-                # Also update player history
-                for name, history in self.player_history.items():
-                    for hist_move in reversed(history):
-                        if hist_move.get("action") == "liar" and "outcome" not in hist_move:
-                            hist_move["outcome"] = outcome
-                            hist_move["actual_count"] = actual_count
-                            hist_move["was_bluff"] = previous_bid_was_bluff
-                            break
+        # Also update player history
+        for name, history in self.player_history.items():
+            for hist_move in reversed(history):
+                if hist_move.get("action") == "liar" and "outcome" not in hist_move:
+                    hist_move["outcome"] = outcome
+                    hist_move["actual_count"] = actual_count
+                    hist_move["was_bluff"] = previous_bid_was_bluff
+                    break
         
         # Check if loser is out
         if loser.get_dice_count() == 0:

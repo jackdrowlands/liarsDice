@@ -80,9 +80,10 @@ class AsyncGameRunner:
                     "total_tokens": total_tokens
                 }
             
-            # Log the response
+            # Log the response with prompt information
             with open("llm_responses.json", "a") as f:
-                json.dump({
+                # Create response log object
+                response_log = {
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                     "response_text": content,
                     "model": player.model,
@@ -90,8 +91,24 @@ class AsyncGameRunner:
                     "response_time": response_time,
                     "prompt_tokens": prompt_tokens,
                     "completion_tokens": completion_tokens,
-                    "total_tokens": total_tokens
-                }, f)
+                    "total_tokens": total_tokens,
+                    "system_prompt": result["choices"][0]["message"].get("system_fingerprint", "")
+                }
+                
+                # Add prompt directly from request_params
+                if "data" in request_params and "messages" in request_params["data"] and len(request_params["data"]["messages"]) >= 2:
+                    response_log["prompt"] = {
+                        "system": request_params["data"]["messages"][0]["content"],
+                        "user": request_params["data"]["messages"][1]["content"]
+                    }
+                # Alternatively, try to get it from the player
+                elif hasattr(player, 'get_prompt_for_game'):
+                    try:
+                        response_log["prompt"] = player.get_prompt_for_game(game_state)
+                    except Exception:
+                        pass
+                        
+                json.dump(response_log, f)
                 f.write("\n")
             
             game_state['response_time'] = response_time
@@ -111,6 +128,19 @@ class AsyncGameRunner:
                     error_info["response"] = response.json()
                 except:
                     error_info["response"] = "Could not parse response as JSON"
+            
+            # Add prompt information
+            if 'request_params' in locals() and "data" in request_params and "messages" in request_params["data"] and len(request_params["data"]["messages"]) >= 2:
+                error_info["prompt"] = {
+                    "system": request_params["data"]["messages"][0]["content"],
+                    "user": request_params["data"]["messages"][1]["content"]
+                }
+            # Alternatively, try to get it from the player
+            elif hasattr(player, 'get_prompt_for_game'):
+                try:
+                    error_info["prompt"] = player.get_prompt_for_game(game_state)
+                except Exception:
+                    pass
             
             # Log the error
             with open("invalid_responses.json", "a") as f:

@@ -1,0 +1,326 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-19 13:06:46
+Total Games: 10
+Models per Game: 6
+
+Providers Used: google, qwen, openai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     openai/o4-mini-high           Alex Morgan         986.7     40.0%          4         10        
+2     google/gemini-2.5-pro-pre...  Matthew             984.0     30.0%          3         10        
+3     openai/o4-mini                James               1073.0    20.0%          2         10        
+4     google/gemini-2.5-flash-p...  Michael             985.4     10.0%          1         10        
+5     google/gemini-2.5-flash-p...  Megan               984.7     0.0%          0         10        
+6     qwen/qwq-32b                  John                986.1     0.0%          0         10        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. openai/o4-mini-high (as 'Alex Morgan')
+   Provider: openai
+   Win Rate: 40.0%
+   Games Won: 4 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 986.7
+   Bluff Success Rate: 43.3%
+   Lie Detection (Precision): 55.0%
+   Lie Detection (Recall): 65.5%
+   Lie Detection (F1): 59.0%
+   Average Final Bid: 3.24
+   Bid Optimality: 81.4%
+   Adaptation Score: 80.0%
+   Rule Adherence Rate: 99.5%
+   Avg API Response Time: 31.12 seconds
+   Token Usage:
+     - Total Tokens: 133942.7
+     - Prompt Tokens: 55629.4
+     - Completion Tokens: 78313.3
+     - Avg Tokens Per Action: 6724.7
+   Liar Call Success Rate: 53.3%
+   Liar Calls: 32 successful, 28 unsuccessful
+   Playing Style: 140 bids, 60 liar calls (30.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 4 long
+
+2. google/gemini-2.5-pro-preview-03-25 (as 'Matthew')
+   Provider: google
+   Win Rate: 30.0%
+   Games Won: 3 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 1073.0
+   Bluff Success Rate: 62.9%
+   Lie Detection (Precision): 40.8%
+   Lie Detection (Recall): 37.4%
+   Lie Detection (F1): 37.7%
+   Average Final Bid: 3.30
+   Bid Optimality: 83.7%
+   Adaptation Score: 40.0%
+   Rule Adherence Rate: 99.5%
+   Avg API Response Time: 13.91 seconds
+   Token Usage:
+     - Total Tokens: 76681.5
+     - Prompt Tokens: 53448.1
+     - Completion Tokens: 23233.4
+     - Avg Tokens Per Action: 4344.6
+   Liar Call Success Rate: 37.5%
+   Liar Calls: 12 successful, 20 unsuccessful
+   Playing Style: 142 bids, 32 liar calls (18.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+3. openai/o4-mini (as 'James')
+   Provider: openai
+   Win Rate: 20.0%
+   Games Won: 2 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 985.4
+   Bluff Success Rate: 57.7%
+   Lie Detection (Precision): 49.3%
+   Lie Detection (Recall): 58.8%
+   Lie Detection (F1): 50.7%
+   Average Final Bid: 3.25
+   Bid Optimality: 83.0%
+   Adaptation Score: 40.0%
+   Rule Adherence Rate: 96.3%
+   Avg API Response Time: 14.01 seconds
+   Token Usage:
+     - Total Tokens: 88308.9
+     - Prompt Tokens: 56504.6
+     - Completion Tokens: 31804.3
+     - Avg Tokens Per Action: 4378.0
+   Liar Call Success Rate: 52.6%
+   Liar Calls: 30 successful, 27 unsuccessful
+   Playing Style: 136 bids, 57 liar calls (29.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+4. google/gemini-2.5-flash-preview:thinking (as 'Michael')
+   Provider: google
+   Win Rate: 10.0%
+   Games Won: 1 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 984.7
+   Bluff Success Rate: 35.3%
+   Lie Detection (Precision): 38.6%
+   Lie Detection (Recall): 33.9%
+   Lie Detection (F1): 35.0%
+   Average Final Bid: 3.49
+   Bid Optimality: 71.4%
+   Adaptation Score: 10.0%
+   Rule Adherence Rate: 84.8%
+   Avg API Response Time: 10.20 seconds
+   Token Usage:
+     - Total Tokens: 66369.4
+     - Prompt Tokens: 45353.9
+     - Completion Tokens: 21312.6
+     - Avg Tokens Per Action: 3908.9
+   Liar Call Success Rate: 37.0%
+   Liar Calls: 17 successful, 29 unsuccessful
+   Playing Style: 98 bids, 46 liar calls (31.9% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+5. google/gemini-2.5-flash-preview (as 'Megan')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 984.0
+   Bluff Success Rate: 48.0%
+   Lie Detection (Precision): 32.5%
+   Lie Detection (Recall): 29.5%
+   Lie Detection (F1): 28.6%
+   Average Final Bid: 3.91
+   Bid Optimality: 62.7%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 80.3%
+   Avg API Response Time: 1.89 seconds
+   Token Usage:
+     - Total Tokens: 45886.4
+     - Prompt Tokens: 44180.9
+     - Completion Tokens: 1705.5
+     - Avg Tokens Per Action: 2662.0
+   Liar Call Success Rate: 32.7%
+   Liar Calls: 16 successful, 33 unsuccessful
+   Playing Style: 86 bids, 49 liar calls (36.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+6. qwen/qwq-32b (as 'John')
+   Provider: qwen
+   Win Rate: 0.0%
+   Games Won: 0 / 10
+   Avg. Rounds per Game: 28.2
+   Elo Rating: 986.1
+   Bluff Success Rate: 35.6%
+   Lie Detection (Precision): 20.5%
+   Lie Detection (Recall): 20.9%
+   Lie Detection (F1): 20.3%
+   Average Final Bid: 4.13
+   Bid Optimality: 63.3%
+   Adaptation Score: 50.0%
+   Rule Adherence Rate: 77.0%
+   Avg API Response Time: 69.81 seconds
+   Token Usage:
+     - Total Tokens: 51300.2
+     - Prompt Tokens: 31217.6
+     - Completion Tokens: 20082.6
+     - Avg Tokens Per Action: 3646.5
+   Liar Call Success Rate: 21.1%
+   Liar Calls: 8 successful, 30 unsuccessful
+   Playing Style: 92 bids, 38 liar calls (29.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 2:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: Matthew (google/gemini-2.5-pro-preview-03-25)
+  Rounds: 27
+  Total Moves: 96
+
+Game 9:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: John-6 (openai/o4-mini-high)
+  Rounds: 30
+  Total Moves: 88
+
+Game 4:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: Matthew (google/gemini-2.5-pro-preview-03-25)
+  Rounds: 26
+  Total Moves: 98
+
+Game 7:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: James (openai/o4-mini)
+  Rounds: 29
+  Total Moves: 95
+
+Game 10:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: Michael (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 29
+  Total Moves: 102
+
+Game 8:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: John-6 (openai/o4-mini-high)
+  Rounds: 26
+  Total Moves: 95
+
+Game 1:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: John-6 (openai/o4-mini-high)
+  Rounds: 27
+  Total Moves: 96
+
+Game 6:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: Matthew (google/gemini-2.5-pro-preview-03-25)
+  Rounds: 28
+  Total Moves: 102
+
+Game 5:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: John-6 (openai/o4-mini-high)
+  Rounds: 29
+  Total Moves: 102
+
+Game 3:
+  Players:
+    - Matthew (google/gemini-2.5-pro-preview-03-25)
+    - Megan (google/gemini-2.5-flash-preview)
+    - Michael (google/gemini-2.5-flash-preview:thinking)
+    - James (openai/o4-mini)
+    - John (qwen/qwq-32b)
+    - John-6 (openai/o4-mini-high)
+  Winner: James (openai/o4-mini)
+  Rounds: 31
+  Total Moves: 102
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: openai/o4-mini-high
+Most Cautious Model: google/gemini-2.5-pro-preview-03-25
+Most Accurate Liar Detector: openai/o4-mini-high (53.3% success rate)
+Model with Shortest Games: google/gemini-2.5-pro-preview-03-25 (28.2 rounds avg)
+Model with Longest Games: google/gemini-2.5-pro-preview-03-25 (28.2 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: google/gemini-2.5-pro-preview-03-25 (62.9% success rate)
+Best Lie Detector: openai/o4-mini-high (F1 score: 59.0%)
+Most Optimal Bidder: google/gemini-2.5-pro-preview-03-25 (83.7% optimal bids)
+Most Adaptive Player: openai/o4-mini-high (80.0% adaptation score)
+Most Rule Adherent: google/gemini-2.5-pro-preview-03-25 (99.5% adherence rate)
+
+PROVIDER COMPARISON
+================================================================================
+Provider       Win Rate       Avg Elo        Wins      Games     
+-----------------------------------------------------------------
+openai         30.0%          986.1     6         20        
+google         13.3%          1013.9     4         30        
+qwen           0.0%          986.1     0         10        
+
+Provider Advanced Metrics Comparison:
+----------------------------------------------------------------------------------------------------
+Provider       Bluff Success  Lie Detection  Bid Optimality Adaptation     Rule Adherence 
+----------------------------------------------------------------------------------------------------
+openai         50.5%          54.8%          82.2%          60.0%          97.9%
+google         48.7%          33.7%          72.6%          16.7%          88.2%
+qwen           35.6%          20.3%          63.3%          50.0%          77.0%

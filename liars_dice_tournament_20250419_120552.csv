@@ -1,0 +1,3 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
+google/gemini-flash-1.5-8b,Ashley,google,1016.0,100.0,1,1,50.0,66.66666666666666,100.0,80.0,3.0,57.14285714285714,0.0,53.84615384615385,1.4512209242040461,8.0,1,0,0
+google/gemini-2.0-flash-lite-001,John,google,984.0,0.0,0,1,0.0,60.0,75.0,66.66666666666666,1.6666666666666667,44.44444444444444,0.0,64.28571428571429,1.578840237397414,8.0,0,0,0

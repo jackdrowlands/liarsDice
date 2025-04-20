@@ -20,7 +20,7 @@ from .ai_player import (
     AIPlayer, REQUESTS_AVAILABLE,
     PROVIDER_OPENROUTER, PROVIDER_LOCAL
 )
-from .metrics import GameMetrics
+from .metrics import GameMetrics, MetricsVisualizer
 
 # Set up logging directories
 os.makedirs("logs", exist_ok=True)
@@ -45,17 +45,20 @@ class AsyncGameRunner:
     """
     def __init__(self, batch_runner):
         self.batch_runner = batch_runner
-        limits = httpx.Limits(max_connections=1000, max_keepalive_connections=1000)
+        limits = httpx.Limits(max_connections=50, max_keepalive_connections=50)
         self.client = httpx.AsyncClient(timeout=30.0, limits=limits)  # Single client for all API calls
         # Track timing data for diagnostics
         self.timing_data = defaultdict(list)
         self.api_call_counts = defaultdict(int)
         self.game_timing_stats = {}
+        # Rate limiting for API calls
+        self.last_api_call_time = {}
+        self.min_delay_between_calls = 0.5  # 500ms between calls to the same model
         
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()
-        
+    
     def save_timing_report(self, game_num):
         """Save detailed timing data to a report file"""
         try:
@@ -93,30 +96,6 @@ class AsyncGameRunner:
                 "game_timing": self.game_timing_stats.get(game_num, {})
             }
             
-            # Include a subset of detailed timings (to avoid overwhelmingly large files)
-            detailed_data = {}
-            for key, value in self.timing_data.items():
-                # Only include important detailed data and limit large arrays
-                if key.startswith("api_") or key.startswith("model_") or "timeout" in key or "error" in key:
-                    if isinstance(value, list) and len(value) > 100:
-                        # For very large lists, include summary stats instead
-                        if all(isinstance(item, (int, float)) for item in value):
-                            detailed_data[key] = {
-                                "summary": {
-                                    "avg": sum(value) / len(value),
-                                    "max": max(value),
-                                    "min": min(value),
-                                    "count": len(value)
-                                },
-                                "sample": value[:50]  # Include first 50 items as a sample
-                            }
-                        else:
-                            detailed_data[key] = value[:50]  # Include first 50 items
-                    else:
-                        detailed_data[key] = value
-            
-            report_data["detailed_timings"] = detailed_data
-            
             # Save to file
             with open(report_path, 'w') as f:
                 json.dump(report_data, f, indent=2)
@@ -128,10 +107,18 @@ class AsyncGameRunner:
             logger.error(traceback.format_exc())
     
     async def make_api_request(self, request_params, player_name=None, model=None):
-        """Make an async API request and return the response"""
+        """Make an async API request with rate limiting and backoff"""
         endpoint_url = request_params["endpoint_url"]
         headers = request_params["headers"]
         data = request_params["data"]
+        
+        # Apply rate limiting for each model
+        if model in self.last_api_call_time:
+            elapsed = time.time() - self.last_api_call_time[model]
+            if elapsed < self.min_delay_between_calls:
+                delay = self.min_delay_between_calls - elapsed
+                logger.debug(f"Rate limiting: Waiting {delay:.2f}s before API call for {model}")
+                await asyncio.sleep(delay)
         
         api_start_time = time.time()
         logger.debug(f"API request starting for {model} (Player: {player_name})")
@@ -139,38 +126,70 @@ class AsyncGameRunner:
         # Track API call for this model
         if model:
             self.api_call_counts[model] += 1
+            self.last_api_call_time[model] = time.time()
         
-        try:
-            response = await self.client.post(
-                endpoint_url,
-                headers=headers,
-                json=data
-            )
-            response_time = time.time() - api_start_time
-            
-            # Record timing data
-            if model:
-                self.timing_data[f"api_call_{model}"].append(response_time)
+        # Exponential backoff parameters
+        max_retries = 3
+        retry_delay = 1.0
+        
+        for retry in range(max_retries + 1):
+            try:
+                response = await self.client.post(
+                    endpoint_url,
+                    headers=headers,
+                    json=data
+                )
+                response_time = time.time() - api_start_time
                 
-            logger.debug(f"API response received from {model} - time: {response_time:.2f}s, status: {response.status_code}")
-            
-            if response.status_code != 200:
-                logger.error(f"API Error for {model}: {response.status_code} - {response.text[:200]}")
-                raise RuntimeError(f"API Error: {response.status_code} - {response.text}")
-            
-            return response, response_time
-            
-        except httpx.ReadTimeout:
-            elapsed = time.time() - api_start_time
-            logger.error(f"API Timeout for {model} after {elapsed:.2f}s")
-            raise
-        except Exception as e:
-            elapsed = time.time() - api_start_time
-            logger.error(f"API Exception for {model} after {elapsed:.2f}s: {str(e)}")
-            raise
+                # Record timing data
+                if model:
+                    self.timing_data[f"api_call_{model}"].append(response_time)
+                    
+                logger.debug(f"API response received from {model} - time: {response_time:.2f}s, status: {response.status_code}")
+                
+                if response.status_code != 200:
+                    error_msg = f"API Error for {model}: {response.status_code} - {response.text[:200]}"
+                    logger.error(error_msg)
+                    
+                    # If we have retries left and the error is potentially retryable
+                    if retry < max_retries and response.status_code in [429, 500, 502, 503, 504]:
+                        logger.info(f"Retrying API request for {model} after error {response.status_code} (Retry {retry+1}/{max_retries})")
+                        await asyncio.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                        continue
+                    
+                    raise RuntimeError(error_msg)
+                
+                return response, response_time
+                
+            except httpx.ReadTimeout:
+                elapsed = time.time() - api_start_time
+                logger.error(f"API Timeout for {model} after {elapsed:.2f}s")
+                
+                # If we have retries left
+                if retry < max_retries:
+                    logger.info(f"Retrying API request for {model} after timeout (Retry {retry+1}/{max_retries})")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                
+                raise
+                
+            except Exception as e:
+                elapsed = time.time() - api_start_time
+                logger.error(f"API Exception for {model} after {elapsed:.2f}s: {str(e)}")
+                
+                # If we have retries left and the error might be temporary
+                if retry < max_retries:
+                    logger.info(f"Retrying API request for {model} after error: {str(e)} (Retry {retry+1}/{max_retries})")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                
+                raise
     
     async def get_ai_decision_async(self, player, game_state):
-        """Async version of get_ai_decision"""
+        """Async version of get_ai_decision with error handling and timeouts"""
         model_id = player.model
         player_name = player.name
         
@@ -347,176 +366,6 @@ class AsyncGameRunner:
             
             raise RuntimeError(f"Error getting AI decision: {e}")
     
-    async def play_single_game_async(self, game_num):
-        """Run a single game with asynchronous API calls"""
-        game, game_models = self.batch_runner.setup_game(game_num)
-        
-        # Reset timing data for this game
-        self.timing_data = defaultdict(list)
-        self.api_call_counts = defaultdict(int)
-        self.timing_data["round_times"] = []
-        
-        # Initialize model-specific timing data
-        for player in game.players:
-            if isinstance(player, AIPlayer):
-                self.timing_data[f"model_{player.model}_times"] = []
-                self.timing_data[f"player_{player.name}_times"] = []
-                
-        # Create a timeout report entry
-        self.game_timing_stats[game_num] = {
-            "start_time": time.time(),
-            "game_models": [model.get("id") for model in game_models],
-            "player_models": {p.name: p.model for p in game.players if isinstance(p, AIPlayer)},
-            "round_completion": {}
-        }
-        
-        # Hide output if not verbose
-        original_stdout = sys.stdout
-        if not self.batch_runner.verbose_output:
-            sys.stdout = open(os.devnull, 'w')
-        
-        # Set start time for timeout tracking
-        start_time = time.time()
-        max_duration = 1800  # 30 minutes in seconds
-        
-        logger.info(f"Starting game {game_num} with models: " + 
-                   ", ".join([f"{p.name}: {p.model}" for p in game.players if isinstance(p, AIPlayer)]))
-        
-        try:
-            # Play the game in auto mode
-            round_number = 0
-            while not game.game_over:
-                round_number += 1
-                round_start = time.time()
-                
-                # Check if we've exceeded the time limit
-                elapsed = time.time() - start_time
-                if elapsed > max_duration:
-                    logger.error(f"Game {game_num} timed out after {elapsed:.2f}s ({round_number-1} rounds completed)")
-                    self.game_timing_stats[game_num]["timeout"] = {
-                        "elapsed_time": elapsed,
-                        "rounds_completed": round_number - 1
-                    }
-                    raise asyncio.TimeoutError(f"Game {game_num} exceeded the 30-minute time limit")
-                
-                # Play a round and track time
-                logger.debug(f"Game {game_num}: Starting round {round_number}")
-                await self.play_round_async(game, auto_mode=True, game_num=game_num)
-                
-                # Record round completion
-                round_time = time.time() - round_start
-                self.timing_data["round_times"].append(round_time)
-                self.game_timing_stats[game_num]["round_completion"][round_number] = {
-                    "time": round_time,
-                    "elapsed": time.time() - start_time,
-                    "total_moves": len(game.move_history)
-                }
-                
-                # Log round metrics
-                logger.debug(f"Game {game_num}: Completed round {round_number} in {round_time:.2f}s")
-                
-                # Check for extremely long rounds (potential sign of issues)
-                if round_time > 300:  # 5 minutes per round
-                    logger.warning(f"Game {game_num}: LONG ROUND DETECTED - Round {round_number} took {round_time:.2f}s")
-            
-            # Record total game time
-            game_time = time.time() - start_time
-            self.timing_data["total_game_time"] = game_time
-            self.game_timing_stats[game_num]["completion_time"] = game_time
-            self.game_timing_stats[game_num]["rounds_completed"] = round_number
-            
-            # Log game completion
-            logger.info(f"Game {game_num} completed in {game_time:.2f}s with {round_number} rounds")
-            
-            # Record the winner and update leaderboard
-            winner_model = None
-            
-            for player in game.players:
-                if isinstance(player, AIPlayer) and player.name == game.winner.name:
-                    winner_model = player.model
-                    logger.info(f"Game {game_num} winner: {player.name} using model {winner_model}")
-                    
-                    # Update wins
-                    self.batch_runner.leaderboard[winner_model]["wins"] += 1
-                    
-                    # Track game length categorized wins
-                    if game.round_number < 10:
-                        self.batch_runner.model_stats[winner_model]["early_game_wins"] += 1
-                    elif game.round_number < 20:
-                        self.batch_runner.model_stats[winner_model]["mid_game_wins"] += 1
-                    else:
-                        self.batch_runner.model_stats[winner_model]["long_game_wins"] += 1
-                    
-                    break
-            
-            # Collect detailed statistics for each model
-            for player in game.players:
-                if isinstance(player, AIPlayer):
-                    model = player.model
-                    
-                    # Count bids and liar calls
-                    bids = 0
-                    liar_calls = 0
-                    successful_liar_calls = 0
-                    unsuccessful_liar_calls = 0
-                    
-                    for move in game.move_history:
-                        if move["player"] == player.name:
-                            if move["action"] == "bid":
-                                bids += 1
-                            elif move["action"] == "liar":
-                                liar_calls += 1
-                                if move.get("outcome") == "success":
-                                    successful_liar_calls += 1
-                                elif move.get("outcome") == "failure":
-                                    unsuccessful_liar_calls += 1
-                    
-                    # Update model statistics
-                    self.batch_runner.model_stats[model]["total_bids"] += bids
-                    self.batch_runner.model_stats[model]["total_liar_calls"] += liar_calls
-                    self.batch_runner.model_stats[model]["successful_liar_calls"] += successful_liar_calls
-                    self.batch_runner.model_stats[model]["unsuccessful_liar_calls"] += unsuccessful_liar_calls
-                    self.batch_runner.model_stats[model]["total_rounds_played"] += game.round_number
-            
-            # Record game result with detailed stats and game object for metrics access
-            result = {
-                "game_number": game_num,
-                "players": [
-                    {
-                        "name": p.name, 
-                        "model": p.model
-                    } for p in game.players if isinstance(p, AIPlayer)
-                ],
-                "winner": game.winner.name,
-                "winner_model": winner_model,
-                "rounds": game.round_number,
-                "move_history": [move.copy() for move in game.move_history],
-                "game_obj": game  # Store the game object to access metrics
-            }
-            self.batch_runner.game_results.append(result)
-            
-            # Restore output
-            if not self.batch_runner.verbose_output:
-                sys.stdout = original_stdout
-            
-            # Print game result
-            print(f"Game {game_num}: Winner is {game.winner.name} ({winner_model}) after {game.round_number} rounds")
-            
-            return winner_model
-        
-        except asyncio.TimeoutError:
-            # Restore output in case of timeout
-            if not self.batch_runner.verbose_output:
-                sys.stdout = original_stdout
-            print(f"Game {game_num} timed out after 30 minutes and was terminated")
-            return None
-        except Exception as e:
-            # Restore output in case of error
-            if not self.batch_runner.verbose_output:
-                sys.stdout = original_stdout
-            print(f"Error in game {game_num}: {e}")
-            return None
-    
     async def get_player_bid_async(self, game, player_idx):
         """Asynchronous version of get_player_bid"""
         player = game.players[player_idx]
@@ -531,12 +380,6 @@ class AsyncGameRunner:
             
             # Create game state for AI
             game_state = game.create_game_state_for_ai(player_idx)
-            
-            # Add a short delay to make it feel more natural (but track it)
-            delay_start = time.time()
-            await asyncio.sleep(random.uniform(0.2, 0.5))  # Reduced delay for diagnostics
-            delay_time = time.time() - delay_start
-            self.timing_data["artificial_delay"].append(delay_time)
             
             # Set a per-turn timeout (independent of the game timeout)
             # This will prevent a single turn from hanging the entire game
@@ -565,20 +408,13 @@ class AsyncGameRunner:
                             usage.get('total_tokens', 0)
                         )
                     
-                    # Process decision time
-                    process_start = time.time()
-                    
-                    # Determine the action type and process
+                    # Process decision
                     if decision["action"] == "liar":
                         is_liar_call = game._process_ai_liar_call(player, decision)
                         action_type = "liar call" if is_liar_call else "bid (from liar)"
                     else:
                         is_liar_call = game._process_ai_bid(player, decision)
                         action_type = "bid"
-                    
-                    # Record decision processing time
-                    process_time = time.time() - process_start
-                    self.timing_data["decision_processing"].append(process_time)
                     
                     # Record total turn time
                     turn_time = time.time() - turn_start_time
@@ -612,9 +448,6 @@ class AsyncGameRunner:
                 # Record the error timing information
                 error_time = time.time() - turn_start_time
                 logger.error(f"Error during {player.name}'s turn after {error_time:.2f}s: {str(e)}")
-                
-                if isinstance(e, asyncio.TimeoutError):
-                    logger.error(f"Turn timed out for {player.name} (Model: {player.model})")
                 
                 # Fallback to a simple bid with detailed logging
                 logger.warning(f"Using fallback logic for {player.name} due to error: {str(e)}")
@@ -716,11 +549,8 @@ class AsyncGameRunner:
             if is_calling_liar:
                 logger.debug(f"Game {game_num} Round {game.round_number}: {current_player.name} called liar")
                 
-                # Time the liar call handling
-                liar_call_start = time.time()
+                # Handle the liar call
                 game.handle_liar_call(auto_continue=auto_mode)
-                liar_call_time = time.time() - liar_call_start
-                self.timing_data["liar_call_handling"].append(liar_call_time)
                 
                 # Check if game is over
                 if game.check_game_over():
@@ -729,21 +559,6 @@ class AsyncGameRunner:
                 
                 # Start new round
                 game.round_number += 1
-                
-                # Record round statistics
-                elapsed_round_time = time.time() - round_start
-                self.timing_data["completed_round_times"].append(elapsed_round_time)
-                
-                # Record detailed round information
-                self.timing_data["rounds"].append({
-                    "round_number": game.round_number - 1,  # The round we just finished
-                    "turns": turn_count,
-                    "duration": elapsed_round_time,
-                    "turn_details": round_turns
-                })
-                
-                # Log summary
-                logger.debug(f"Game {game_num} Round {game.round_number-1} ended after {elapsed_round_time:.2f}s with {turn_count} turns")
                 
                 # Reset for next round
                 print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
@@ -758,206 +573,144 @@ class AsyncGameRunner:
             logger.debug(f"Game {game_num} Round {game.round_number}: Advancing to next player after {current_player.name}")
             game.next_player()
     
-    async def run_games_async(self, game_nums):
-        """Run multiple games concurrently using asyncio"""
-        tasks = []
-        run_stats = {}
+    async def play_single_game_async(self, game_num):
+        """Run a single game with asynchronous API calls"""
+        game, game_models = self.batch_runner.setup_game(game_num)
         
-        # Initialize global diagnostic stats
-        all_game_stats = {
+        # Reset timing data for this game
+        self.timing_data = defaultdict(list)
+        self.api_call_counts = defaultdict(int)
+        self.timing_data["round_times"] = []
+        
+        # Initialize model-specific timing data
+        for player in game.players:
+            if isinstance(player, AIPlayer):
+                self.timing_data[f"model_{player.model}_times"] = []
+                self.timing_data[f"player_{player.name}_times"] = []
+                
+        # Create a timeout report entry
+        self.game_timing_stats[game_num] = {
             "start_time": time.time(),
-            "total_games": len(game_nums),
-            "timeouts": 0,
-            "errors": 0,
-            "completed": 0,
-            "per_model_stats": defaultdict(lambda: {"timeouts": 0, "completions": 0, "time_spent": 0})
+            "game_models": [model.get("id") for model in game_models],
+            "player_models": {p.name: p.model for p in game.players if isinstance(p, AIPlayer)},
+            "round_completion": {}
         }
         
-        # Ensure diagnostic directories exist
-        os.makedirs("diagnostics/timing_reports", exist_ok=True)
-        os.makedirs("diagnostics/game_stats", exist_ok=True)
+        # Hide output if not verbose
+        original_stdout = sys.stdout
+        if not self.batch_runner.verbose_output:
+            sys.stdout = open(os.devnull, 'w')
         
-        logger.info(f"Starting async game batch with {len(game_nums)} games")
+        # Set start time for timeout tracking
+        start_time = time.time()
+        max_duration = 3600  # 60 minutes in seconds
         
-        for game_num in game_nums:
-            # Record stats for this game
-            run_stats[game_num] = {
-                "start_time": time.time(),
-                "status": "pending"
-            }
+        logger.info(f"Starting game {game_num} with models: " + 
+                   ", ".join([f"{p.name}: {p.model}" for p in game.players if isinstance(p, AIPlayer)]))
+        
+        try:
+            # Play the game in auto mode
+            round_number = 0
+            while not game.game_over:
+                round_number += 1
+                round_start = time.time()
+                
+                # Check if we've exceeded the time limit
+                elapsed = time.time() - start_time
+                if elapsed > max_duration:
+                    logger.error(f"Game {game_num} timed out after {elapsed:.2f}s ({round_number-1} rounds completed)")
+                    self.game_timing_stats[game_num]["timeout"] = {
+                        "elapsed_time": elapsed,
+                        "rounds_completed": round_number - 1
+                    }
+                    raise asyncio.TimeoutError(f"Game {game_num} exceeded the time limit")
+                
+                # Play a round and track time
+                logger.debug(f"Game {game_num}: Starting round {round_number}")
+                await self.play_round_async(game, auto_mode=True, game_num=game_num)
+                
+                # Record round completion
+                round_time = time.time() - round_start
+                self.timing_data["round_times"].append(round_time)
+                self.game_timing_stats[game_num]["round_completion"][round_number] = {
+                    "time": round_time,
+                    "elapsed": time.time() - start_time,
+                    "total_moves": len(game.move_history)
+                }
+                
+                # Log round metrics
+                logger.debug(f"Game {game_num}: Completed round {round_number} in {round_time:.2f}s")
+                
+                # Check for extremely long rounds
+                if round_time > 300:  # 5 minutes per round
+                    logger.warning(f"Game {game_num}: LONG ROUND DETECTED - Round {round_number} took {round_time:.2f}s")
             
-            # Wrap each game with a timeout of 30 minutes (1800 seconds)
-            task = asyncio.create_task(
-                asyncio.wait_for(
-                    self.play_single_game_async(game_num),
-                    timeout=1800
-                )
-            )
-            tasks.append((game_num, task))
+            # Record total game time
+            game_time = time.time() - start_time
+            self.timing_data["total_game_time"] = game_time
+            self.game_timing_stats[game_num]["completion_time"] = game_time
+            self.game_timing_stats[game_num]["rounds_completed"] = round_number
+            
+            # Log game completion
+            logger.info(f"Game {game_num} completed in {game_time:.2f}s with {round_number} rounds")
+            
+            # Process results
+            winner_model = self.batch_runner._process_game_results(game, game_num)
+            
+            # Restore output
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            
+            # Print game result
+            print(f"Game {game_num}: Winner is {game.winner.name} ({winner_model}) after {game.round_number} rounds")
+            
+            return winner_model
         
-        # Process games as they complete
-        processed_results = [None] * len(game_nums)
-        game_num_to_index = {game_num: i for i, game_num in enumerate(game_nums)}
-        completed_count = 0
+        except asyncio.TimeoutError:
+            # Restore output in case of timeout
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Game {game_num} timed out and was terminated")
+            return None
+        except Exception as e:
+            # Restore output in case of error
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Error in game {game_num}: {e}")
+            return None
+    
+    async def run_game_with_semaphore(self, game_num, semaphore):
+        """Run a game with a semaphore to limit concurrent executions"""
+        async with semaphore:
+            return await self.play_single_game_async(game_num)
+    
+    async def run_games_async(self, game_nums):
+        """Run multiple games concurrently using asyncio with rate limiting"""
+        # Use a semaphore to limit concurrent API-heavy operations
+        concurrency_limit = 32  # Match the ThreadPoolExecutor limit
+        semaphore = asyncio.Semaphore(concurrency_limit)
         
-        # Use as_completed to handle results as they arrive
-        for future in asyncio.as_completed([task for _, task in tasks]):
-            try:
-                result = await future
-                
-                # Find which game this is by checking results of finished tasks
-                game_num = None
-                for gnum, task in tasks:
-                    if task.done() and id(task) == id(future):
-                        game_num = gnum
-                        break
-                
-                if game_num is None:
-                    logger.error("Could not determine which game completed")
-                    continue
-                
-                # Save completion stats
-                run_stats[game_num]["status"] = "completed"
-                run_stats[game_num]["end_time"] = time.time()
-                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
-                
-                # Save the result
-                if game_num in game_num_to_index:
-                    processed_results[game_num_to_index[game_num]] = result
-                
-                # Track global stats
-                all_game_stats["completed"] += 1
-                completed_count += 1
-                
-                # Save the timing report for this game
+        logger.info(f"Starting async game batch with {len(game_nums)} games (max concurrent: {concurrency_limit})")
+        
+        # Create tasks for all games
+        tasks = [self.run_game_with_semaphore(game_num, semaphore) for game_num in game_nums]
+        
+        # Process games as they complete (gather doesn't preserve order)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Handle any exceptions
+        processed_results = []
+        for i, result in enumerate(results):
+            game_num = game_nums[i]
+            if isinstance(result, Exception):
+                logger.error(f"Game {game_num} error: {str(result)}")
+                processed_results.append(None)
                 self.save_timing_report(game_num)
-                
-                # Print progress
-                logger.info(f"Game {game_num} completed successfully - {completed_count}/{len(game_nums)} total")
-                
-                # Update per-model stats
-                for model_name, times in [(k, v) for k, v in self.timing_data.items() if k.startswith("model_")]:
-                    model = model_name.replace("model_", "").replace("_times", "")
-                    all_game_stats["per_model_stats"][model]["completions"] += 1
-                    all_game_stats["per_model_stats"][model]["time_spent"] += sum(times) if times else 0
-                
-            except asyncio.TimeoutError:
-                # Find which game timed out
-                game_num = None
-                for gnum, task in tasks:
-                    if task.done() and id(task) == id(future):
-                        game_num = gnum
-                        break
-                
-                if game_num is None:
-                    logger.error("Could not determine which game timed out")
-                    continue
-                
-                # Save timeout stats
-                run_stats[game_num]["status"] = "timeout"
-                run_stats[game_num]["end_time"] = time.time()
-                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
-                
-                # Clear result
-                if game_num in game_num_to_index:
-                    processed_results[game_num_to_index[game_num]] = None
-                
-                # Track global stats
-                all_game_stats["timeouts"] += 1
-                completed_count += 1
-                
-                # Save timing report for analysis (important for timeouts)
+            else:
+                processed_results.append(result)
                 self.save_timing_report(game_num)
-                
-                # Log timeout
-                logger.error(f"Game {game_num} timed out after 30 minutes - {completed_count}/{len(game_nums)} processed")
-                print(f"Game {game_num} timed out after 30 minutes and was terminated")
-                
-                # Update per-model timeout stats
-                if game_num in self.game_timing_stats:
-                    for player_name, model in self.game_timing_stats[game_num].get("player_models", {}).items():
-                        all_game_stats["per_model_stats"][model]["timeouts"] += 1
-                
-            except Exception as e:
-                # Find which game had an error
-                game_num = None
-                for gnum, task in tasks:
-                    if task.done() and id(task) == id(future):
-                        game_num = gnum
-                        break
-                
-                if game_num is None:
-                    logger.error(f"Could not determine which game had error: {str(e)}")
-                    continue
-                
-                # Save error stats
-                run_stats[game_num]["status"] = "error"
-                run_stats[game_num]["end_time"] = time.time()
-                run_stats[game_num]["duration"] = run_stats[game_num]["end_time"] - run_stats[game_num]["start_time"]
-                run_stats[game_num]["error"] = str(e)
-                
-                # Clear result
-                if game_num in game_num_to_index:
-                    processed_results[game_num_to_index[game_num]] = None
-                
-                # Track global stats
-                all_game_stats["errors"] += 1
-                completed_count += 1
-                
-                # Try to save timing report for analysis
-                try:
-                    self.save_timing_report(game_num)
-                except Exception:
-                    pass
-                
-                # Log error
-                logger.error(f"Game {game_num} error: {str(e)}")
-                print(f"Error in game {game_num}: {e}")
         
-        # Save overall stats
-        all_game_stats["end_time"] = time.time()
-        all_game_stats["total_duration"] = all_game_stats["end_time"] - all_game_stats["start_time"]
-        
-        # Log summary
-        logger.info(f"Completed {all_game_stats['completed']} games, {all_game_stats['timeouts']} timeouts, {all_game_stats['errors']} errors")
-        
-        # Calculate per-model summary
-        if all_game_stats["per_model_stats"]:
-            model_summary = []
-            for model, stats in all_game_stats["per_model_stats"].items():
-                # Skip any models with no data
-                if stats["completions"] + stats["timeouts"] == 0:
-                    continue
-                    
-                timeout_rate = stats["timeouts"] / (stats["completions"] + stats["timeouts"]) * 100 if (stats["completions"] + stats["timeouts"]) > 0 else 0
-                model_summary.append(f"{model}: {timeout_rate:.1f}% timeout rate ({stats['timeouts']} of {stats['completions'] + stats['timeouts']} games)")
-            
-            if model_summary:
-                logger.info("Model timeout rates:")
-                for line in model_summary:
-                    logger.info(line)
-        
-        # Save complete run stats
-        summary_path = "diagnostics/run_summary.json"
-        with open(summary_path, "w") as f:
-            json.dump({
-                "run_stats": run_stats,
-                "overall_stats": all_game_stats
-            }, f, indent=2)
-        
-        logger.info(f"Saved run statistics to {summary_path}")
-        
-        # Save model-specific performance summary
-        model_summary_path = "diagnostics/model_performance.json"
-        with open(model_summary_path, "w") as f:
-            json.dump({
-                "models": all_game_stats["per_model_stats"],
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "total_games": all_game_stats["total_games"]
-            }, f, indent=2)
-            
-        logger.info(f"Saved model performance statistics to {model_summary_path}")
-        
+        logger.info(f"Completed {len(processed_results)} games in async mode")
         return processed_results
 
 class GameBatchRunner:
@@ -970,6 +723,8 @@ class GameBatchRunner:
         self.local_endpoint_url = None
         self.local_models = []
         self.enable_autosaves = True  # Default to enabled
+        self.save_individual_games = True  # Save individual games by default
+        self.create_visualizations = True  # Create enhanced visualizations by default
     
     def setup_batch(self):
         """Setup a batch of games to run"""
@@ -1111,6 +866,20 @@ class GameBatchRunner:
             print("Autosaves enabled - tournament state will be saved periodically.")
         else:
             print("Autosaves disabled - tournament state will not be saved until completion.")
+            
+        # Ask about saving individual games
+        self.save_individual_games = input("Save individual game data after each game? (y/n): ").lower().strip() == 'y'
+        if self.save_individual_games:
+            print("Individual game saving enabled - each game will be saved to a separate file with complete move history.")
+        else:
+            print("Individual game saving disabled - only tournament summary will be saved.")
+            
+        # Ask about generating enhanced visualizations
+        self.create_visualizations = input("Generate enhanced visualizations after tournament? (y/n): ").lower().strip() == 'y'
+        if self.create_visualizations:
+            print("Enhanced visualizations enabled - publication-quality charts and graphs will be generated.")
+        else:
+            print("Enhanced visualizations disabled - only basic visualizations will be included.")
         
         return True
     
@@ -1118,7 +887,7 @@ class GameBatchRunner:
         """Set up a single game with selected models but don't run it yet"""
         game = LiarsDice()
         
-        # List of distinct human names for AI players (20 names)
+        # List of distinct human names for AI players
         human_names = [
         "John", "Sarah", "Michael", "Emily", "David", "Jessica", "James", "Amanda", "Daniel", "Ashley", "Matthew", "Jennifer", "Andrew", "Megan", "Brian", "Laura", "Kevin", "Nicole", "Thomas", "Rachel"
         ]
@@ -1134,16 +903,15 @@ class GameBatchRunner:
             model_id = model_info["id"]
             provider = model_info["provider"]
             
-            # Assign a random human name, but keep consistency by hashing the model ID
-            # This way, the same model always gets the same name within a tournament
+            # Assign a random human name, but keep consistency
             name_index = hash(model_id) % len(human_names)
             player_name = human_names[name_index]
             
-            # Make names unique by adding numbers if needed
+            # Make names unique if needed
             if i > 0 and player_name in [game.players[j].name for j in range(len(game.players))]:
                 player_name = f"{player_name}-{i+1}"
             
-            # Add the AI player with the appropriate configuration
+            # Add the AI player
             game.add_ai_player(
                 name=player_name, 
                 model=model_id,
@@ -1173,82 +941,19 @@ class GameBatchRunner:
         
         # Set start time for timeout tracking
         start_time = time.time()
-        max_duration = 1800  # 30 minutes in seconds
+        max_duration = 3600  # 60 minutes in seconds
         
         try:
             # Play the game in auto mode
             while not game.game_over:
                 # Check if we've exceeded the time limit
                 if time.time() - start_time > max_duration:
-                    raise TimeoutError(f"Game {game_num} exceeded the 30-minute time limit")
+                    raise TimeoutError(f"Game {game_num} exceeded the time limit")
                 
                 game.play_round(auto_mode=True, game_num=game_num)
             
-            # Record the winner and update leaderboard
-            winner_model = None
-            
-            for player in game.players:
-                if isinstance(player, AIPlayer) and player.name == game.winner.name:
-                    winner_model = player.model
-                    
-                    # Update wins
-                    self.leaderboard[winner_model]["wins"] += 1
-                    
-                    # Track game length categorized wins
-                    if game.round_number < 10:
-                        self.model_stats[winner_model]["early_game_wins"] += 1
-                    elif game.round_number < 20:
-                        self.model_stats[winner_model]["mid_game_wins"] += 1
-                    else:
-                        self.model_stats[winner_model]["long_game_wins"] += 1
-                    
-                    break
-            
-            # Collect detailed statistics for each model
-            for player in game.players:
-                if isinstance(player, AIPlayer):
-                    model = player.model
-                    
-                    # Count bids and liar calls
-                    bids = 0
-                    liar_calls = 0
-                    successful_liar_calls = 0
-                    unsuccessful_liar_calls = 0
-                    
-                    for move in game.move_history:
-                        if move["player"] == player.name:
-                            if move["action"] == "bid":
-                                bids += 1
-                            elif move["action"] == "liar":
-                                liar_calls += 1
-                                if move.get("outcome") == "success":
-                                    successful_liar_calls += 1
-                                elif move.get("outcome") == "failure":
-                                    unsuccessful_liar_calls += 1
-                    
-                    # Update model statistics
-                    self.model_stats[model]["total_bids"] += bids
-                    self.model_stats[model]["total_liar_calls"] += liar_calls
-                    self.model_stats[model]["successful_liar_calls"] += successful_liar_calls
-                    self.model_stats[model]["unsuccessful_liar_calls"] += unsuccessful_liar_calls
-                    self.model_stats[model]["total_rounds_played"] += game.round_number
-            
-            # Record game result with detailed stats and game object for metrics access
-            result = {
-                "game_number": game_num,
-                "players": [
-                    {
-                        "name": p.name, 
-                        "model": p.model
-                    } for p in game.players if isinstance(p, AIPlayer)
-                ],
-                "winner": game.winner.name,
-                "winner_model": winner_model,
-                "rounds": game.round_number,
-                "move_history": [move.copy() for move in game.move_history],
-                "game_obj": game  # Store the game object to access metrics
-            }
-            self.game_results.append(result)
+            # Process results
+            winner_model = self._process_game_results(game, game_num)
             
             # Restore output
             if not self.verbose_output:
@@ -1263,7 +968,7 @@ class GameBatchRunner:
             # Restore output in case of timeout
             if not self.verbose_output:
                 sys.stdout = original_stdout
-            print(f"Game {game_num} timed out after 30 minutes and was terminated")
+            print(f"Game {game_num} timed out and was terminated")
             return None
         except Exception as e:
             # Restore output in case of error
@@ -1271,17 +976,176 @@ class GameBatchRunner:
                 sys.stdout = original_stdout
             print(f"Error in game {game_num}: {e}")
             return None
+    
+    def save_individual_game(self, game, game_num):
+        """Save an individual game's data to a file"""
+        if not self.save_individual_games:
+            return None
+        
+        # Create directory if it doesn't exist
+        games_dir = "games"
+        os.makedirs(games_dir, exist_ok=True)
+        
+        # Generate filename with timestamp and game number
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"{games_dir}/game_{game_num}_{timestamp}.json"
+        
+        # Get the winner model
+        winner_model = None
+        if game.winner:
+            for player in game.players:
+                if isinstance(player, AIPlayer) and player.name == game.winner.name:
+                    winner_model = player.model
+                    break
+        
+        # Prepare serializable game state
+        game_state = {
+            "game_number": game_num,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "players": [game._serialize_player(p) for p in game.players],
+            "current_player_idx": game.current_player_idx,
+            "last_bid": game.last_bid,
+            "total_dice_in_game": game.total_dice_in_game,
+            "game_over": game.game_over,
+            "winner": game._serialize_player(game.winner) if game.winner else None,
+            "winner_model": winner_model,
+            "move_history": game.move_history,
+            "round_number": game.round_number,
+            "player_history": game.player_history,
+            # Save metrics data
+            "metrics": game.get_metrics()
+        }
+        
+        # Check if there were any invalid responses
+        invalid_responses = []
+        for player in game.players:
+            if isinstance(player, AIPlayer):
+                for move in game.move_history:
+                    if move["player"] == player.name and move.get("error_fallback", False):
+                        # Find corresponding error info in logs/invalid_responses.json
+                        try:
+                            with open("logs/invalid_responses.json", "r") as f:
+                                for line in f:
+                                    try:
+                                        error_info = json.loads(line)
+                                        if error_info.get("model") == player.model:
+                                            invalid_responses.append(error_info)
+                                    except json.JSONDecodeError:
+                                        continue
+                        except (IOError, FileNotFoundError):
+                            pass
+        
+        # Add invalid responses to game data if any
+        if invalid_responses:
+            game_state["invalid_responses"] = invalid_responses
             
-    def run_multiple_games_batch(self, game_nums, batch_size=10):
-        """Run multiple games in parallel using ThreadPoolExecutor"""
+        # Check if there were any API responses
+        responses = []
+        try:
+            with open("logs/llm_responses.json", "r") as f:
+                for line in f:
+                    try:
+                        response_data = json.loads(line)
+                        # Add all responses that match any of the players' models to record
+                        for player in game.players:
+                            if isinstance(player, AIPlayer) and response_data.get("model") == player.model:
+                                responses.append(response_data)
+                    except json.JSONDecodeError:
+                        continue
+        except (IOError, FileNotFoundError):
+            pass
+            
+        # Add responses to game data if any
+        if responses:
+            game_state["llm_responses"] = responses
         
-        # Determine optimal batch size based on CPU count and available memory
-        cpu_count = os.cpu_count() or 4
-        optimal_workers = min(max(cpu_count * 2, batch_size), 32)  # Scale by CPU count, but set reasonable limits
+        # Write to file
+        with open(filename, 'w') as f:
+            json.dump(game_state, f, indent=2)
+            
+        print(f"Saved game {game_num} data to {filename}")
+        return filename
+
+    def _process_game_results(self, game, game_num):
+        """Process and store game results"""
+        winner_model = None
         
-        print(f"Running with {optimal_workers} parallel workers")
+        for player in game.players:
+            if isinstance(player, AIPlayer) and player.name == game.winner.name:
+                winner_model = player.model
+                
+                # Update wins
+                self.leaderboard[winner_model]["wins"] += 1
+                
+                # Track game length categorized wins
+                if game.round_number < 10:
+                    self.model_stats[winner_model]["early_game_wins"] += 1
+                elif game.round_number < 20:
+                    self.model_stats[winner_model]["mid_game_wins"] += 1
+                else:
+                    self.model_stats[winner_model]["long_game_wins"] += 1
+                
+                break
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=optimal_workers) as executor:
+        # Collect detailed statistics for each model
+        for player in game.players:
+            if isinstance(player, AIPlayer):
+                model = player.model
+                
+                # Count bids and liar calls
+                bids = 0
+                liar_calls = 0
+                successful_liar_calls = 0
+                unsuccessful_liar_calls = 0
+                
+                for move in game.move_history:
+                    if move["player"] == player.name:
+                        if move["action"] == "bid":
+                            bids += 1
+                        elif move["action"] == "liar":
+                            liar_calls += 1
+                            if move.get("outcome") == "success":
+                                successful_liar_calls += 1
+                            elif move.get("outcome") == "failure":
+                                unsuccessful_liar_calls += 1
+                
+                # Update model statistics
+                self.model_stats[model]["total_bids"] += bids
+                self.model_stats[model]["total_liar_calls"] += liar_calls
+                self.model_stats[model]["successful_liar_calls"] += successful_liar_calls
+                self.model_stats[model]["unsuccessful_liar_calls"] += unsuccessful_liar_calls
+                self.model_stats[model]["total_rounds_played"] += game.round_number
+        
+        # Record game result with detailed stats and game object for metrics access
+        result = {
+            "game_number": game_num,
+            "players": [
+                {
+                    "name": p.name, 
+                    "model": p.model
+                } for p in game.players if isinstance(p, AIPlayer)
+            ],
+            "winner": game.winner.name,
+            "winner_model": winner_model,
+            "rounds": game.round_number,
+            "move_history": [move.copy() for move in game.move_history],
+            "game_obj": game  # Store the game object to access metrics
+        }
+        self.game_results.append(result)
+        
+        # Save the individual game data
+        self.save_individual_game(game, game_num)
+        
+        return winner_model
+        
+    def run_multiple_games_batch(self, game_nums):
+        """Run multiple games in parallel using ThreadPoolExecutor with reduced concurrency"""
+        # Use a fixed, smaller number of workers
+        max_workers = 32  # Reduced from original max value
+        
+        print(f"Running with {max_workers} parallel workers")
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all games in this batch
             futures = {}
             for game_num in game_nums:
@@ -1296,29 +1160,28 @@ class GameBatchRunner:
             for future in concurrent.futures.as_completed(futures):
                 game_num = futures[future]
                 try:
-                    # Enforce a 30-minute timeout per thread
-                    result = future.result(timeout=1800)
+                    # Enforce a timeout per thread
+                    result = future.result(timeout=3600)  # 60 minutes timeout
                     results.append(result)
                     completed += 1
 
                     # Print progress as a percentage
-                    print(f"Completed game {game_num} in batch ({completed}/{total}, {completed/total*100:.1f}%)")
+                    print(f"Completed game {game_num} ({completed}/{total}, {completed/total*100:.1f}%)")
 
-                    # Autosave tournament state periodically but less frequently (if enabled)
-                    if self.enable_autosaves and completed % max(50, total // 5) == 0:  # Save at 20% intervals or every 50 games
-                        # Start the autosave in a non-blocking way
+                    # Autosave tournament state periodically if enabled
+                    if self.enable_autosaves and completed % max(50, total // 5) == 0:
                         print(f"Starting autosave at {completed}/{total}")
                         threading.Thread(target=self.save_tournament_state).start()
 
                 except concurrent.futures.TimeoutError:
-                    print(f"Game {game_num} timed out after 30 minutes and was terminated")
+                    print(f"Game {game_num} timed out and was terminated")
                     results.append(None)
                 except Exception as e:
                     print(f"Error in game {game_num}: {e}")
                     results.append(None)
             
         return results
-        
+    
     def run_games_with_asyncio(self, game_nums):
         """Run games concurrently using asyncio"""
         # Create the async game runner
@@ -1361,19 +1224,16 @@ class GameBatchRunner:
         finally:
             # Clean up event loop
             loop.close()
-        
+    
     def save_tournament_state(self, filepath=None):
         """Save the current tournament state to a file"""
         if filepath is None:
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            filepath = f"tournament_autosave_{timestamp}.json"
+            filepath = f"liars_dice_save_{timestamp}.json"
             
         print(f"Saving tournament state to {filepath}...")
         
-        # Create a minimal version of tournament state to save disk space and improve performance
-        # We'll only store essential information for resuming
-        
-        # Store minimal game result data
+        # Create a minimal version of tournament state
         minimal_game_results = []
         for result in self.game_results:
             # Only keep essential fields for each game
@@ -1385,7 +1245,7 @@ class GameBatchRunner:
             }
             minimal_game_results.append(minimal_result)
         
-        # Create minimal tournament state
+        # Create tournament state
         tournament_state = {
             "leaderboard": self.leaderboard,
             "game_results": minimal_game_results,
@@ -1396,20 +1256,17 @@ class GameBatchRunner:
             "selected_models": self.selected_models,
             "use_local_endpoint": self.use_local_endpoint,
             "enable_autosaves": self.enable_autosaves,
+            "save_individual_games": self.save_individual_games,
             "use_async": self.use_async
         }
         
-        # Use a separate thread for file I/O to avoid blocking
-        def write_to_file():
-            with open(filepath, 'w') as f:
-                json.dump(tournament_state, f)
-        
-        # Start file writing in background thread
-        threading.Thread(target=write_to_file).start()
+        # Write to file
+        with open(filepath, 'w') as f:
+            json.dump(tournament_state, f)
             
-        print(f"Tournament state saving initiated to {filepath}")
+        print(f"Tournament state saved to {filepath}")
         return filepath
-        
+    
     def load_tournament_state(self, filepath):
         """Load tournament state from a file"""
         print(f"Loading tournament state from {filepath}...")
@@ -1430,6 +1287,14 @@ class GameBatchRunner:
             # Preserve the autosave setting or ask for it when resuming
             autosave_choice = input("Enable autosaves for this resumed tournament? (y/n): ").lower().strip()
             self.enable_autosaves = autosave_choice == 'y'
+            
+            # Preserve the individual game saving setting or ask for it when resuming
+            save_games_choice = input("Save individual game data for this resumed tournament? (y/n): ").lower().strip()
+            self.save_individual_games = save_games_choice == 'y'
+            if self.save_individual_games:
+                print("Individual game saving enabled - each game will be saved to a separate file with complete move history.")
+            else:
+                print("Individual game saving disabled - only tournament summary will be saved.")
             
             # Restore the minimal game results format we saved
             for result in self.game_results:
@@ -1527,18 +1392,7 @@ class GameBatchRunner:
             print(f"   Playing Style: {model_stats['total_bids']} bids, {model_stats['total_liar_calls']} liar calls ({liar_call_pct:.1f}% liar calls)")
             
             print(f"   Wins by Game Length: {model_stats['early_game_wins']} early, {model_stats['mid_game_wins']} mid, {model_stats['long_game_wins']} long")
-            
-            api_times = []
-            for game in self.game_results:
-                game_obj = game.get("game_obj")
-                if game_obj:
-                    metrics = game_obj.get_metrics()
-                    if model in metrics and "avg_api_response_time" in metrics[model]:
-                        api_times.append(metrics[model]["avg_api_response_time"])
-            if api_times:
-                avg_api_time = sum(api_times) / len(api_times)
-                print(f"   Avg API Response Time: {avg_api_time:.2f} seconds")
-                
+    
     def _get_model_to_human_name_mapping(self):
         """Get a mapping from model IDs to the human names used in games"""
         model_to_human_name = {}
@@ -1572,11 +1426,17 @@ class GameBatchRunner:
                 
         return model_to_human_name
     
-    def save_results(self):
-        """Save the tournament results to a file"""
+    def save_results(self, create_visualizations=True):
+        """
+        Save the tournament results to a file
+        
+        Args:
+            create_visualizations: Whether to generate visualization charts (default: True)
+        """
         base_filename = f"liars_dice_tournament_{time.strftime('%Y%m%d_%H%M%S')}"
         txt_filename = f"{base_filename}.txt"
         csv_filename = f"{base_filename}.csv"
+        visualization_dir = f"{base_filename}_visualizations"
         
         # Export traditional summary report to text file
         with open(txt_filename, 'w') as f:
@@ -1852,9 +1712,6 @@ class GameBatchRunner:
                     metrics = stats["metrics"]
                     f.write(f"{provider:<15}{metrics['bluff_success_rate']:.1f}%{' ':<10}{metrics['lie_detection_f1']:.1f}%{' ':<10}{metrics['bid_optimality']:.1f}%{' ':<10}{metrics['adaptation_score']:.1f}%{' ':<10}{metrics['rule_adherence_rate']:.1f}%\n")
         
-        # Get mapping of model IDs to the human names used
-        model_to_human_name = self._get_model_to_human_name_mapping()
-        
         # Also save results in CSV format for easier analysis
         with open(csv_filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
@@ -1911,35 +1768,83 @@ class GameBatchRunner:
                 ]
                 writer.writerow(row)
         
-        print(f"\nResults saved to {txt_filename} and {csv_filename}")
-        
         # Create visualizations of the results
         try:
             self.generate_visualizations(base_filename, all_advanced_metrics)
         except Exception as e:
             print(f"Could not generate visualizations: {e}")
-
-    def generate_visualizations(self, base_filename, metrics_data):
-        """Generate visualizations of the tournament results"""
-        if not metrics_data:
+        
+        print(f"\nResults saved to {txt_filename} and {csv_filename}")
+    
+    def run_tournament(self, resume_from=None, create_visualizations=True):
+        """
+        Run a tournament of multiple games
+        
+        Args:
+            resume_from: Optional filename to resume a tournament from
+            create_visualizations: Whether to generate advanced visualizations (default: True)
+        """
+        if resume_from and os.path.exists(resume_from):
+            print(f"Resuming tournament from {resume_from}")
+            completed_games = self.load_tournament_state(resume_from)
+            start_game = completed_games + 1
+        else:
+            if not self.setup_batch():
+                return
+            start_game = 1
+        
+        print(f"\nStarting tournament from game {start_game}...")
+        
+        # Create list of game numbers to run
+        game_nums = list(range(start_game, self.total_games + 1))
+        
+        if not game_nums:
+            print("No games to run.")
             return
-            
+
+        # Run the games
+        if self.use_async:
+            self.run_games_with_asyncio(game_nums)
+        else:
+            self.run_multiple_games_batch(game_nums)
+        
+        # Update statistics
+        self.update_leaderboard()
+        
+        # Display final results
+        print("\nTournament complete!")
+        self.display_leaderboard()
+        
+        # Save results and create visualizations if requested
+        self.save_results(create_visualizations=create_visualizations if create_visualizations is not None else self.create_visualizations)
+        
+    def generate_visualizations(self, base_filename, all_advanced_metrics=None):
+        """Generate visualizations of the tournament results"""
         # Create directory for visualizations
         vis_dir = f"{base_filename}_visualizations"
         os.makedirs(vis_dir, exist_ok=True)
         
-        # 1. Plot Elo ratings
+        # Plot Elo ratings
         plt.figure(figsize=(12, 6))
         models = []
         elos = []
         
-        for model, data in metrics_data.items():
-            models.append(model.split('/')[-1] if '/' in model else model)  # Shorter model names
-            elos.append(data["elo_rating"])
+        # Collect Elo ratings from game results
+        for game in self.game_results:
+            game_obj = game.get("game_obj")
+            if game_obj:
+                metrics = game_obj.get_metrics()
+                for model, data in metrics.items():
+                    if "elo_rating" in data:
+                        models.append(model)
+                        elos.append(data["elo_rating"])
         
-        # Sort by Elo
-        sorted_indices = np.argsort(elos)[::-1]  # Descending order
-        sorted_models = [models[i] for i in sorted_indices]
+        if not models:
+            return
+            
+        # Sort by Elo (descending)
+        sorted_indices = np.argsort(elos)[::-1]
+        sorted_models = [models[i].split('/')[-1] if '/' in models[i] else models[i] for i in sorted_indices]
         sorted_elos = [elos[i] for i in sorted_indices]
         
         plt.bar(sorted_models, sorted_elos, color='skyblue')
@@ -1951,206 +1856,155 @@ class GameBatchRunner:
         plt.savefig(f"{vis_dir}/elo_ratings.png")
         plt.close()
         
-        # 2. Create a radar chart for top 5 models comparing all metrics
-        top_models = sorted_indices[:5]
-        top_model_names = [models[i] for i in top_models]
-        
-        # Get metrics for radar chart
-        metrics_to_plot = {
-            "Bluff Success": [metrics_data[model]["bluff_success_rate"] / 100 for model in top_model_names],
-            "Lie Detection": [metrics_data[model]["lie_detection"]["f1_score"] / 100 for model in top_model_names],
-            "Bid Optimality": [metrics_data[model]["bid_optimality"] / 100 for model in top_model_names],
-            "Adaptation": [metrics_data[model]["adaptation_score"] / 100 for model in top_model_names],
-            "Rule Adherence": [metrics_data[model]["rule_adherence_rate"] / 100 for model in top_model_names]
-        }
-        
-        # Create radar chart
-        categories = list(metrics_to_plot.keys())
-        N = len(categories)
-        
-        # Create angles for each metric
-        angles = [n / float(N) * 2 * np.pi for n in range(N)]
-        angles += angles[:1]  # Close the loop
-        
-        # Create plot
-        fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
-        
-        # Add each model's data
-        for i, model in enumerate(top_model_names):
-            values = [metrics_to_plot[cat][i] for cat in categories]
-            values += values[:1]  # Close the loop
+        # Create a radar chart for top 5 models comparing all metrics
+        if all_advanced_metrics:
+            top_models = sorted_indices[:5]
+            top_model_names = [models[i] for i in top_models]
             
-            # Plot data and fill area
-            ax.plot(angles, values, linewidth=1, label=model)
-            ax.fill(angles, values, alpha=0.1)
-        
-        # Set category labels
-        plt.xticks(angles[:-1], categories)
-        
-        # Add legend
-        plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
-        plt.title('Advanced Metrics Comparison for Top Models')
-        plt.tight_layout()
-        plt.savefig(f"{vis_dir}/radar_metrics.png")
-        plt.close()
-        
-        # 3. Correlation between metrics and win rate
-        win_rates = []
-        metric_values = defaultdict(list)
-        
-        for model, stats in self.leaderboard.items():
-            if model in metrics_data:
-                win_rates.append(stats["win_rate"])
+            # Get metrics for radar chart
+            metrics_to_plot = {
+                "Bluff Success": [all_advanced_metrics[model]["bluff_success_rate"] / 100 for model in top_model_names],
+                "Lie Detection": [all_advanced_metrics[model]["lie_detection"]["f1_score"] / 100 for model in top_model_names],
+                "Bid Optimality": [all_advanced_metrics[model]["bid_optimality"] / 100 for model in top_model_names],
+                "Adaptation": [all_advanced_metrics[model]["adaptation_score"] / 100 for model in top_model_names],
+                "Rule Adherence": [all_advanced_metrics[model]["rule_adherence_rate"] / 100 for model in top_model_names]
+            }
+            
+            # Create radar chart
+            categories = list(metrics_to_plot.keys())
+            N = len(categories)
+            
+            # Create angles for each metric
+            angles = [n / float(N) * 2 * np.pi for n in range(N)]
+            angles += angles[:1]  # Close the loop
+            
+            # Create plot
+            fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
+            
+            # Add each model's data
+            for i, model in enumerate(top_model_names):
+                values = [metrics_to_plot[cat][i] for cat in categories]
+                values += values[:1]  # Close the loop
                 
-                # Add each metric
-                metric_values["Bluff Success"].append(metrics_data[model]["bluff_success_rate"])
-                metric_values["Lie Detection"].append(metrics_data[model]["lie_detection"]["f1_score"])
-                metric_values["Bid Optimality"].append(metrics_data[model]["bid_optimality"])
-                metric_values["Adaptation"].append(metrics_data[model]["adaptation_score"])
-                metric_values["Rule Adherence"].append(metrics_data[model]["rule_adherence_rate"])
-        
-        # Plot correlation for each metric with win rate
-        for metric, values in metric_values.items():
-            plt.figure(figsize=(8, 6))
-            plt.scatter(values, win_rates)
+                # Plot data and fill area
+                ax.plot(angles, values, linewidth=1, label=model.split('/')[-1] if '/' in model else model)
+                ax.fill(angles, values, alpha=0.1)
             
-            # Add trend line
-            z = np.polyfit(values, win_rates, 1)
-            p = np.poly1d(z)
-            plt.plot(values, p(values), "r--", alpha=0.8)
+            # Set category labels
+            plt.xticks(angles[:-1], categories)
             
-            plt.title(f'Correlation: {metric} vs Win Rate')
-            plt.xlabel(f'{metric} Score (%)')
-            plt.ylabel('Win Rate (%)')
-            plt.grid(True, alpha=0.3)
+            # Add legend
+            plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+            plt.title('Advanced Metrics Comparison for Top Models')
             plt.tight_layout()
-            plt.savefig(f"{vis_dir}/correlation_{metric.lower().replace(' ', '_')}.png")
+            plt.savefig(f"{vis_dir}/radar_metrics.png")
             plt.close()
         
-        print(f"Visualizations saved to {vis_dir}/")
-    
-    def run_tournament(self, resume_from=None):
-        """Run a tournament of multiple games with optimized parallelism"""
-        completed_games = 0
-        
-        if resume_from:
-            completed_games = self.load_tournament_state(resume_from)
-            print(f"Resuming tournament with {completed_games} completed games")
-        else:
-            if not self.setup_batch():
-                return
-        
-        print("\nStarting tournament...")
-
-        # Calculate remaining games
-        remaining_games = self.total_games - completed_games
-        total = self.total_games
-        
-        try:
-            # Check execution mode
-            if self.use_async:
-                # Import httpx if not already imported
-                try:
-                    import httpx
-                    print(f"Using asynchronous execution with httpx")
+        # Generate enhanced visualizations using the MetricsVisualizer
+        if create_visualizations:
+            print(f"\nGenerating enhanced visualizations in {visualization_dir}...")
+            
+            # Create a GameMetrics instance from our tournament data
+            metrics = GameMetrics()
+            
+            # Initialize metrics with ELO ratings from our game data
+            for model in self.leaderboard:
+                metrics.initialize_model(model)
+            
+            # Load model metrics from game results
+            for game in self.game_results:
+                game_obj = game.get("game_obj")
+                if game_obj:
+                    # Get metrics from this game
+                    game_metrics = game_obj.get_metrics()
                     
-                    # Run all games with asyncio
-                    game_nums = list(range(completed_games + 1, self.total_games + 1))
-                    results = self.run_games_with_asyncio(game_nums)
-                    
-                    # Verify all games were processed
-                    if len(results) != len(game_nums):
-                        print(f"Warning: Expected {len(game_nums)} results but got {len(results)}")
-                    
-                except ImportError:
-                    print("httpx package not installed. Falling back to threaded execution.")
-                    self.use_async = False
-                    
-                    # Run with thread pool executor with completion tracking
-                    completed_count = 0
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
-                        future_to_game = {
-                            executor.submit(self.run_single_game, game_num): game_num 
-                            for game_num in range(completed_games + 1, self.total_games + 1)
-                        }
+                    # Transfer metrics to our combined metrics object
+                    if game_metrics:
+                        # If there were only 2 players, record the match result for ELO
+                        if len(game["players"]) == 2:
+                            p1_model = game["players"][0]["model"]
+                            p2_model = game["players"][1]["model"]
+                            winner_model = game.get("winner_model")
+                            
+                            if winner_model and (winner_model == p1_model or winner_model == p2_model):
+                                loser_model = p2_model if winner_model == p1_model else p1_model
+                                metrics.update_elo(winner_model, loser_model)
                         
-                        # Process all futures to ensure completion
-                        for future in concurrent.futures.as_completed(future_to_game):
-                            game_num = future_to_game[future]
-                            self._process_completed_game(future, game_num, total)
-                            completed_count += 1
+                        # Transfer other metrics
+                        for model, model_metrics in game_metrics.items():
+                            # Transfer all the game-specific metrics
+                            if "bluff_success_rate" in model_metrics:
+                                bluff_rate = model_metrics["bluff_success_rate"]
+                                if isinstance(bluff_rate, dict):
+                                    success = bluff_rate.get("successful", 0)
+                                    total = bluff_rate.get("total", 0)
+                                    if total > 0:
+                                        metrics.bluff_data[model]["successful"] += success
+                                        metrics.bluff_data[model]["total"] += total
+                                
+                            if "lie_detection" in model_metrics:
+                                lie_det = model_metrics["lie_detection"]
+                                if isinstance(lie_det, dict):
+                                    tp = lie_det.get("true_positives", 0)
+                                    fp = lie_det.get("false_positives", 0)
+                                    fn = lie_det.get("false_negatives", 0)
+                                    
+                                    metrics.lie_detection_data[model]["true_positive"] += tp
+                                    metrics.lie_detection_data[model]["false_positive"] += fp
+                                    metrics.lie_detection_data[model]["false_negative"] += fn
+                            
+                            if "bid_optimality" in model_metrics:
+                                bid_opt = model_metrics["bid_optimality"]
+                                if isinstance(bid_opt, dict):
+                                    optimal = bid_opt.get("optimal", 0)
+                                    total = bid_opt.get("total", 0)
+                                    if total > 0:
+                                        metrics.bid_optimality[model]["optimal"] += optimal
+                                        metrics.bid_optimality[model]["total"] += total
+                                        
+                            if "adaptation_score" in model_metrics:
+                                adapt = model_metrics["adaptation_score"]
+                                if isinstance(adapt, dict):
+                                    adapted = adapt.get("adapted", 0)
+                                    opportunities = adapt.get("opportunities", 0)
+                                    if opportunities > 0:
+                                        metrics.adaptation_scores[model]["adapted"] += adapted
+                                        metrics.adaptation_scores[model]["opportunities"] += opportunities
+                                        
+                            if "rule_adherence_rate" in model_metrics:
+                                adhere = model_metrics["rule_adherence_rate"]
+                                if isinstance(adhere, dict):
+                                    valid = adhere.get("valid_actions", 0)
+                                    total = adhere.get("total_actions", 0)
+                                    if total > 0:
+                                        metrics.rule_adherence[model]["valid_actions"] += valid
+                                        metrics.rule_adherence[model]["total_actions"] += total
+                                        
+                            if "avg_api_response_time" in model_metrics:
+                                time_val = model_metrics["avg_api_response_time"]
+                                if isinstance(time_val, (int, float)):
+                                    metrics.api_response_times[model].append(time_val)
+                                elif isinstance(time_val, dict):
+                                    avg_time = time_val.get("average", 0)
+                                    if avg_time > 0:
+                                        metrics.api_response_times[model].append(avg_time)
                         
-                        print(f"Processed {completed_count} out of {len(future_to_game)} games")
-            else:
-                # Create a pool of workers with explicit completion tracking
-                completed_count = 0
-                with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
-                    # Submit all remaining games at once
-                    future_to_game = {
-                        executor.submit(self.run_single_game, game_num): game_num 
-                        for game_num in range(completed_games + 1, self.total_games + 1)
-                    }
-                    
-                    # Process all futures to ensure completion
-                    for future in concurrent.futures.as_completed(future_to_game):
-                        game_num = future_to_game[future]
-                        self._process_completed_game(future, game_num, total)
-                        completed_count += 1
-                    
-                    print(f"Processed {completed_count} out of {len(future_to_game)} games")
-        
-        except KeyboardInterrupt:
-            # Handle manual interruption 
-            print("\n\nTournament interrupted! Saving current state...")
-            save_path = self.save_tournament_state()
-            print(f"Tournament state saved to {save_path}")
-            print("You can resume this tournament later by running:")
-            print(f"python main.py --resume-tournament {save_path}")
-            return
+            # Generate comprehensive visualizations
+            generated_files = metrics.create_visualizations(output_dir=visualization_dir, prefix=base_filename)
             
-        finally:
-            # Verify the final number of completed games
-            actual_completed = len(self.game_results)
-            print(f"\nTournament finished with {actual_completed} completed games out of {total} total")
-            
-            if actual_completed < total:
-                print(f"Warning: {total - actual_completed} games did not complete")
-            
-            # Final update and save
-            print("\nTournament complete!")
-            self.update_leaderboard() 
-            self.display_leaderboard()
-            self.save_results()
-            
-            # Clean up any autosaves since we have completed successfully
-            try:
-                for f in os.listdir('.'):
-                    if f.startswith('tournament_autosave_') and f.endswith('.json'):
-                        os.remove(f)
-                        print(f"Cleaned up autosave file: {f}")
-            except Exception as e:
-                print(f"Error cleaning up autosave files: {e}")
-    
-    def _process_completed_game(self, future, game_num, total):
-        """Process a completed game future"""
-        try:
-            winner_model = future.result()
-            completed_games = len(self.game_results)
-            
-            # Show progress
-            progress_pct = (completed_games / total) * 100
-            print(f"Game {game_num} completed. Progress: {completed_games}/{total} games ({progress_pct:.1f}%)")
-            
-            # Always update the leaderboard periodically to show progress
-            if completed_games % max(50, total // 5) == 0:  # Every 20% or every 50 games, whichever is more
-                self.update_leaderboard()
-                self.display_leaderboard()
+            # Add a note to the text report about visualizations
+            with open(txt_filename, 'a') as f:
+                f.write("\n\nENHANCED VISUALIZATIONS\n")
+                f.write("=" * 80 + "\n")
+                f.write(f"Enhanced visualizations have been generated in {visualization_dir}/\n\n")
                 
-                # Only save state if autosaves are enabled
-                if self.enable_autosaves and completed_games > 0 and completed_games < total:
-                    print(f"Initiating autosave at {completed_games}/{total} games...")
-                    # Save in background thread to avoid blocking
-                    threading.Thread(target=self.save_tournament_state).start()
+                if generated_files:
+                    f.write("Generated visualization files:\n")
+                    for key, filepath in generated_files.items():
+                        filename = os.path.basename(filepath)
+                        f.write(f"- {key}: {filename}\n")
+            
+            print(f"Enhanced visualizations saved to {visualization_dir}/")
         
-        except Exception as e:
-            print(f"Error in game {game_num}: {e}")
+        print(f"\nTournament results have been saved to {txt_filename} and {csv_filename}")
+        return base_filename

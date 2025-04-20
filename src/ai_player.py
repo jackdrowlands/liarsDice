@@ -50,7 +50,7 @@ class AIPlayer(Player):
         system_prompt = f"""**You are Player {player_id}** in an n-player game of Liar's Dice. The goal is to win by being the last player with dice remaining.
 
 ### Game Rules
-1. Each player begins with 5 standard six-sided dice (1–6). Dice are private and rerolled at the start of each round.
+1. Each player begins with 5 standard six-sided dice (1-6). Dice are private and rerolled at the start of each round.
 2. On your turn, you may **make a higher bid** or **call** the previous bid:
    - A bid is a claim like "four 3s" (quantity and face value).
    - Each new bid must either increase the quantity or keep the quantity the same and increase the face.
@@ -65,7 +65,7 @@ class AIPlayer(Player):
 You MUST respond with ONLY a single JSON object with these keys, in this exact order:
 1. **"reasoning"**: A brief explanation (max ~100 tokens) of your current thought process.
 2. **"action"**: Either "bid" or "call".
-3. **"quantity"**: An integer ≥ 0. If calling, set to 0.
+3. **"quantity"**: An integer >= 0. If calling, set to 0.
 4. **"face"**: An integer from 1 to 6. Ignored if calling.
 5. **"utterance"**: Up to 50 tokens of what you'd say in-character (e.g., bluff, trash talk, etc.)
 

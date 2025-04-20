@@ -1,0 +1,457 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-20 14:58:15
+Total Games: 1
+Models per Game: 6
+
+Providers Used: google, mistralai, deepseek, mistral, cohere, meta-llama, openai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     google/gemini-2.5-flash-p...  James               1073.0    100.0%          1         1         
+2     mistralai/ministral-3b        Parker Quinn        N/A       0.0%          0         0         
+3     cohere/command-r7b-12-2024    Ashley              984.0     0.0%          0         1         
+4     google/gemini-flash-1.5-8b    Nico Riley          N/A       0.0%          0         0         
+5     google/gemini-2.0-flash-l...  Sidney Shaw         N/A       0.0%          0         0         
+6     google/gemini-flash-1.5       Rachel              984.7     0.0%          0         1         
+7     mistral/ministral-8b          John                986.7     0.0%          0         1         
+8     mistralai/ministral-8b        Taylor Wright       N/A       0.0%          0         0         
+9     meta-llama/llama-3.1-8b-i...  Ellis Jordan        N/A       0.0%          0         0         
+10    meta-llama/llama-3.3-70b-...  Ellis Jordan        N/A       0.0%          0         0         
+11    mistralai/mistral-small-3...  Ellis Jordan        N/A       0.0%          0         0         
+12    mistralai/mistral-small-2...  Harper Lee          N/A       0.0%          0         0         
+13    google/gemini-2.0-flash-001   Devon Parker        N/A       0.0%          0         0         
+14    deepseek/deepseek-r1-dist...  Taylor Wright       N/A       0.0%          0         0         
+15    mistralai/pixtral-12b         Indigo Carter       N/A       0.0%          0         0         
+16    mistralai/mistral-nemo        Nico Riley          N/A       0.0%          0         0         
+17    meta-llama/llama-4-scout      Devon Parker        N/A       0.0%          0         0         
+18    cohere/command-r-08-2024      Kennedy Ross        N/A       0.0%          0         0         
+19    openai/gpt-4o-mini            Reese Johnson       N/A       0.0%          0         0         
+20    openai/gpt-4o-mini-2024-0...  Sidney Shaw         N/A       0.0%          0         0         
+21    mistralai/mistral-saba        Kennedy Ross        N/A       0.0%          0         0         
+22    mistralai/mistral-small       Logan Bailey        N/A       0.0%          0         0         
+23    mistralai/mistral-tiny        David               986.1     0.0%          0         1         
+24    meta-llama/llama-4-maverick   Gray Wilson         N/A       0.0%          0         0         
+25    mistralai/codestral-2501      Gray Wilson         985.4     0.0%          0         1         
+26    google/gemini-2.5-flash-p...  Blake Taylor        N/A       0.0%          0         0         
+27    cohere/command-r              Alex Morgan         N/A       0.0%          0         0         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. google/gemini-2.5-flash-preview (as 'James')
+   Provider: google
+   Win Rate: 100.0%
+   Games Won: 1 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 1073.0
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 80.0%
+   Lie Detection (Recall): 100.0%
+   Lie Detection (F1): 88.9%
+   Average Final Bid: 4.00
+   Bid Optimality: 70.4%
+   Adaptation Score: 100.0%
+   Rule Adherence Rate: 79.4%
+   Avg API Response Time: 2.33 seconds
+   Token Usage:
+     - Total Tokens: 121507.0
+     - Prompt Tokens: 118259.0
+     - Completion Tokens: 3248.0
+     - Avg Tokens Per Action: 3573.7
+   Liar Call Success Rate: 80.0%
+   Liar Calls: 12 successful, 3 unsuccessful
+   Playing Style: 12 bids, 15 liar calls (55.6% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+2. mistralai/ministral-3b (as 'Parker Quinn')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+3. cohere/command-r7b-12-2024 (as 'Ashley')
+   Provider: cohere
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 984.0
+   Bluff Success Rate: 16.7%
+   Lie Detection (Precision): 100.0%
+   Lie Detection (Recall): 30.0%
+   Lie Detection (F1): 46.2%
+   Average Final Bid: 2.83
+   Bid Optimality: 46.7%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 51.7%
+   Avg API Response Time: 1.70 seconds
+   Token Usage:
+     - Total Tokens: 71335.0
+     - Prompt Tokens: 69002.0
+     - Completion Tokens: 2333.0
+     - Avg Tokens Per Action: 3242.5
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 3 successful, 0 unsuccessful
+   Playing Style: 19 bids, 3 liar calls (13.6% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+4. google/gemini-flash-1.5-8b (as 'Nico Riley')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+5. google/gemini-2.0-flash-lite-001 (as 'Sidney Shaw')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+6. google/gemini-flash-1.5 (as 'Rachel')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 984.7
+   Bluff Success Rate: 42.9%
+   Lie Detection (Precision): 50.0%
+   Lie Detection (Recall): 12.5%
+   Lie Detection (F1): 20.0%
+   Average Final Bid: 2.50
+   Bid Optimality: 92.9%
+   Adaptation Score: 100.0%
+   Rule Adherence Rate: 58.3%
+   Avg API Response Time: 2.19 seconds
+   Token Usage:
+     - Total Tokens: 56893.0
+     - Prompt Tokens: 55367.0
+     - Completion Tokens: 1526.0
+     - Avg Tokens Per Action: 2994.4
+   Liar Call Success Rate: 50.0%
+   Liar Calls: 1 successful, 1 unsuccessful
+   Playing Style: 17 bids, 2 liar calls (10.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+7. mistral/ministral-8b (as 'John')
+   Provider: mistral
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 986.7
+   Bluff Success Rate: 28.6%
+   Lie Detection (Precision): 100.0%
+   Lie Detection (Recall): 12.5%
+   Lie Detection (F1): 22.2%
+   Average Final Bid: 4.43
+   Bid Optimality: 87.5%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 44.4%
+   Avg API Response Time: 1.72 seconds
+   Token Usage:
+     - Total Tokens: 31018.0
+     - Prompt Tokens: 29945.0
+     - Completion Tokens: 1073.0
+     - Avg Tokens Per Action: 2386.0
+   Liar Call Success Rate: 100.0%
+   Liar Calls: 1 successful, 0 unsuccessful
+   Playing Style: 12 bids, 1 liar calls (7.7% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+8. mistralai/ministral-8b (as 'Taylor Wright')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+9. meta-llama/llama-3.1-8b-instruct (as 'Ellis Jordan')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+10. meta-llama/llama-3.3-70b-instruct (as 'Ellis Jordan')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+11. mistralai/mistral-small-3.1-24b-instruct (as 'Ellis Jordan')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+12. mistralai/mistral-small-24b-instruct-2501 (as 'Harper Lee')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+13. google/gemini-2.0-flash-001 (as 'Devon Parker')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+14. deepseek/deepseek-r1-distill-llama-70b (as 'Taylor Wright')
+   Provider: deepseek
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+15. mistralai/pixtral-12b (as 'Indigo Carter')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+16. mistralai/mistral-nemo (as 'Nico Riley')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+17. meta-llama/llama-4-scout (as 'Devon Parker')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+18. cohere/command-r-08-2024 (as 'Kennedy Ross')
+   Provider: cohere
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+19. openai/gpt-4o-mini (as 'Reese Johnson')
+   Provider: openai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+20. openai/gpt-4o-mini-2024-07-18 (as 'Sidney Shaw')
+   Provider: openai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+21. mistralai/mistral-saba (as 'Kennedy Ross')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+22. mistralai/mistral-small (as 'Logan Bailey')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+23. mistralai/mistral-tiny (as 'David')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 986.1
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 0.00
+   Bid Optimality: 16.7%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 60.0%
+   Avg API Response Time: 1.85 seconds
+   Token Usage:
+     - Total Tokens: 15614.0
+     - Prompt Tokens: 14452.0
+     - Completion Tokens: 1162.0
+     - Avg Tokens Per Action: 1561.4
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 5 unsuccessful
+   Playing Style: 1 bids, 5 liar calls (83.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+24. meta-llama/llama-4-maverick (as 'Gray Wilson')
+   Provider: meta-llama
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+25. mistralai/codestral-2501 (as 'Gray Wilson')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 29.0
+   Elo Rating: 985.4
+   Bluff Success Rate: 60.0%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 3.60
+   Bid Optimality: 42.9%
+   Adaptation Score: 100.0%
+   Rule Adherence Rate: 87.5%
+   Avg API Response Time: 1.35 seconds
+   Token Usage:
+     - Total Tokens: 34375.0
+     - Prompt Tokens: 33049.0
+     - Completion Tokens: 1326.0
+     - Avg Tokens Per Action: 2148.4
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 3 unsuccessful
+   Playing Style: 11 bids, 3 liar calls (21.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+26. google/gemini-2.5-flash-preview:thinking (as 'Blake Taylor')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+27. cohere/command-r (as 'Alex Morgan')
+   Provider: cohere
+   Win Rate: 0.0%
+   Games Won: 0 / 0
+   Avg. Rounds per Game: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 0 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 1:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Ashley (cohere/command-r7b-12-2024)
+    - Rachel (google/gemini-flash-1.5)
+    - James-4 (mistralai/codestral-2501)
+    - David (mistralai/mistral-tiny)
+    - John (mistral/ministral-8b)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 29
+  Total Moves: 101
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: google/gemini-2.5-flash-preview
+Most Cautious Model: mistral/ministral-8b
+Most Accurate Liar Detector: cohere/command-r7b-12-2024 (100.0% success rate)
+Model with Shortest Games: cohere/command-r7b-12-2024 (29.0 rounds avg)
+Model with Longest Games: cohere/command-r7b-12-2024 (29.0 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: mistralai/codestral-2501 (60.0% success rate)
+Best Lie Detector: google/gemini-2.5-flash-preview (F1 score: 88.9%)
+Most Optimal Bidder: google/gemini-flash-1.5 (92.9% optimal bids)
+Most Adaptive Player: google/gemini-2.5-flash-preview (100.0% adaptation score)
+Most Rule Adherent: mistralai/codestral-2501 (87.5% adherence rate)
+
+PROVIDER COMPARISON
+================================================================================
+Provider       Win Rate       Avg Elo        Wins      Games     
+-----------------------------------------------------------------
+google         50.0%          1028.9     1         2         
+mistralai      0.0%          985.8     0         2         
+deepseek       0.0%          0.0     0         0         
+mistral        0.0%          986.7     0         1         
+cohere         0.0%          984.0     0         1         
+meta-llama     0.0%          0.0     0         0         
+openai         0.0%          0.0     0         0         
+
+Provider Advanced Metrics Comparison:
+----------------------------------------------------------------------------------------------------
+Provider       Bluff Success  Lie Detection  Bid Optimality Adaptation     Rule Adherence 
+----------------------------------------------------------------------------------------------------
+google         21.4%          54.4%          81.6%          100.0%          68.9%
+mistralai      30.0%          0.0%          29.8%          50.0%          73.8%
+deepseek       0.0%          0.0%          0.0%          0.0%          0.0%
+mistral        28.6%          22.2%          87.5%          0.0%          44.4%
+cohere         16.7%          46.2%          46.7%          0.0%          51.7%
+meta-llama     0.0%          0.0%          0.0%          0.0%          0.0%
+openai         0.0%          0.0%          0.0%          0.0%          0.0%

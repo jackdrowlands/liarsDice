@@ -25,6 +25,7 @@ The codebase has been organized into the following modules:
 - Detailed statistics and performance metrics
 - Auto-play mode for AI-only games
 - **NEW**: Asynchronous game execution for improved performance
+- **NEW**: Individual game saving with complete move history and LLM reasoning
 
 ## Dependencies
 
@@ -56,6 +57,19 @@ The tournament mode allows you to:
 - Generate detailed reports on win rates and playing styles
 - Compare models across providers (OpenAI, Anthropic, Google, etc.)
 - Enable asynchronous execution for better performance
+- Save complete game data including all moves, reasoning, and model responses
+
+### Game Data Collection
+
+When enabled, the system will save detailed data for each individual game:
+- Complete move history with timestamps
+- Player reasoning for each move
+- Player utterances during the game
+- Model responses and prompts
+- Any invalid responses or errors that occurred
+- Complete metrics for model performance
+
+Games are saved in the `games/` directory with filenames like `game_1_20250420_132217.json`.
 
 ### Game Runner Modes
 

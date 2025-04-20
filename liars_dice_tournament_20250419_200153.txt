@@ -1,0 +1,2344 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-19 20:01:53
+Total Games: 1000
+Models per Game: 6
+
+Providers Used: mistral, mistralai, google, cohere, openai, meta-llama, deepseek
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     google/gemini-2.5-flash-p...  James               984.0     8.3%          17        204       
+2     meta-llama/llama-4-maverick   Kevin               986.1     5.3%          11        208       
+3     openai/gpt-4o-mini-2024-0...  Daniel              1073.0    5.1%          11        216       
+4     google/gemini-2.5-flash-p...  James               985.4     4.2%          9         214       
+5     openai/gpt-4o-mini            David               1073.0    4.2%          8         192       
+6     meta-llama/llama-3.3-70b-...  Daniel              986.1     3.9%          9         232       
+7     deepseek/deepseek-r1-dist...  James               984.0     2.7%          6         220       
+8     mistralai/mistral-small-2...  Daniel              985.4     2.6%          6         232       
+9     mistralai/mistral-tiny        Matthew             986.7     2.3%          5         215       
+10    google/gemini-2.0-flash-l...  John                986.7     2.2%          5         224       
+11    mistralai/mistral-saba        Rachel              985.4     1.8%          4         221       
+12    cohere/command-r              Michael             984.7     1.7%          4         235       
+13    mistralai/ministral-3b        Amanda              984.7     1.6%          4         250       
+14    meta-llama/llama-4-scout      Matthew             985.4     1.6%          4         252       
+15    mistralai/ministral-8b        Emily               986.7     1.5%          3         203       
+16    mistralai/pixtral-12b         Thomas              986.1     1.4%          3         207       
+17    cohere/command-r-08-2024      Matthew             1073.0    1.4%          3         210       
+18    mistralai/mistral-small       Daniel              986.7     1.3%          3         224       
+19    google/gemini-flash-1.5-8b    Jennifer            1073.0    1.3%          3         234       
+20    cohere/command-r7b-12-2024    James               986.7     1.3%          3         235       
+21    meta-llama/llama-3.1-8b-i...  Thomas              985.4     1.0%          2         206       
+22    mistral/ministral-8b          Ashley              984.0     1.0%          2         210       
+23    mistralai/codestral-2501      Sarah               984.0     0.9%          2         226       
+24    mistralai/mistral-small-3...  Daniel              984.7     0.9%          2         235       
+25    google/gemini-2.0-flash-001   Nicole              986.1     0.8%          2         248       
+26    google/gemini-flash-1.5       Kevin               1073.0    0.5%          1         215       
+27    mistralai/mistral-nemo        Michael             986.1     0.0%          0         232       
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. google/gemini-2.5-flash-preview:thinking (as 'James')
+   Provider: google
+   Win Rate: 8.3%
+   Games Won: 17 / 204
+   Avg. Rounds per Game: 2.8
+   Elo Rating: 1073.0
+   Bluff Success Rate: 6.6%
+   Lie Detection (Precision): 7.9%
+   Lie Detection (Recall): 9.3%
+   Lie Detection (F1): 8.4%
+   Average Final Bid: 0.30
+   Bid Optimality: 8.9%
+   Adaptation Score: 3.9%
+   Rule Adherence Rate: 6.7%
+   Avg API Response Time: 4.31 seconds
+   Token Usage:
+     - Total Tokens: 11331.098039215687
+     - Prompt Tokens: 8861.529411764706
+     - Completion Tokens: 2469.5686274509803
+     - Avg Tokens Per Action: 468.8
+   Liar Call Success Rate: 76.1%
+   Liar Calls: 124 successful, 39 unsuccessful
+   Playing Style: 400 bids, 163 liar calls (29.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 17 long
+
+2. meta-llama/llama-4-maverick (as 'Kevin')
+   Provider: meta-llama
+   Win Rate: 5.3%
+   Games Won: 11 / 208
+   Avg. Rounds per Game: 4.4
+   Elo Rating: 986.7
+   Bluff Success Rate: 5.1%
+   Lie Detection (Precision): 8.7%
+   Lie Detection (Recall): 6.4%
+   Lie Detection (F1): 6.8%
+   Average Final Bid: 0.64
+   Bid Optimality: 8.2%
+   Adaptation Score: 6.7%
+   Rule Adherence Rate: 10.6%
+   Avg API Response Time: 3.77 seconds
+   Token Usage:
+     - Total Tokens: 13693.322115384615
+     - Prompt Tokens: 13241.0
+     - Completion Tokens: 452.32211538461536
+     - Avg Tokens Per Action: 581.3
+   Liar Call Success Rate: 76.7%
+   Liar Calls: 69 successful, 21 unsuccessful
+   Playing Style: 826 bids, 90 liar calls (9.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 11 long
+
+3. openai/gpt-4o-mini-2024-07-18 (as 'Daniel')
+   Provider: openai
+   Win Rate: 5.1%
+   Games Won: 11 / 216
+   Avg. Rounds per Game: 3.2
+   Elo Rating: 985.4
+   Bluff Success Rate: 4.6%
+   Lie Detection (Precision): 6.5%
+   Lie Detection (Recall): 6.8%
+   Lie Detection (F1): 6.2%
+   Average Final Bid: 0.44
+   Bid Optimality: 7.0%
+   Adaptation Score: 5.6%
+   Rule Adherence Rate: 5.9%
+   Avg API Response Time: 3.03 seconds
+   Token Usage:
+     - Total Tokens: 12830.527777777777
+     - Prompt Tokens: 12570.388888888889
+     - Completion Tokens: 260.1388888888889
+     - Avg Tokens Per Action: 428.0
+   Liar Call Success Rate: 68.0%
+   Liar Calls: 100 successful, 47 unsuccessful
+   Playing Style: 622 bids, 147 liar calls (19.1% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 11 long
+
+4. google/gemini-2.5-flash-preview (as 'James')
+   Provider: google
+   Win Rate: 4.2%
+   Games Won: 9 / 214
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 986.1
+   Bluff Success Rate: 6.2%
+   Lie Detection (Precision): 9.6%
+   Lie Detection (Recall): 8.6%
+   Lie Detection (F1): 8.7%
+   Average Final Bid: 0.40
+   Bid Optimality: 8.9%
+   Adaptation Score: 4.2%
+   Rule Adherence Rate: 10.4%
+   Avg API Response Time: 4.27 seconds
+   Token Usage:
+     - Total Tokens: 12983.532710280373
+     - Prompt Tokens: 12667.663551401869
+     - Completion Tokens: 315.86915887850466
+     - Avg Tokens Per Action: 508.7
+   Liar Call Success Rate: 75.2%
+   Liar Calls: 176 successful, 58 unsuccessful
+   Playing Style: 644 bids, 234 liar calls (26.7% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 9 long
+
+5. openai/gpt-4o-mini (as 'David')
+   Provider: openai
+   Win Rate: 4.2%
+   Games Won: 8 / 192
+   Avg. Rounds per Game: 3.3
+   Elo Rating: 984.0
+   Bluff Success Rate: 4.4%
+   Lie Detection (Precision): 6.1%
+   Lie Detection (Recall): 6.7%
+   Lie Detection (F1): 6.0%
+   Average Final Bid: 0.28
+   Bid Optimality: 8.2%
+   Adaptation Score: 6.2%
+   Rule Adherence Rate: 5.9%
+   Avg API Response Time: 3.67 seconds
+   Token Usage:
+     - Total Tokens: 11475.552083333334
+     - Prompt Tokens: 11243.734375
+     - Completion Tokens: 231.81770833333334
+     - Avg Tokens Per Action: 425.4
+   Liar Call Success Rate: 60.9%
+   Liar Calls: 95 successful, 61 unsuccessful
+   Playing Style: 500 bids, 156 liar calls (23.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 8 long
+
+6. meta-llama/llama-3.3-70b-instruct (as 'Daniel')
+   Provider: meta-llama
+   Win Rate: 3.9%
+   Games Won: 9 / 232
+   Avg. Rounds per Game: 4.0
+   Elo Rating: 984.7
+   Bluff Success Rate: 4.8%
+   Lie Detection (Precision): 7.8%
+   Lie Detection (Recall): 7.3%
+   Lie Detection (F1): 7.2%
+   Average Final Bid: 0.39
+   Bid Optimality: 8.8%
+   Adaptation Score: 5.6%
+   Rule Adherence Rate: 7.9%
+   Avg API Response Time: 6.27 seconds
+   Token Usage:
+     - Total Tokens: 8905.870689655172
+     - Prompt Tokens: 8657.426724137931
+     - Completion Tokens: 248.44396551724137
+     - Avg Tokens Per Action: 408.8
+   Liar Call Success Rate: 62.3%
+   Liar Calls: 167 successful, 101 unsuccessful
+   Playing Style: 531 bids, 268 liar calls (33.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 9 long
+
+7. deepseek/deepseek-r1-distill-llama-70b (as 'James')
+   Provider: deepseek
+   Win Rate: 2.7%
+   Games Won: 6 / 220
+   Avg. Rounds per Game: 4.2
+   Elo Rating: 984.7
+   Bluff Success Rate: 4.1%
+   Lie Detection (Precision): 0.0%
+   Lie Detection (Recall): 0.0%
+   Lie Detection (F1): 0.0%
+   Average Final Bid: 0.75
+   Bid Optimality: 9.9%
+   Adaptation Score: 3.2%
+   Rule Adherence Rate: 0.4%
+   Avg API Response Time: 8.76 seconds
+   Token Usage:
+     - Total Tokens: 18783.78181818182
+     - Prompt Tokens: 18783.78181818182
+     - Completion Tokens: 0.0
+     - Avg Tokens Per Action: 573.4
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 1116 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 6 long
+
+8. mistralai/mistral-small-24b-instruct-2501 (as 'Daniel')
+   Provider: mistralai
+   Win Rate: 2.6%
+   Games Won: 6 / 232
+   Avg. Rounds per Game: 3.7
+   Elo Rating: 986.1
+   Bluff Success Rate: 3.8%
+   Lie Detection (Precision): 6.7%
+   Lie Detection (Recall): 7.3%
+   Lie Detection (F1): 6.7%
+   Average Final Bid: 0.34
+   Bid Optimality: 7.8%
+   Adaptation Score: 5.6%
+   Rule Adherence Rate: 6.3%
+   Avg API Response Time: 3.90 seconds
+   Token Usage:
+     - Total Tokens: 9024.89224137931
+     - Prompt Tokens: 8670.163793103447
+     - Completion Tokens: 354.7284482758621
+     - Avg Tokens Per Action: 390.4
+   Liar Call Success Rate: 57.4%
+   Liar Calls: 147 successful, 109 unsuccessful
+   Playing Style: 427 bids, 256 liar calls (37.5% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 6 long
+
+9. mistralai/mistral-tiny (as 'Matthew')
+   Provider: mistralai
+   Win Rate: 2.3%
+   Games Won: 5 / 215
+   Avg. Rounds per Game: 2.7
+   Elo Rating: 985.4
+   Bluff Success Rate: 2.8%
+   Lie Detection (Precision): 4.9%
+   Lie Detection (Recall): 4.5%
+   Lie Detection (F1): 4.5%
+   Average Final Bid: 0.34
+   Bid Optimality: 4.7%
+   Adaptation Score: 2.8%
+   Rule Adherence Rate: 3.9%
+   Avg API Response Time: 2.85 seconds
+   Token Usage:
+     - Total Tokens: 11001.460465116279
+     - Prompt Tokens: 10715.920930232558
+     - Completion Tokens: 285.53953488372093
+     - Avg Tokens Per Action: 356.5
+   Liar Call Success Rate: 62.9%
+   Liar Calls: 105 successful, 62 unsuccessful
+   Playing Style: 379 bids, 167 liar calls (30.6% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 5 long
+
+10. google/gemini-2.0-flash-lite-001 (as 'John')
+   Provider: google
+   Win Rate: 2.2%
+   Games Won: 5 / 224
+   Avg. Rounds per Game: 4.4
+   Elo Rating: 985.4
+   Bluff Success Rate: 7.0%
+   Lie Detection (Precision): 6.2%
+   Lie Detection (Recall): 6.5%
+   Lie Detection (F1): 6.0%
+   Average Final Bid: 0.26
+   Bid Optimality: 8.2%
+   Adaptation Score: 5.8%
+   Rule Adherence Rate: 9.3%
+   Avg API Response Time: 4.63 seconds
+   Token Usage:
+     - Total Tokens: 8515.88392857143
+     - Prompt Tokens: 8274.294642857143
+     - Completion Tokens: 241.58928571428572
+     - Avg Tokens Per Action: 428.1
+   Liar Call Success Rate: 48.4%
+   Liar Calls: 149 successful, 159 unsuccessful
+   Playing Style: 395 bids, 308 liar calls (43.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 5 long
+
+11. mistralai/mistral-saba (as 'Rachel')
+   Provider: mistralai
+   Win Rate: 1.8%
+   Games Won: 4 / 221
+   Avg. Rounds per Game: 4.3
+   Elo Rating: 984.7
+   Bluff Success Rate: 5.1%
+   Lie Detection (Precision): 5.7%
+   Lie Detection (Recall): 5.2%
+   Lie Detection (F1): 5.0%
+   Average Final Bid: 0.53
+   Bid Optimality: 7.8%
+   Adaptation Score: 6.3%
+   Rule Adherence Rate: 5.8%
+   Avg API Response Time: 4.70 seconds
+   Token Usage:
+     - Total Tokens: 8878.941176470587
+     - Prompt Tokens: 8647.280542986426
+     - Completion Tokens: 231.6606334841629
+     - Avg Tokens Per Action: 448.7
+   Liar Call Success Rate: 46.7%
+   Liar Calls: 91 successful, 104 unsuccessful
+   Playing Style: 555 bids, 195 liar calls (26.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 4 long
+
+12. cohere/command-r (as 'Michael')
+   Provider: cohere
+   Win Rate: 1.7%
+   Games Won: 4 / 235
+   Avg. Rounds per Game: 4.1
+   Elo Rating: 985.4
+   Bluff Success Rate: 4.2%
+   Lie Detection (Precision): 3.5%
+   Lie Detection (Recall): 2.0%
+   Lie Detection (F1): 2.1%
+   Average Final Bid: 0.61
+   Bid Optimality: 9.5%
+   Adaptation Score: 10.2%
+   Rule Adherence Rate: 3.9%
+   Avg API Response Time: 4.25 seconds
+   Token Usage:
+     - Total Tokens: 3253.5106382978724
+     - Prompt Tokens: 3130.9744680851063
+     - Completion Tokens: 122.53617021276595
+     - Avg Tokens Per Action: 351.5
+   Liar Call Success Rate: 42.9%
+   Liar Calls: 6 successful, 8 unsuccessful
+   Playing Style: 812 bids, 14 liar calls (1.7% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 4 long
+
+13. mistralai/ministral-3b (as 'Amanda')
+   Provider: mistralai
+   Win Rate: 1.6%
+   Games Won: 4 / 250
+   Avg. Rounds per Game: 3.0
+   Elo Rating: 986.7
+   Bluff Success Rate: 3.0%
+   Lie Detection (Precision): 5.5%
+   Lie Detection (Recall): 4.3%
+   Lie Detection (F1): 4.5%
+   Average Final Bid: 0.43
+   Bid Optimality: 6.3%
+   Adaptation Score: 4.0%
+   Rule Adherence Rate: 3.8%
+   Avg API Response Time: 2.83 seconds
+   Token Usage:
+     - Total Tokens: 6925.312
+     - Prompt Tokens: 6750.76
+     - Completion Tokens: 174.552
+     - Avg Tokens Per Action: 335.0
+   Liar Call Success Rate: 57.1%
+   Liar Calls: 76 successful, 57 unsuccessful
+   Playing Style: 509 bids, 133 liar calls (20.7% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 4 long
+
+14. meta-llama/llama-4-scout (as 'Matthew')
+   Provider: meta-llama
+   Win Rate: 1.6%
+   Games Won: 4 / 252
+   Avg. Rounds per Game: 3.1
+   Elo Rating: 986.7
+   Bluff Success Rate: 4.0%
+   Lie Detection (Precision): 5.5%
+   Lie Detection (Recall): 5.2%
+   Lie Detection (F1): 4.9%
+   Average Final Bid: 0.41
+   Bid Optimality: 6.1%
+   Adaptation Score: 7.1%
+   Rule Adherence Rate: 5.8%
+   Avg API Response Time: 3.03 seconds
+   Token Usage:
+     - Total Tokens: 6937.626984126984
+     - Prompt Tokens: 6728.789682539683
+     - Completion Tokens: 208.8373015873016
+     - Avg Tokens Per Action: 331.1
+   Liar Call Success Rate: 52.7%
+   Liar Calls: 89 successful, 80 unsuccessful
+   Playing Style: 507 bids, 169 liar calls (25.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 4 long
+
+15. mistralai/ministral-8b (as 'Emily')
+   Provider: mistralai
+   Win Rate: 1.5%
+   Games Won: 3 / 203
+   Avg. Rounds per Game: 4.5
+   Elo Rating: 985.4
+   Bluff Success Rate: 5.6%
+   Lie Detection (Precision): 6.7%
+   Lie Detection (Recall): 5.8%
+   Lie Detection (F1): 5.7%
+   Average Final Bid: 0.53
+   Bid Optimality: 7.0%
+   Adaptation Score: 6.4%
+   Rule Adherence Rate: 5.8%
+   Avg API Response Time: 4.85 seconds
+   Token Usage:
+     - Total Tokens: 7918.482758620689
+     - Prompt Tokens: 7689.0344827586205
+     - Completion Tokens: 229.44827586206895
+     - Avg Tokens Per Action: 436.8
+   Liar Call Success Rate: 49.7%
+   Liar Calls: 94 successful, 95 unsuccessful
+   Playing Style: 436 bids, 189 liar calls (30.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+16. mistralai/pixtral-12b (as 'Thomas')
+   Provider: mistralai
+   Win Rate: 1.4%
+   Games Won: 3 / 207
+   Avg. Rounds per Game: 3.9
+   Elo Rating: 985.4
+   Bluff Success Rate: 3.8%
+   Lie Detection (Precision): 4.6%
+   Lie Detection (Recall): 2.4%
+   Lie Detection (F1): 2.7%
+   Average Final Bid: 0.61
+   Bid Optimality: 7.9%
+   Adaptation Score: 7.2%
+   Rule Adherence Rate: 5.7%
+   Avg API Response Time: 3.74 seconds
+   Token Usage:
+     - Total Tokens: 9535.777777777777
+     - Prompt Tokens: 9318.207729468599
+     - Completion Tokens: 217.57004830917873
+     - Avg Tokens Per Action: 451.8
+   Liar Call Success Rate: 55.7%
+   Liar Calls: 44 successful, 35 unsuccessful
+   Playing Style: 627 bids, 79 liar calls (11.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+17. cohere/command-r-08-2024 (as 'Matthew')
+   Provider: cohere
+   Win Rate: 1.4%
+   Games Won: 3 / 210
+   Avg. Rounds per Game: 3.1
+   Elo Rating: 984.0
+   Bluff Success Rate: 2.7%
+   Lie Detection (Precision): 4.9%
+   Lie Detection (Recall): 3.3%
+   Lie Detection (F1): 3.3%
+   Average Final Bid: 0.44
+   Bid Optimality: 6.4%
+   Adaptation Score: 7.1%
+   Rule Adherence Rate: 3.6%
+   Avg API Response Time: 3.89 seconds
+   Token Usage:
+     - Total Tokens: 2832.2380952380954
+     - Prompt Tokens: 2723.733333333333
+     - Completion Tokens: 108.5047619047619
+     - Avg Tokens Per Action: 259.9
+   Liar Call Success Rate: 40.3%
+   Liar Calls: 25 successful, 37 unsuccessful
+   Playing Style: 550 bids, 62 liar calls (10.1% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+18. mistralai/mistral-small (as 'Daniel')
+   Provider: mistralai
+   Win Rate: 1.3%
+   Games Won: 3 / 224
+   Avg. Rounds per Game: 3.5
+   Elo Rating: 984.7
+   Bluff Success Rate: 4.3%
+   Lie Detection (Precision): 5.4%
+   Lie Detection (Recall): 3.7%
+   Lie Detection (F1): 4.0%
+   Average Final Bid: 0.51
+   Bid Optimality: 6.8%
+   Adaptation Score: 4.0%
+   Rule Adherence Rate: 5.2%
+   Avg API Response Time: 4.21 seconds
+   Token Usage:
+     - Total Tokens: 8449.183035714286
+     - Prompt Tokens: 8251.464285714286
+     - Completion Tokens: 197.71875
+     - Avg Tokens Per Action: 415.6
+   Liar Call Success Rate: 49.6%
+   Liar Calls: 66 successful, 67 unsuccessful
+   Playing Style: 500 bids, 133 liar calls (21.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+19. google/gemini-flash-1.5-8b (as 'Jennifer')
+   Provider: google
+   Win Rate: 1.3%
+   Games Won: 3 / 234
+   Avg. Rounds per Game: 3.2
+   Elo Rating: 1073.0
+   Bluff Success Rate: 2.9%
+   Lie Detection (Precision): 4.2%
+   Lie Detection (Recall): 2.0%
+   Lie Detection (F1): 2.3%
+   Average Final Bid: 0.46
+   Bid Optimality: 7.9%
+   Adaptation Score: 5.1%
+   Rule Adherence Rate: 2.2%
+   Avg API Response Time: 2.82 seconds
+   Token Usage:
+     - Total Tokens: 12714.726495726496
+     - Prompt Tokens: 12535.51282051282
+     - Completion Tokens: 179.2136752136752
+     - Avg Tokens Per Action: 449.5
+   Liar Call Success Rate: 83.9%
+   Liar Calls: 26 successful, 5 unsuccessful
+   Playing Style: 751 bids, 31 liar calls (4.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+20. cohere/command-r7b-12-2024 (as 'James')
+   Provider: cohere
+   Win Rate: 1.3%
+   Games Won: 3 / 235
+   Avg. Rounds per Game: 3.2
+   Elo Rating: 985.4
+   Bluff Success Rate: 2.4%
+   Lie Detection (Precision): 5.7%
+   Lie Detection (Recall): 3.5%
+   Lie Detection (F1): 3.6%
+   Average Final Bid: 0.48
+   Bid Optimality: 5.4%
+   Adaptation Score: 7.2%
+   Rule Adherence Rate: 4.1%
+   Avg API Response Time: 3.17 seconds
+   Token Usage:
+     - Total Tokens: 6438.527659574468
+     - Prompt Tokens: 6229.668085106383
+     - Completion Tokens: 208.8595744680851
+     - Avg Tokens Per Action: 358.7
+   Liar Call Success Rate: 53.4%
+   Liar Calls: 55 successful, 48 unsuccessful
+   Playing Style: 527 bids, 103 liar calls (16.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 3 long
+
+21. meta-llama/llama-3.1-8b-instruct (as 'Thomas')
+   Provider: meta-llama
+   Win Rate: 1.0%
+   Games Won: 2 / 206
+   Avg. Rounds per Game: 4.5
+   Elo Rating: 986.1
+   Bluff Success Rate: 4.3%
+   Lie Detection (Precision): 5.5%
+   Lie Detection (Recall): 2.1%
+   Lie Detection (F1): 2.6%
+   Average Final Bid: 0.75
+   Bid Optimality: 8.7%
+   Adaptation Score: 10.2%
+   Rule Adherence Rate: 5.3%
+   Avg API Response Time: 3.94 seconds
+   Token Usage:
+     - Total Tokens: 13619.932038834952
+     - Prompt Tokens: 13325.257281553399
+     - Completion Tokens: 294.6747572815534
+     - Avg Tokens Per Action: 564.2
+   Liar Call Success Rate: 45.5%
+   Liar Calls: 25 successful, 30 unsuccessful
+   Playing Style: 859 bids, 55 liar calls (6.0% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+22. mistral/ministral-8b (as 'Ashley')
+   Provider: mistral
+   Win Rate: 1.0%
+   Games Won: 2 / 210
+   Avg. Rounds per Game: 3.3
+   Elo Rating: 986.7
+   Bluff Success Rate: 3.3%
+   Lie Detection (Precision): 4.3%
+   Lie Detection (Recall): 3.6%
+   Lie Detection (F1): 3.5%
+   Average Final Bid: 0.41
+   Bid Optimality: 4.2%
+   Adaptation Score: 4.8%
+   Rule Adherence Rate: 4.5%
+   Avg API Response Time: 3.51 seconds
+   Token Usage:
+     - Total Tokens: 4869.252380952381
+     - Prompt Tokens: 4714.333333333333
+     - Completion Tokens: 154.91904761904763
+     - Avg Tokens Per Action: 295.2
+   Liar Call Success Rate: 38.6%
+   Liar Calls: 51 successful, 81 unsuccessful
+   Playing Style: 311 bids, 132 liar calls (29.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+23. mistralai/codestral-2501 (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 0.9%
+   Games Won: 2 / 226
+   Avg. Rounds per Game: 4.4
+   Elo Rating: 986.1
+   Bluff Success Rate: 3.2%
+   Lie Detection (Precision): 7.5%
+   Lie Detection (Recall): 4.7%
+   Lie Detection (F1): 4.8%
+   Average Final Bid: 0.76
+   Bid Optimality: 7.3%
+   Adaptation Score: 4.9%
+   Rule Adherence Rate: 9.7%
+   Avg API Response Time: 4.05 seconds
+   Token Usage:
+     - Total Tokens: 9736.756637168142
+     - Prompt Tokens: 9493.442477876106
+     - Completion Tokens: 243.31415929203538
+     - Avg Tokens Per Action: 489.9
+   Liar Call Success Rate: 53.5%
+   Liar Calls: 77 successful, 67 unsuccessful
+   Playing Style: 686 bids, 144 liar calls (17.3% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+24. mistralai/mistral-small-3.1-24b-instruct (as 'Daniel')
+   Provider: mistralai
+   Win Rate: 0.9%
+   Games Won: 2 / 235
+   Avg. Rounds per Game: 3.6
+   Elo Rating: 985.4
+   Bluff Success Rate: 5.1%
+   Lie Detection (Precision): 5.2%
+   Lie Detection (Recall): 3.7%
+   Lie Detection (F1): 4.2%
+   Average Final Bid: 0.44
+   Bid Optimality: 7.2%
+   Adaptation Score: 7.7%
+   Rule Adherence Rate: 7.0%
+   Avg API Response Time: 4.14 seconds
+   Token Usage:
+     - Total Tokens: 8282.787234042553
+     - Prompt Tokens: 8041.75744680851
+     - Completion Tokens: 241.02978723404254
+     - Avg Tokens Per Action: 400.6
+   Liar Call Success Rate: 47.7%
+   Liar Calls: 83 successful, 91 unsuccessful
+   Playing Style: 544 bids, 174 liar calls (24.2% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+25. google/gemini-2.0-flash-001 (as 'Nicole')
+   Provider: google
+   Win Rate: 0.8%
+   Games Won: 2 / 248
+   Avg. Rounds per Game: 3.4
+   Elo Rating: 986.1
+   Bluff Success Rate: 3.0%
+   Lie Detection (Precision): 6.5%
+   Lie Detection (Recall): 2.8%
+   Lie Detection (F1): 3.5%
+   Average Final Bid: 0.62
+   Bid Optimality: 5.8%
+   Adaptation Score: 4.4%
+   Rule Adherence Rate: 8.2%
+   Avg API Response Time: 3.23 seconds
+   Token Usage:
+     - Total Tokens: 6750.879032258064
+     - Prompt Tokens: 6572.866935483871
+     - Completion Tokens: 178.01209677419354
+     - Avg Tokens Per Action: 387.7
+   Liar Call Success Rate: 76.5%
+   Liar Calls: 52 successful, 16 unsuccessful
+   Playing Style: 607 bids, 68 liar calls (10.1% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 2 long
+
+26. google/gemini-flash-1.5 (as 'Kevin')
+   Provider: google
+   Win Rate: 0.5%
+   Games Won: 1 / 215
+   Avg. Rounds per Game: 3.0
+   Elo Rating: 986.7
+   Bluff Success Rate: 2.0%
+   Lie Detection (Precision): 6.0%
+   Lie Detection (Recall): 2.6%
+   Lie Detection (F1): 3.3%
+   Average Final Bid: 0.46
+   Bid Optimality: 6.8%
+   Adaptation Score: 3.7%
+   Rule Adherence Rate: 3.5%
+   Avg API Response Time: 2.41 seconds
+   Token Usage:
+     - Total Tokens: 14007.0
+     - Prompt Tokens: 13791.390697674418
+     - Completion Tokens: 215.60930232558138
+     - Avg Tokens Per Action: 430.5
+   Liar Call Success Rate: 69.7%
+   Liar Calls: 53 successful, 23 unsuccessful
+   Playing Style: 698 bids, 76 liar calls (9.8% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 1 long
+
+27. mistralai/mistral-nemo (as 'Michael')
+   Provider: mistralai
+   Win Rate: 0.0%
+   Games Won: 0 / 232
+   Avg. Rounds per Game: 4.1
+   Elo Rating: 986.1
+   Bluff Success Rate: 3.8%
+   Lie Detection (Precision): 6.2%
+   Lie Detection (Recall): 2.7%
+   Lie Detection (F1): 3.2%
+   Average Final Bid: 0.70
+   Bid Optimality: 7.1%
+   Adaptation Score: 6.5%
+   Rule Adherence Rate: 6.6%
+   Avg API Response Time: 4.27 seconds
+   Token Usage:
+     - Total Tokens: 6311.172413793103
+     - Prompt Tokens: 6139.5301724137935
+     - Completion Tokens: 171.64224137931035
+     - Avg Tokens Per Action: 409.4
+   Liar Call Success Rate: 49.4%
+   Liar Calls: 38 successful, 39 unsuccessful
+   Playing Style: 601 bids, 77 liar calls (11.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 495:
+  Players:
+    - David (openai/gpt-4o-mini)
+    - Rachel (mistralai/mistral-saba)
+    - Emily (mistralai/ministral-8b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Ashley (mistral/ministral-8b)
+  Winner: Jennifer (google/gemini-flash-1.5-8b)
+  Rounds: 26
+  Total Moves: 84
+
+Game 70:
+  Players:
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Ashley (mistral/ministral-8b)
+    - Thomas (mistralai/pixtral-12b)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - James-5 (google/gemini-2.5-flash-preview)
+    - Amanda (mistralai/ministral-3b)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 26
+  Total Moves: 100
+
+Game 209:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - David (openai/gpt-4o-mini)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Emily (mistralai/ministral-8b)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Matthew (meta-llama/llama-4-scout)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 26
+  Total Moves: 96
+
+Game 436:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - James (google/gemini-2.5-flash-preview)
+    - Ashley (mistral/ministral-8b)
+    - Matthew (mistralai/mistral-tiny)
+    - Emily (mistralai/ministral-8b)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: John (google/gemini-2.0-flash-lite-001)
+  Rounds: 29
+  Total Moves: 96
+
+Game 271:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Emily (mistralai/ministral-8b)
+    - Matthew (mistralai/mistral-tiny)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Kevin (google/gemini-flash-1.5)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 25
+  Total Moves: 105
+
+Game 93:
+  Players:
+    - Matthew (cohere/command-r-08-2024)
+    - Matthew-2 (mistralai/mistral-tiny)
+    - James (cohere/command-r7b-12-2024)
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Daniel (mistralai/mistral-small-3.1-24b-instruct)
+  Rounds: 27
+  Total Moves: 103
+
+Game 129:
+  Players:
+    - Thomas (mistralai/pixtral-12b)
+    - David (openai/gpt-4o-mini)
+    - Matthew (meta-llama/llama-4-scout)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Rachel (mistralai/mistral-saba)
+    - Ashley (mistral/ministral-8b)
+  Winner: Ashley (mistral/ministral-8b)
+  Rounds: 28
+  Total Moves: 105
+
+Game 724:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Ashley (mistral/ministral-8b)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - James-5 (google/gemini-2.5-flash-preview)
+    - John (google/gemini-2.0-flash-lite-001)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 25
+  Total Moves: 110
+
+Game 535:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Emily (mistralai/ministral-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - James-5 (google/gemini-2.5-flash-preview:thinking)
+    - Daniel-6 (openai/gpt-4o-mini-2024-07-18)
+  Winner: James-5 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 26
+  Total Moves: 93
+
+Game 439:
+  Players:
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Emily (mistralai/ministral-8b)
+    - Michael (cohere/command-r)
+    - Sarah (mistralai/codestral-2501)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 29
+  Total Moves: 106
+
+Game 258:
+  Players:
+    - David (openai/gpt-4o-mini)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew (meta-llama/llama-4-scout)
+    - Matthew-4 (cohere/command-r-08-2024)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (mistralai/mistral-nemo)
+  Winner: Matthew-4 (cohere/command-r-08-2024)
+  Rounds: 26
+  Total Moves: 113
+
+Game 825:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew (meta-llama/llama-4-scout)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Matthew-5 (cohere/command-r-08-2024)
+    - Emily (mistralai/ministral-8b)
+  Winner: John (google/gemini-2.0-flash-lite-001)
+  Rounds: 28
+  Total Moves: 110
+
+Game 960:
+  Players:
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Daniel-2 (meta-llama/llama-3.3-70b-instruct)
+    - Sarah (mistralai/codestral-2501)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Kevin (meta-llama/llama-4-maverick)
+    - David (openai/gpt-4o-mini)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 25
+  Total Moves: 109
+
+Game 805:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Ashley (mistral/ministral-8b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Amanda (mistralai/ministral-3b)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: John (google/gemini-2.0-flash-lite-001)
+  Rounds: 27
+  Total Moves: 115
+
+Game 42:
+  Players:
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Sarah (mistralai/codestral-2501)
+    - Ashley (mistral/ministral-8b)
+    - Michael (mistralai/mistral-nemo)
+    - Matthew (mistralai/mistral-tiny)
+    - Amanda (mistralai/ministral-3b)
+  Winner: Ashley (mistral/ministral-8b)
+  Rounds: 28
+  Total Moves: 115
+
+Game 14:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (mistralai/mistral-small)
+    - Ashley (mistral/ministral-8b)
+    - Rachel (mistralai/mistral-saba)
+    - Michael-6 (cohere/command-r)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 28
+  Total Moves: 117
+
+Game 399:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (mistralai/mistral-nemo)
+    - Amanda (mistralai/ministral-3b)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: John (google/gemini-2.0-flash-lite-001)
+  Rounds: 29
+  Total Moves: 121
+
+Game 450:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - Matthew (cohere/command-r-08-2024)
+    - Sarah (mistralai/codestral-2501)
+    - David (openai/gpt-4o-mini)
+    - Emily (mistralai/ministral-8b)
+    - Michael (mistralai/mistral-nemo)
+  Winner: Emily (mistralai/ministral-8b)
+  Rounds: 28
+  Total Moves: 125
+
+Game 843:
+  Players:
+    - Matthew (meta-llama/llama-4-scout)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Daniel-3 (mistralai/mistral-small)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - James (google/gemini-2.5-flash-preview)
+    - Matthew-6 (cohere/command-r-08-2024)
+  Winner: Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 27
+  Total Moves: 119
+
+Game 115:
+  Players:
+    - Nicole (google/gemini-2.0-flash-001)
+    - Matthew (meta-llama/llama-4-scout)
+    - Sarah (mistralai/codestral-2501)
+    - Michael (mistralai/mistral-nemo)
+    - Matthew-5 (cohere/command-r-08-2024)
+    - James (google/gemini-2.5-flash-preview:thinking)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 27
+  Total Moves: 124
+
+Game 220:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - James-4 (google/gemini-2.5-flash-preview:thinking)
+    - Daniel-5 (mistralai/mistral-small-3.1-24b-instruct)
+    - Michael (mistralai/mistral-nemo)
+  Winner: James-4 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 26
+  Total Moves: 125
+
+Game 643:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Kevin (google/gemini-flash-1.5)
+    - Emily (mistralai/ministral-8b)
+    - Matthew (mistralai/mistral-tiny)
+    - Sarah (mistralai/codestral-2501)
+    - James-6 (google/gemini-2.5-flash-preview)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 28
+  Total Moves: 126
+
+Game 386:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - James (cohere/command-r7b-12-2024)
+    - James-3 (google/gemini-2.5-flash-preview:thinking)
+    - Kevin (google/gemini-flash-1.5)
+    - Rachel (mistralai/mistral-saba)
+    - John (google/gemini-2.0-flash-lite-001)
+  Winner: James-3 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 27
+  Total Moves: 122
+
+Game 96:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel-5 (meta-llama/llama-3.3-70b-instruct)
+    - Matthew (meta-llama/llama-4-scout)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 25
+  Total Moves: 120
+
+Game 344:
+  Players:
+    - Daniel (mistralai/mistral-small)
+    - Daniel-2 (meta-llama/llama-3.3-70b-instruct)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Emily (mistralai/ministral-8b)
+    - Daniel-5 (mistralai/mistral-small-24b-instruct-2501)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Daniel-2 (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 27
+  Total Moves: 117
+
+Game 121:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Rachel (mistralai/mistral-saba)
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Sarah (mistralai/codestral-2501)
+    - James-6 (cohere/command-r7b-12-2024)
+  Winner: Rachel (mistralai/mistral-saba)
+  Rounds: 27
+  Total Moves: 121
+
+Game 195:
+  Players:
+    - Nicole (google/gemini-2.0-flash-001)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Daniel (mistralai/mistral-small)
+    - Michael (cohere/command-r)
+    - Daniel-5 (mistralai/mistral-small-3.1-24b-instruct)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 27
+  Total Moves: 127
+
+Game 913:
+  Players:
+    - Matthew (mistralai/mistral-tiny)
+    - Matthew-2 (meta-llama/llama-4-scout)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Sarah (mistralai/codestral-2501)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - James-6 (google/gemini-2.5-flash-preview)
+  Winner: Sarah (mistralai/codestral-2501)
+  Rounds: 29
+  Total Moves: 122
+
+Game 261:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (mistralai/mistral-small)
+    - Matthew (meta-llama/llama-4-scout)
+    - Daniel-4 (meta-llama/llama-3.3-70b-instruct)
+    - Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+    - Emily (mistralai/ministral-8b)
+  Winner: Emily (mistralai/ministral-8b)
+  Rounds: 28
+  Total Moves: 120
+
+Game 66:
+  Players:
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - David (openai/gpt-4o-mini)
+    - Emily (mistralai/ministral-8b)
+    - Daniel-4 (meta-llama/llama-3.3-70b-instruct)
+    - Michael (cohere/command-r)
+    - Daniel-6 (mistralai/mistral-small-24b-instruct-2501)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 30
+  Total Moves: 119
+
+Game 775:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-6 (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: Emily (mistralai/ministral-8b)
+  Rounds: 29
+  Total Moves: 123
+
+Game 839:
+  Players:
+    - Michael (cohere/command-r)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-3 (meta-llama/llama-3.3-70b-instruct)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Amanda (mistralai/ministral-3b)
+    - Ashley (mistral/ministral-8b)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 25
+  Total Moves: 124
+
+Game 530:
+  Players:
+    - Thomas (mistralai/pixtral-12b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Daniel (mistralai/mistral-small)
+    - Matthew (meta-llama/llama-4-scout)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Jennifer (google/gemini-flash-1.5-8b)
+  Winner: Thomas (mistralai/pixtral-12b)
+  Rounds: 28
+  Total Moves: 127
+
+Game 162:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Daniel (mistralai/mistral-small)
+    - Matthew (cohere/command-r-08-2024)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Daniel-5 (meta-llama/llama-3.3-70b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Nicole (google/gemini-2.0-flash-001)
+  Rounds: 29
+  Total Moves: 125
+
+Game 37:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - David (openai/gpt-4o-mini)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Rachel (mistralai/mistral-saba)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 28
+  Total Moves: 135
+
+Game 841:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Amanda (mistralai/ministral-3b)
+    - Rachel (mistralai/mistral-saba)
+    - Nicole (google/gemini-2.0-flash-001)
+    - James (google/gemini-2.5-flash-preview:thinking)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 28
+  Total Moves: 127
+
+Game 310:
+  Players:
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Daniel-4 (mistralai/mistral-small-24b-instruct-2501)
+    - John (google/gemini-2.0-flash-lite-001)
+    - James (cohere/command-r7b-12-2024)
+  Winner: Daniel (mistralai/mistral-small)
+  Rounds: 28
+  Total Moves: 125
+
+Game 592:
+  Players:
+    - Kevin (meta-llama/llama-4-maverick)
+    - Michael (mistralai/mistral-nemo)
+    - David (openai/gpt-4o-mini)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Daniel-6 (mistralai/mistral-small-24b-instruct-2501)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 27
+  Total Moves: 121
+
+Game 803:
+  Players:
+    - Nicole (google/gemini-2.0-flash-001)
+    - James (google/gemini-2.5-flash-preview)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Rachel (mistralai/mistral-saba)
+    - James-5 (google/gemini-2.5-flash-preview:thinking)
+    - Daniel-6 (openai/gpt-4o-mini-2024-07-18)
+  Winner: James-5 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 29
+  Total Moves: 123
+
+Game 790:
+  Players:
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Daniel-6 (mistralai/mistral-small)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 27
+  Total Moves: 131
+
+Game 706:
+  Players:
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Thomas (mistralai/pixtral-12b)
+    - Daniel-3 (mistralai/mistral-small-3.1-24b-instruct)
+    - Kevin (google/gemini-flash-1.5)
+    - James (cohere/command-r7b-12-2024)
+    - Matthew (mistralai/mistral-tiny)
+  Winner: Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 26
+  Total Moves: 120
+
+Game 396:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Michael (cohere/command-r)
+    - Matthew (meta-llama/llama-4-scout)
+    - Emily (mistralai/ministral-8b)
+    - Michael-6 (mistralai/mistral-nemo)
+  Winner: Matthew (meta-llama/llama-4-scout)
+  Rounds: 30
+  Total Moves: 115
+
+Game 999:
+  Players:
+    - Daniel (mistralai/mistral-small)
+    - Amanda (mistralai/ministral-3b)
+    - Daniel-3 (mistralai/mistral-small-3.1-24b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Michael (cohere/command-r)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Michael (cohere/command-r)
+  Rounds: 28
+  Total Moves: 129
+
+Game 492:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Michael (mistralai/mistral-nemo)
+    - Amanda (mistralai/ministral-3b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Matthew (mistralai/mistral-tiny)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 26
+  Total Moves: 117
+
+Game 183:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - James (cohere/command-r7b-12-2024)
+    - Rachel (mistralai/mistral-saba)
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (mistralai/mistral-small)
+    - James-6 (google/gemini-2.5-flash-preview)
+  Winner: James-6 (google/gemini-2.5-flash-preview)
+  Rounds: 28
+  Total Moves: 137
+
+Game 834:
+  Players:
+    - Kevin (meta-llama/llama-4-maverick)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Matthew (mistralai/mistral-tiny)
+    - Thomas (mistralai/pixtral-12b)
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 27
+  Total Moves: 128
+
+Game 861:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Matthew (cohere/command-r-08-2024)
+    - Daniel (mistralai/mistral-small)
+    - James (google/gemini-2.5-flash-preview)
+    - Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 25
+  Total Moves: 130
+
+Game 640:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew (cohere/command-r-08-2024)
+    - Daniel-4 (meta-llama/llama-3.3-70b-instruct)
+    - Sarah (mistralai/codestral-2501)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+  Winner: Sarah (mistralai/codestral-2501)
+  Rounds: 29
+  Total Moves: 136
+
+Game 23:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Matthew (mistralai/mistral-tiny)
+    - David (openai/gpt-4o-mini)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Amanda (mistralai/ministral-3b)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Matthew (mistralai/mistral-tiny)
+  Rounds: 29
+  Total Moves: 133
+
+Game 557:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Matthew (meta-llama/llama-4-scout)
+    - Kevin (google/gemini-flash-1.5)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 28
+  Total Moves: 132
+
+Game 674:
+  Players:
+    - Matthew (mistralai/mistral-tiny)
+    - Thomas (mistralai/pixtral-12b)
+    - James (cohere/command-r7b-12-2024)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Daniel-6 (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: Thomas (mistralai/pixtral-12b)
+  Rounds: 27
+  Total Moves: 113
+
+Game 22:
+  Players:
+    - Nicole (google/gemini-2.0-flash-001)
+    - Matthew (mistralai/mistral-tiny)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Matthew-4 (meta-llama/llama-4-scout)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Rachel (mistralai/mistral-saba)
+  Rounds: 29
+  Total Moves: 129
+
+Game 682:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - James-3 (cohere/command-r7b-12-2024)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Amanda (mistralai/ministral-3b)
+  Winner: James-3 (cohere/command-r7b-12-2024)
+  Rounds: 28
+  Total Moves: 133
+
+Game 780:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - James (cohere/command-r7b-12-2024)
+    - Emily (mistralai/ministral-8b)
+    - Amanda (mistralai/ministral-3b)
+    - James-5 (google/gemini-2.5-flash-preview:thinking)
+    - Michael (mistralai/mistral-nemo)
+  Winner: James-5 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 27
+  Total Moves: 141
+
+Game 799:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Ashley (mistral/ministral-8b)
+    - Daniel-5 (mistralai/mistral-small-24b-instruct-2501)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 28
+  Total Moves: 124
+
+Game 119:
+  Players:
+    - Daniel (mistralai/mistral-small)
+    - James (cohere/command-r7b-12-2024)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Matthew (meta-llama/llama-4-scout)
+    - Ashley (mistral/ministral-8b)
+    - John (google/gemini-2.0-flash-lite-001)
+  Winner: Daniel (mistralai/mistral-small)
+  Rounds: 28
+  Total Moves: 133
+
+Game 415:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+    - John (google/gemini-2.0-flash-lite-001)
+    - James (cohere/command-r7b-12-2024)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (mistralai/mistral-nemo)
+  Winner: James (cohere/command-r7b-12-2024)
+  Rounds: 28
+  Total Moves: 130
+
+Game 49:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Emily (mistralai/ministral-8b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 29
+  Total Moves: 138
+
+Game 609:
+  Players:
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Amanda (mistralai/ministral-3b)
+    - Daniel-4 (mistralai/mistral-small)
+    - Daniel-5 (meta-llama/llama-3.3-70b-instruct)
+    - Michael (mistralai/mistral-nemo)
+  Winner: Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 29
+  Total Moves: 112
+
+Game 309:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - David (openai/gpt-4o-mini)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Daniel-4 (mistralai/mistral-small-3.1-24b-instruct)
+    - Michael (mistralai/mistral-nemo)
+    - Jennifer (google/gemini-flash-1.5-8b)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 27
+  Total Moves: 129
+
+Game 235:
+  Players:
+    - James (cohere/command-r7b-12-2024)
+    - Thomas (mistralai/pixtral-12b)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Michael (mistralai/mistral-nemo)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Kevin-6 (google/gemini-flash-1.5)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 28
+  Total Moves: 126
+
+Game 587:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Sarah (mistralai/codestral-2501)
+    - David (openai/gpt-4o-mini)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-6 (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 27
+  Total Moves: 146
+
+Game 737:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Thomas (mistralai/pixtral-12b)
+    - Sarah (mistralai/codestral-2501)
+    - Michael (mistralai/mistral-nemo)
+    - Ashley (mistral/ministral-8b)
+    - Emily (mistralai/ministral-8b)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 28
+  Total Moves: 148
+
+Game 381:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Michael (cohere/command-r)
+    - Amanda (mistralai/ministral-3b)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: John (google/gemini-2.0-flash-lite-001)
+  Rounds: 29
+  Total Moves: 133
+
+Game 618:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - James (cohere/command-r7b-12-2024)
+    - Emily (mistralai/ministral-8b)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 29
+  Total Moves: 129
+
+Game 821:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - James (cohere/command-r7b-12-2024)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Emily (mistralai/ministral-8b)
+    - Amanda (mistralai/ministral-3b)
+    - James-6 (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: James (cohere/command-r7b-12-2024)
+  Rounds: 29
+  Total Moves: 142
+
+Game 528:
+  Players:
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Rachel (mistralai/mistral-saba)
+    - Matthew (cohere/command-r-08-2024)
+    - Matthew-5 (meta-llama/llama-4-scout)
+    - Amanda (mistralai/ministral-3b)
+  Winner: Matthew-5 (meta-llama/llama-4-scout)
+  Rounds: 29
+  Total Moves: 133
+
+Game 837:
+  Players:
+    - Thomas (mistralai/pixtral-12b)
+    - Ashley (mistral/ministral-8b)
+    - Daniel (mistralai/mistral-small)
+    - Thomas-4 (meta-llama/llama-3.1-8b-instruct)
+    - Amanda (mistralai/ministral-3b)
+    - Matthew (cohere/command-r-08-2024)
+  Winner: Amanda (mistralai/ministral-3b)
+  Rounds: 29
+  Total Moves: 133
+
+Game 974:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Matthew (cohere/command-r-08-2024)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Emily (mistralai/ministral-8b)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Daniel (mistralai/mistral-small-3.1-24b-instruct)
+  Rounds: 28
+  Total Moves: 143
+
+Game 910:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - James-2 (google/gemini-2.5-flash-preview)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Kevin (google/gemini-flash-1.5)
+    - Daniel-5 (mistralai/mistral-small)
+    - James-6 (cohere/command-r7b-12-2024)
+  Winner: James (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 29
+  Total Moves: 140
+
+Game 127:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Michael (cohere/command-r)
+    - Amanda (mistralai/ministral-3b)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Jennifer (google/gemini-flash-1.5-8b)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 26
+  Total Moves: 148
+
+Game 993:
+  Players:
+    - Matthew (mistralai/mistral-tiny)
+    - James (cohere/command-r7b-12-2024)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-4 (mistralai/mistral-small)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Sarah (mistralai/codestral-2501)
+  Winner: Matthew (mistralai/mistral-tiny)
+  Rounds: 28
+  Total Moves: 133
+
+Game 454:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Amanda (mistralai/ministral-3b)
+    - James (google/gemini-2.5-flash-preview)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 27
+  Total Moves: 146
+
+Game 150:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - David (openai/gpt-4o-mini)
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Kevin (meta-llama/llama-4-maverick)
+    - James-6 (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 26
+  Total Moves: 154
+
+Game 575:
+  Players:
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Ashley (mistral/ministral-8b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Amanda (mistralai/ministral-3b)
+    - Kevin (google/gemini-flash-1.5)
+    - Emily (mistralai/ministral-8b)
+  Winner: Amanda (mistralai/ministral-3b)
+  Rounds: 29
+  Total Moves: 146
+
+Game 978:
+  Players:
+    - Michael (cohere/command-r)
+    - Rachel (mistralai/mistral-saba)
+    - Thomas (mistralai/pixtral-12b)
+    - Michael-4 (mistralai/mistral-nemo)
+    - Nicole (google/gemini-2.0-flash-001)
+    - James (google/gemini-2.5-flash-preview)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 27
+  Total Moves: 155
+
+Game 619:
+  Players:
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small)
+    - Thomas (mistralai/pixtral-12b)
+    - Daniel-4 (mistralai/mistral-small-3.1-24b-instruct)
+    - Thomas-5 (meta-llama/llama-3.1-8b-instruct)
+    - Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Winner: Thomas-5 (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 26
+  Total Moves: 146
+
+Game 540:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - James (google/gemini-2.5-flash-preview)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+    - Michael-6 (cohere/command-r)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 28
+  Total Moves: 158
+
+Game 594:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - Thomas (mistralai/pixtral-12b)
+    - Michael (cohere/command-r)
+    - Emily (mistralai/ministral-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew (mistralai/mistral-tiny)
+  Winner: Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 29
+  Total Moves: 143
+
+Game 816:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Ashley (mistral/ministral-8b)
+    - Matthew (meta-llama/llama-4-scout)
+    - James-4 (google/gemini-2.5-flash-preview:thinking)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: James-4 (google/gemini-2.5-flash-preview:thinking)
+  Rounds: 29
+  Total Moves: 137
+
+Game 991:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - James (google/gemini-2.5-flash-preview)
+    - Amanda (mistralai/ministral-3b)
+    - James-4 (cohere/command-r7b-12-2024)
+    - Sarah (mistralai/codestral-2501)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 29
+  Total Moves: 148
+
+Game 573:
+  Players:
+    - David (openai/gpt-4o-mini)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (cohere/command-r)
+    - Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Winner: Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 28
+  Total Moves: 152
+
+Game 401:
+  Players:
+    - Amanda (mistralai/ministral-3b)
+    - Matthew (cohere/command-r-08-2024)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel-5 (meta-llama/llama-3.3-70b-instruct)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Amanda (mistralai/ministral-3b)
+  Rounds: 29
+  Total Moves: 149
+
+Game 279:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Thomas-5 (mistralai/pixtral-12b)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 26
+  Total Moves: 160
+
+Game 1000:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - Kevin (google/gemini-flash-1.5)
+    - Kevin-3 (meta-llama/llama-4-maverick)
+    - James (google/gemini-2.5-flash-preview)
+    - Sarah (mistralai/codestral-2501)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 26
+  Total Moves: 166
+
+Game 959:
+  Players:
+    - Amanda (mistralai/ministral-3b)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Matthew (mistralai/mistral-tiny)
+    - David (openai/gpt-4o-mini)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 28
+  Total Moves: 138
+
+Game 339:
+  Players:
+    - Kevin (meta-llama/llama-4-maverick)
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small)
+    - John (google/gemini-2.0-flash-lite-001)
+    - David (openai/gpt-4o-mini)
+    - Amanda (mistralai/ministral-3b)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 27
+  Total Moves: 151
+
+Game 243:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Daniel (mistralai/mistral-small)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Daniel-6 (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 27
+  Total Moves: 144
+
+Game 951:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - James (cohere/command-r7b-12-2024)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Sarah (mistralai/codestral-2501)
+    - Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Daniel-5 (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 27
+  Total Moves: 158
+
+Game 106:
+  Players:
+    - Michael (cohere/command-r)
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (mistralai/mistral-small)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Matthew (meta-llama/llama-4-scout)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Rachel (mistralai/mistral-saba)
+  Rounds: 28
+  Total Moves: 158
+
+Game 35:
+  Players:
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - David (openai/gpt-4o-mini)
+    - Ashley (mistral/ministral-8b)
+    - James (google/gemini-2.5-flash-preview)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 29
+  Total Moves: 155
+
+Game 416:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - John (google/gemini-2.0-flash-lite-001)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Matthew (meta-llama/llama-4-scout)
+    - Michael-5 (cohere/command-r)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 29
+  Total Moves: 147
+
+Game 699:
+  Players:
+    - Matthew (meta-llama/llama-4-scout)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - David (openai/gpt-4o-mini)
+    - Michael (cohere/command-r)
+    - Emily (mistralai/ministral-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 25
+  Total Moves: 142
+
+Game 784:
+  Players:
+    - Thomas (mistralai/pixtral-12b)
+    - David (openai/gpt-4o-mini)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Ashley (mistral/ministral-8b)
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 28
+  Total Moves: 152
+
+Game 163:
+  Players:
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Nicole (google/gemini-2.0-flash-001)
+    - John (google/gemini-2.0-flash-lite-001)
+    - Matthew (cohere/command-r-08-2024)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Daniel-6 (mistralai/mistral-small-24b-instruct-2501)
+  Winner: Daniel-6 (mistralai/mistral-small-24b-instruct-2501)
+  Rounds: 28
+  Total Moves: 158
+
+Game 920:
+  Players:
+    - James (cohere/command-r7b-12-2024)
+    - Thomas (mistralai/pixtral-12b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Ashley (mistral/ministral-8b)
+    - Thomas-5 (meta-llama/llama-3.1-8b-instruct)
+    - Michael (mistralai/mistral-nemo)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 29
+  Total Moves: 153
+
+Game 504:
+  Players:
+    - Thomas (mistralai/pixtral-12b)
+    - Kevin (google/gemini-flash-1.5)
+    - Matthew (cohere/command-r-08-2024)
+    - Sarah (mistralai/codestral-2501)
+    - Kevin-5 (meta-llama/llama-4-maverick)
+    - Emily (mistralai/ministral-8b)
+  Winner: Thomas (mistralai/pixtral-12b)
+  Rounds: 26
+  Total Moves: 155
+
+Game 859:
+  Players:
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Thomas (mistralai/pixtral-12b)
+    - James (cohere/command-r7b-12-2024)
+    - James-4 (google/gemini-2.5-flash-preview)
+    - Sarah (mistralai/codestral-2501)
+    - Nicole (google/gemini-2.0-flash-001)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 29
+  Total Moves: 165
+
+Game 369:
+  Players:
+    - Rachel (mistralai/mistral-saba)
+    - Michael (cohere/command-r)
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Matthew (meta-llama/llama-4-scout)
+  Winner: Michael (cohere/command-r)
+  Rounds: 28
+  Total Moves: 159
+
+Game 224:
+  Players:
+    - David (openai/gpt-4o-mini)
+    - Kevin (meta-llama/llama-4-maverick)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - James-4 (google/gemini-2.5-flash-preview:thinking)
+    - Sarah (mistralai/codestral-2501)
+    - James-6 (google/gemini-2.5-flash-preview)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 29
+  Total Moves: 159
+
+Game 306:
+  Players:
+    - Michael (mistralai/mistral-nemo)
+    - Thomas (mistralai/pixtral-12b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Sarah (mistralai/codestral-2501)
+  Winner: Nicole (google/gemini-2.0-flash-001)
+  Rounds: 26
+  Total Moves: 165
+
+Game 479:
+  Players:
+    - James (cohere/command-r7b-12-2024)
+    - Sarah (mistralai/codestral-2501)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Thomas (mistralai/pixtral-12b)
+    - Michael (mistralai/mistral-nemo)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 27
+  Total Moves: 152
+
+Game 30:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Amanda (mistralai/ministral-3b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Daniel (meta-llama/llama-3.3-70b-instruct)
+  Rounds: 28
+  Total Moves: 168
+
+Game 751:
+  Players:
+    - Emily (mistralai/ministral-8b)
+    - Michael (mistralai/mistral-nemo)
+    - Michael-3 (cohere/command-r)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 28
+  Total Moves: 157
+
+Game 217:
+  Players:
+    - James (google/gemini-2.5-flash-preview)
+    - Rachel (mistralai/mistral-saba)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Michael (cohere/command-r)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 27
+  Total Moves: 166
+
+Game 292:
+  Players:
+    - Matthew (cohere/command-r-08-2024)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Matthew-4 (mistralai/mistral-tiny)
+    - Daniel-5 (meta-llama/llama-3.3-70b-instruct)
+    - Daniel-6 (mistralai/mistral-small)
+  Winner: Daniel-6 (mistralai/mistral-small)
+  Rounds: 27
+  Total Moves: 166
+
+Game 696:
+  Players:
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Rachel (mistralai/mistral-saba)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (cohere/command-r)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Winner: Rachel (mistralai/mistral-saba)
+  Rounds: 29
+  Total Moves: 165
+
+Game 586:
+  Players:
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Matthew (meta-llama/llama-4-scout)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Daniel-4 (mistralai/mistral-small-3.1-24b-instruct)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Sarah (mistralai/codestral-2501)
+  Winner: Matthew (meta-llama/llama-4-scout)
+  Rounds: 28
+  Total Moves: 168
+
+Game 856:
+  Players:
+    - Michael (cohere/command-r)
+    - Kevin (google/gemini-flash-1.5)
+    - Matthew (meta-llama/llama-4-scout)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Daniel-5 (mistralai/mistral-small)
+    - Thomas (mistralai/pixtral-12b)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 29
+  Total Moves: 175
+
+Game 918:
+  Players:
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Michael (cohere/command-r)
+    - Sarah (mistralai/codestral-2501)
+    - Emily (mistralai/ministral-8b)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Rachel (mistralai/mistral-saba)
+  Winner: Jennifer (google/gemini-flash-1.5-8b)
+  Rounds: 28
+  Total Moves: 176
+
+Game 486:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - Kevin (google/gemini-flash-1.5)
+    - Matthew (meta-llama/llama-4-scout)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Emily (mistralai/ministral-8b)
+    - David (openai/gpt-4o-mini)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 28
+  Total Moves: 193
+
+Game 493:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - Matthew (meta-llama/llama-4-scout)
+    - Michael (cohere/command-r)
+    - Matthew-4 (cohere/command-r-08-2024)
+    - James (cohere/command-r7b-12-2024)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Michael (cohere/command-r)
+  Rounds: 29
+  Total Moves: 196
+
+Game 392:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - Matthew (cohere/command-r-08-2024)
+    - Amanda (mistralai/ministral-3b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Matthew-6 (mistralai/mistral-tiny)
+  Winner: Amanda (mistralai/ministral-3b)
+  Rounds: 29
+  Total Moves: 200
+
+Game 969:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Matthew (mistralai/mistral-tiny)
+    - Daniel-3 (mistralai/mistral-small)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - James (cohere/command-r7b-12-2024)
+    - James-6 (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: Matthew (mistralai/mistral-tiny)
+  Rounds: 29
+  Total Moves: 202
+
+Game 996:
+  Players:
+    - Matthew (cohere/command-r-08-2024)
+    - Michael (cohere/command-r)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew-4 (meta-llama/llama-4-scout)
+    - Rachel (mistralai/mistral-saba)
+    - Kevin (google/gemini-flash-1.5)
+  Winner: Matthew (cohere/command-r-08-2024)
+  Rounds: 28
+  Total Moves: 206
+
+Game 773:
+  Players:
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Matthew (mistralai/mistral-tiny)
+    - Thomas (mistralai/pixtral-12b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Kevin (google/gemini-flash-1.5)
+    - Michael (mistralai/mistral-nemo)
+  Winner: Matthew (mistralai/mistral-tiny)
+  Rounds: 28
+  Total Moves: 206
+
+Game 963:
+  Players:
+    - Kevin (meta-llama/llama-4-maverick)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Thomas (mistralai/pixtral-12b)
+    - Thomas-6 (meta-llama/llama-3.1-8b-instruct)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 25
+  Total Moves: 157
+
+Game 326:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (mistralai/mistral-nemo)
+    - James (google/gemini-2.5-flash-preview)
+    - James-5 (deepseek/deepseek-r1-distill-llama-70b)
+    - Kevin (meta-llama/llama-4-maverick)
+  Winner: Kevin (meta-llama/llama-4-maverick)
+  Rounds: 27
+  Total Moves: 173
+
+Game 628:
+  Players:
+    - David (openai/gpt-4o-mini)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Kevin-3 (google/gemini-flash-1.5)
+    - Thomas (mistralai/pixtral-12b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Sarah (mistralai/codestral-2501)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 29
+  Total Moves: 222
+
+Game 317:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - Michael (mistralai/mistral-nemo)
+    - Matthew (cohere/command-r-08-2024)
+    - Matthew-4 (mistralai/mistral-tiny)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+  Winner: Matthew-4 (mistralai/mistral-tiny)
+  Rounds: 29
+  Total Moves: 252
+
+Game 226:
+  Players:
+    - Matthew (cohere/command-r-08-2024)
+    - Ashley (mistral/ministral-8b)
+    - Daniel (mistralai/mistral-small-24b-instruct-2501)
+    - Matthew-4 (meta-llama/llama-4-scout)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - James-6 (cohere/command-r7b-12-2024)
+  Winner: Matthew-4 (meta-llama/llama-4-scout)
+  Rounds: 29
+  Total Moves: 164
+
+Game 513:
+  Players:
+    - Kevin (google/gemini-flash-1.5)
+    - Michael (cohere/command-r)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Nicole (google/gemini-2.0-flash-001)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - James-6 (cohere/command-r7b-12-2024)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 27
+  Total Moves: 239
+
+Game 101:
+  Players:
+    - James (google/gemini-2.5-flash-preview:thinking)
+    - Michael (cohere/command-r)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - James-4 (cohere/command-r7b-12-2024)
+    - James-5 (deepseek/deepseek-r1-distill-llama-70b)
+    - Matthew (cohere/command-r-08-2024)
+  Winner: Michael (cohere/command-r)
+  Rounds: 27
+  Total Moves: 234
+
+Game 509:
+  Players:
+    - Ashley (mistral/ministral-8b)
+    - James (google/gemini-2.5-flash-preview)
+    - James-3 (deepseek/deepseek-r1-distill-llama-70b)
+    - Rachel (mistralai/mistral-saba)
+    - Michael (cohere/command-r)
+    - James-6 (cohere/command-r7b-12-2024)
+  Winner: James (google/gemini-2.5-flash-preview)
+  Rounds: 27
+  Total Moves: 179
+
+Game 266:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Michael (cohere/command-r)
+    - Kevin (google/gemini-flash-1.5)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael-5 (mistralai/mistral-nemo)
+    - Jennifer (google/gemini-flash-1.5-8b)
+  Winner: Kevin (google/gemini-flash-1.5)
+  Rounds: 28
+  Total Moves: 307
+
+Game 804:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - James-4 (google/gemini-2.5-flash-preview)
+    - Michael (mistralai/mistral-nemo)
+    - Rachel (mistralai/mistral-saba)
+  Winner: James (deepseek/deepseek-r1-distill-llama-70b)
+  Rounds: 28
+  Total Moves: 185
+
+Game 798:
+  Players:
+    - John (google/gemini-2.0-flash-lite-001)
+    - David (openai/gpt-4o-mini)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Michael (cohere/command-r)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+  Winner: David (openai/gpt-4o-mini)
+  Rounds: 25
+  Total Moves: 203
+
+Game 414:
+  Players:
+    - Sarah (mistralai/codestral-2501)
+    - Jennifer (google/gemini-flash-1.5-8b)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Kevin (meta-llama/llama-4-maverick)
+    - Amanda (mistralai/ministral-3b)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 26
+  Total Moves: 231
+
+Game 281:
+  Players:
+    - Daniel (mistralai/mistral-small)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Amanda (mistralai/ministral-3b)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Thomas-5 (mistralai/pixtral-12b)
+    - Daniel-6 (meta-llama/llama-3.3-70b-instruct)
+  Winner: Thomas (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 27
+  Total Moves: 231
+
+Game 264:
+  Players:
+    - Matthew (meta-llama/llama-4-scout)
+    - Daniel (openai/gpt-4o-mini-2024-07-18)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Thomas (meta-llama/llama-3.1-8b-instruct)
+    - Rachel (mistralai/mistral-saba)
+    - John (google/gemini-2.0-flash-lite-001)
+  Winner: Daniel (openai/gpt-4o-mini-2024-07-18)
+  Rounds: 26
+  Total Moves: 237
+
+Game 131:
+  Players:
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Michael (cohere/command-r)
+    - Rachel (mistralai/mistral-saba)
+    - Daniel (meta-llama/llama-3.3-70b-instruct)
+    - Matthew (mistralai/mistral-tiny)
+    - Jennifer (google/gemini-flash-1.5-8b)
+  Winner: Jennifer (google/gemini-flash-1.5-8b)
+  Rounds: 25
+  Total Moves: 254
+
+Game 914:
+  Players:
+    - Matthew (cohere/command-r-08-2024)
+    - James (deepseek/deepseek-r1-distill-llama-70b)
+    - Daniel (mistralai/mistral-small-3.1-24b-instruct)
+    - Matthew-4 (meta-llama/llama-4-scout)
+    - Michael (mistralai/mistral-nemo)
+    - Daniel-6 (mistralai/mistral-small)
+  Winner: Matthew (cohere/command-r-08-2024)
+  Rounds: 28
+  Total Moves: 301
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: google/gemini-2.0-flash-lite-001
+Most Cautious Model: deepseek/deepseek-r1-distill-llama-70b
+Most Accurate Liar Detector: google/gemini-flash-1.5-8b (83.9% success rate)
+Model with Shortest Games: mistralai/mistral-tiny (2.7 rounds avg)
+Model with Longest Games: meta-llama/llama-3.1-8b-instruct (4.5 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: google/gemini-2.0-flash-lite-001 (7.0% success rate)
+Best Lie Detector: google/gemini-2.5-flash-preview (F1 score: 8.7%)
+Most Optimal Bidder: deepseek/deepseek-r1-distill-llama-70b (9.9% optimal bids)
+Most Adaptive Player: cohere/command-r (10.2% adaptation score)
+Most Rule Adherent: meta-llama/llama-4-maverick (10.6% adherence rate)
+
+PROVIDER COMPARISON
+================================================================================
+Provider       Win Rate       Avg Elo        Wins      Games     
+-----------------------------------------------------------------
+openai         4.7%          984.7     19        408       
+meta-llama     2.9%          986.1     26        898       
+google         2.8%          1015.1     37        1339      
+deepseek       2.7%          984.7     6         220       
+cohere         1.5%          985.0     10        680       
+mistralai      1.4%          985.6     32        2245      
+mistral        1.0%          986.7     2         210       
+
+Provider Advanced Metrics Comparison:
+----------------------------------------------------------------------------------------------------
+Provider       Bluff Success  Lie Detection  Bid Optimality Adaptation     Rule Adherence 
+----------------------------------------------------------------------------------------------------
+openai         4.5%          6.1%          7.6%          5.9%          5.9%
+meta-llama     4.5%          5.4%          8.0%          7.4%          7.4%
+google         4.6%          5.4%          7.8%          4.5%          6.7%
+deepseek       4.1%          0.0%          9.9%          3.2%          0.4%
+cohere         3.1%          3.0%          7.1%          8.2%          3.9%
+mistralai      4.0%          4.5%          7.0%          5.5%          6.0%
+mistral        3.3%          3.5%          4.2%          4.8%          4.5%

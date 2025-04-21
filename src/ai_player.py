@@ -509,12 +509,47 @@ It is now your move. Return exactly one JSON object following the format describ
                 json.dump(invalid_response, f)
                 f.write("\n")
                 
-            # Return a default response as fallback
-            return {
-                "action": "bid", 
-                "quantity": 1, 
-                "face": 4,
-                "reasoning": "Error processing response, using default bid.",
-                "utterance": "I'll make a simple bid."
-            }
-            
+            # Return a valid fallback bid based on current game state
+            if not game_state.get('last_bid'):
+                # First bid in the round - make a safe default bid
+                return {
+                    "action": "bid", 
+                    "quantity": 1, 
+                    "face": 4,
+                    "reasoning": "Error processing response, using default bid.",
+                    "utterance": "I'll make a simple bid."
+                }
+            else:
+                # Get the last bid
+                last_quantity, last_value = game_state['last_bid']
+                total_dice = game_state.get('total_dice', 0)
+                
+                # If the last bid is implausible (higher than total dice), call liar
+                if last_quantity > total_dice:
+                    return {
+                        "action": "liar",
+                        "quantity": 0,
+                        "face": 0,
+                        "reasoning": "Error processing response. Last bid exceeds total dice, calling liar.",
+                        "utterance": "That's impossible! I call."
+                    }
+                # Otherwise make a valid higher bid
+                else:
+                    if last_value < 6:
+                        # Increase face value
+                        return {
+                            "action": "bid", 
+                            "quantity": last_quantity, 
+                            "face": last_value + 1,
+                            "reasoning": "Error processing response, making minimal valid higher bid.",
+                            "utterance": "Let me increase that bid."
+                        }
+                    else:
+                        # Increase quantity, reset face to 1
+                        return {
+                            "action": "bid", 
+                            "quantity": last_quantity + 1, 
+                            "face": 1,
+                            "reasoning": "Error processing response, making minimal valid higher bid.",
+                            "utterance": "I'll raise the quantity."
+                        }

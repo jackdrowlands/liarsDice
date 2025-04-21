@@ -1,0 +1,26 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
+mistralai/codestral-mamba,Indigo Carter,mistralai,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r7b-12-2024,Harper Lee,cohere,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-flash-1.5-8b,Winter Stone,google,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.0-flash-lite-001,Jordan Smith,google,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-flash-1.5,Winter Stone,google,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+minimax/minimax-01,Gray Wilson,minimax,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/ministral-3b,Reese Johnson,mistralai,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+meta-llama/llama-3.1-70b-instruct,Taylor Wright,meta-llama,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+meta-llama/llama-3.2-90b-vision-instruct,Taylor Wright,meta-llama,1000,0.0,0,4,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small-24b-instruct-2501:free,Devon Parker,mistralai,1000,0.0,0,2,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small,Gray Wilson,mistralai,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.0-flash-001,Alex Morgan,google,1000,0.0,0,4,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+deepseek/deepseek-r1-distill-llama-70b,Harper Lee,deepseek,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mixtral-8x7b-instruct,Harper Lee,mistralai,1000,0.0,0,5,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-medium,Harper Lee,mistralai,1000,0.0,0,2,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.5-flash-preview,Indigo Carter,google,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r-08-2024,Jordan Smith,cohere,1000,0.0,0,2,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+openai/gpt-4o-2024-11-20,Devon Parker,openai,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+openai/gpt-4o-mini,Reese Johnson,openai,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-nemo:free,Blake Taylor,mistralai,1000,0.0,0,2,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-saba,Nico Riley,mistralai,1000,0.0,0,4,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small-3.1-24b-instruct:free,Winter Stone,mistralai,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+mistral/ministral-8b,Blake Taylor,mistral,1000,0.0,0,3,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.5-flash-preview:thinking,Vaughn Miller,google,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r,Finley Quinn,cohere,1000,0.0,0,4,0,0,0,0,0,0,0,0,0,0.0,0,0,0

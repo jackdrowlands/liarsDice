@@ -664,20 +664,35 @@ class AsyncGameRunner:
             # Print game result
             print(f"Game {game_num}: Winner is {game.winner.name} ({winner_model}) after {game.round_number} rounds")
             
-            return winner_model
+            # Return both winner model and game object to ensure metrics are preserved
+            return {
+                "winner": winner_model,
+                "game": game,
+                "game_num": game_num
+            }
         
         except asyncio.TimeoutError:
             # Restore output in case of timeout
             if not self.batch_runner.verbose_output:
                 sys.stdout = original_stdout
             print(f"Game {game_num} timed out and was terminated")
-            return None
+            return {
+                "winner": None,
+                "game": None,
+                "game_num": game_num,
+                "error": "timeout"
+            }
         except Exception as e:
             # Restore output in case of error
             if not self.batch_runner.verbose_output:
                 sys.stdout = original_stdout
             print(f"Error in game {game_num}: {e}")
-            return None
+            return {
+                "winner": None,
+                "game": None,
+                "game_num": game_num,
+                "error": str(e)
+            }
     
     async def run_game_with_semaphore(self, game_num, semaphore):
         """Run a game with a semaphore to limit concurrent executions"""
@@ -704,9 +719,16 @@ class AsyncGameRunner:
             game_num = game_nums[i]
             if isinstance(result, Exception):
                 logger.error(f"Game {game_num} error: {str(result)}")
-                processed_results.append(None)
+                # Create the error result in the same format we return elsewhere
+                processed_results.append({
+                    "winner": None,
+                    "game": None,
+                    "game_num": game_num,
+                    "error": str(result)
+                })
                 self.save_timing_report(game_num)
             else:
+                # Process the expanded result that now includes both winner and game object
                 processed_results.append(result)
                 self.save_timing_report(game_num)
         
@@ -1206,7 +1228,29 @@ class GameBatchRunner:
             
             for i, result in enumerate(results):
                 game_num = game_nums[i]
-                processed_results.append(result)
+                
+                # Handle the expanded result that includes game object
+                if result and isinstance(result, dict) and 'winner' in result and 'game' in result:
+                    # Extract the winner model
+                    winner_model = result['winner']
+                    game = result['game']
+                    game_num = result['game_num']
+                    
+                    # We don't need to call _process_game_results again, since it was already called
+                    # in play_single_game_async, but we do need to ensure the game object is stored
+                    # It's possible the game object might have been overwritten in game_results
+                    # Find the corresponding result and update it with this game object
+                    for existing_result in self.game_results:
+                        if existing_result.get('game_number') == game_num:
+                            # Update the existing result with the game object
+                            existing_result['game_obj'] = game
+                            break
+                    
+                    processed_results.append(winner_model)
+                else:
+                    # Handle the old format or None results
+                    processed_results.append(result)
+                
                 completed += 1
                 
                 # Print progress

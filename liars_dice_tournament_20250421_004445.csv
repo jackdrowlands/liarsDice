@@ -1,0 +1,26 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
+mistralai/ministral-3b,Vaughn Miller,mistralai,1000,0.0,0,238,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r7b-12-2024,Ellis Jordan,cohere,1000,0.0,0,236,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-flash-1.5-8b,Reese Johnson,google,1000,0.0,0,242,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.0-flash-lite-001,Nico Riley,google,1000,0.0,0,257,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-flash-1.5,Parker Quinn,google,1000,0.0,0,255,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistral/ministral-8b,Parker Quinn,mistral,1000,0.0,0,218,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/ministral-8b,Blake Taylor,mistralai,1000,0.0,0,224,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+meta-llama/llama-3.1-8b-instruct,Gray Wilson,meta-llama,1000,0.0,0,243,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+meta-llama/llama-3.3-70b-instruct,Kennedy Ross,meta-llama,1000,0.0,0,239,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small-3.1-24b-instruct,Harper Lee,mistralai,1000,0.0,0,254,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small-24b-instruct-2501,Kennedy Ross,mistralai,1000,0.0,0,219,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.0-flash-001,Finley Quinn,google,1000,0.0,0,260,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+deepseek/deepseek-r1-distill-llama-70b,Taylor Wright,deepseek,1000,0.0,0,231,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/pixtral-12b,Indigo Carter,mistralai,1000,0.0,0,254,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-nemo,Gray Wilson,mistralai,1000,0.0,0,235,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.5-flash-preview,Taylor Wright,google,1000,0.0,0,225,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r-08-2024,Vaughn Miller,cohere,1000,0.0,0,250,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+openai/gpt-4o-mini,Finley Quinn,openai,1000,0.0,0,264,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+openai/gpt-4o-mini-2024-07-18,Indigo Carter,openai,1000,0.0,0,234,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-saba,Logan Bailey,mistralai,1000,0.0,0,258,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-small,Taylor Wright,mistralai,1000,0.0,0,232,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/mistral-tiny,Winter Stone,mistralai,1000,0.0,0,233,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+mistralai/codestral-2501,Devon Parker,mistralai,1000,0.0,0,231,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+google/gemini-2.5-flash-preview:thinking,Reese Johnson,google,1000,0.0,0,222,0,0,0,0,0,0,0,0,0,0.0,0,0,0
+cohere/command-r,Morgan Casey,cohere,1000,0.0,0,246,0,0,0,0,0,0,0,0,0,0.0,0,0,0

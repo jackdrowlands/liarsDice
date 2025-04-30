@@ -1,0 +1,56 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-04-21 20:26:45
+Total Games: 1
+Models per Game: 2
+
+Providers Used: google
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     google/gemini-2.0-flash-l...  Brian               N/A       100.0%          1         1         
+2     google/gemini-2.5-flash-p...  Michael             N/A       0.0%          0         1         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. google/gemini-2.0-flash-lite-001 (as 'Brian')
+   Provider: google
+   Win Rate: 100.0%
+   Games Won: 1 / 1
+   Avg. Rounds per Game: 9.0
+   Liar Call Success Rate: 60.0%
+   Liar Calls: 3 successful, 2 unsuccessful
+   Playing Style: 6 bids, 5 liar calls (45.5% liar calls)
+   Wins by Game Length: 1 early, 0 mid, 0 long
+
+2. google/gemini-2.5-flash-preview (as 'Michael')
+   Provider: google
+   Win Rate: 0.0%
+   Games Won: 0 / 1
+   Avg. Rounds per Game: 9.0
+   Liar Call Success Rate: 50.0%
+   Liar Calls: 2 successful, 2 unsuccessful
+   Playing Style: 7 bids, 4 liar calls (36.4% liar calls)
+   Wins by Game Length: 0 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 1:
+  Players:
+    - Brian (google/gemini-2.0-flash-lite-001)
+    - Michael (google/gemini-2.5-flash-preview)
+  Winner: Brian (google/gemini-2.0-flash-lite-001)
+  Rounds: 9
+  Total Moves: 22
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: google/gemini-2.0-flash-lite-001
+Most Cautious Model: google/gemini-2.5-flash-preview
+Most Accurate Liar Detector: google/gemini-2.0-flash-lite-001 (60.0% success rate)
+Model with Shortest Games: google/gemini-2.0-flash-lite-001 (9.0 rounds avg)
+Model with Longest Games: google/gemini-2.0-flash-lite-001 (9.0 rounds avg)

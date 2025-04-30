@@ -1,6 +1,7 @@
 import os
+from typing import List, Optional, Union, Dict, Any, Tuple
 
-def print_intro():
+def print_intro() -> None:
     """Print the introduction message for the game"""
     print("=" * 70)
     print("Welcome to Liar's Dice OpenRouter Tournament!")
@@ -48,7 +49,7 @@ def print_intro():
     print("=" * 70)
 
 
-def print_main_menu():
+def print_main_menu() -> str:
     """Print the main menu options and get user selection"""
     print("\n" + "=" * 70)
     print("LIARS DICE MAIN MENU")
@@ -59,16 +60,16 @@ def print_main_menu():
     print("4. Exit")
     return input("\nSelect an option (1-4): ").strip()
     
-def find_saved_games():
+def find_saved_games() -> List[str]:
     """Find all saved game files in the current directory"""
     import glob
-    saves = glob.glob("liars_dice_save_*.json")
+    saves: List[str] = glob.glob("liars_dice_save_*.json")
     saves.sort(reverse=True)  # Most recent first
     return saves
     
-def select_saved_game():
+def select_saved_game() -> Optional[str]:
     """Let user select a saved game from available saves"""
-    saves = find_saved_games()
+    saves: List[str] = find_saved_games()
     
     if not saves:
         print("No saved games found.")
@@ -79,7 +80,7 @@ def select_saved_game():
         print(f"{i+1}. {save}")
     
     try:
-        choice = int(input("\nSelect a game to load (number) or 0 to cancel: "))
+        choice: int = int(input("\nSelect a game to load (number) or 0 to cancel: "))
         if choice == 0:
             return None
         elif 1 <= choice <= len(saves):
@@ -90,3 +91,53 @@ def select_saved_game():
     except ValueError:
         print("Invalid input.")
         return None
+        
+# Add any other utility functions here with type hints
+
+def validate_bid(bid: Tuple[int, int], last_bid: Optional[Tuple[int, int]] = None) -> bool:
+    """
+    Validate if a bid is legal according to game rules
+    
+    Args:
+        bid: A tuple of (quantity, face value)
+        last_bid: The previous bid to compare against (if any)
+        
+    Returns:
+        True if the bid is valid, False otherwise
+    """
+    quantity, face = bid
+    
+    # Basic validation
+    if quantity < 1 or face < 1 or face > 6:
+        return False
+        
+    # If there's no previous bid, any valid bid is acceptable
+    if not last_bid:
+        return True
+        
+    # Check against previous bid
+    last_quantity, last_face = last_bid
+    
+    # Higher quantity always wins
+    if quantity > last_quantity:
+        return True
+        
+    # Same quantity but higher face
+    if quantity == last_quantity and face > last_face:
+        return True
+        
+    # Otherwise, bid is not higher
+    return False
+
+def format_time(seconds: float) -> str:
+    """Format seconds into a readable time string"""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        minutes = int(seconds // 60)
+        secs = seconds % 60
+        return f"{minutes}m {secs:.1f}s"
+    else:
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        return f"{hours}h {minutes}m"

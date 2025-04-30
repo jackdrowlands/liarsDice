@@ -3,11 +3,13 @@ import time
 import json
 import random
 import re
+from typing import Dict, List, Optional, Any, Union, Tuple, TypedDict, cast
 from .player import Player
 
 # Check for required libraries
 try:
     import requests
+    from requests import Response
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
@@ -17,31 +19,56 @@ PROVIDER_OPENROUTER = "openrouter"
 PROVIDER_LOCAL = "local"
 GOOGLE_SDK_AVAILABLE = False
 
+# Type definitions for better type checking
+class GameState(TypedDict, total=False):
+    total_dice: int
+    player_dice_counts: Dict[str, int]
+    last_bid: Optional[Tuple[int, int]]
+    current_player: str
+    move_history: List[Dict[str, Any]]
+    round_number: int
+    provider: str
+    response_time: float
+    token_usage: Dict[str, int]
+
+class PromptDict(TypedDict):
+    system: str
+    user: str
+
+class RequestParams(TypedDict):
+    endpoint_url: str
+    headers: Dict[str, str]
+    data: Dict[str, Any]
+    game_state: GameState
+    provider: str
+
 class AIPlayer(Player):
-    def __init__(self, name, model, provider=PROVIDER_OPENROUTER, api_key=None, api_url=None, project_id=None, region=None):
+    def __init__(self, name: str, model: str, provider: str = PROVIDER_OPENROUTER, 
+                 api_key: Optional[str] = None, api_url: Optional[str] = None, 
+                 project_id: Optional[str] = None, region: Optional[str] = None) -> None:
         super().__init__(name)
-        self.model = model
-        self.game_history = []
-        self.provider = provider
-        self.api_url = api_url
-        self.project_id = None
-        self.region = None
+        self.model: str = model
+        self.game_history: List[GameState] = []
+        self.provider: str = provider
+        self.api_url: Optional[str] = api_url
+        self.project_id: Optional[str] = project_id
+        self.region: Optional[str] = region
         
         # Set API key based on provider
         if api_key:
-            self.api_key = api_key
+            self.api_key: str = api_key
         elif provider == PROVIDER_OPENROUTER:
             self.api_key = os.environ.get("OPENROUTER_API_KEY", "")
         else:
             self.api_key = ""
         
         # Check if using local endpoint
-        self.is_local_endpoint = self.api_url and "127.0.0.1" in self.api_url
+        self.is_local_endpoint: bool = bool(self.api_url and "127.0.0.1" in self.api_url)
 
-    def record_game_state(self, game_state):
+    def record_game_state(self, game_state: GameState) -> None:
         self.game_history.append(game_state)
     
-    def get_prompt_for_game(self, game_state):
+    def get_prompt_for_game(self, game_state: GameState) -> PromptDict:
         """Create a prompt for the AI model using the new format with exact JSON"""
         # Use the player's name as player_id (for the system message)
         player_id = self.name
@@ -84,8 +111,7 @@ CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after 
         
         # Format move history for prompt in a format that shows previous JSON actions and utterances
         move_history_text = ""
-        if game_state['move_history']:
-            for i, move in enumerate(game_state['move_history']):
+        for i, move in enumerate(game_state.get('move_history', [])):
                 player_name = move['player']
                 
                 if move["action"] == "bid":
@@ -122,8 +148,10 @@ CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after 
         
         # Current bid info
         current_bid = "0 × 0"
-        if game_state['last_bid']:
-            current_bid = f"{game_state['last_bid'][0]} × {game_state['last_bid'][1]}"
+        if game_state.get('last_bid') is not None:
+            last_bid = game_state['last_bid']
+            if last_bid is not None:  # Extra check for type checker
+                current_bid = f"{last_bid[0]} × {last_bid[1]}"
         
         # Create the user prompt in the exact format from the request
         user_prompt = f"""### Your private dice (keep secret)
@@ -143,7 +171,7 @@ It is now your move. Return exactly one JSON object following the format describ
         # Return the prompts to be used in the API request
         return {"system": system_prompt, "user": user_prompt}
     
-    def get_prompt_and_params(self, game_state):
+    def get_prompt_and_params(self, game_state: GameState) -> RequestParams:
         """Prepare the API request parameters but don't send yet"""
         # Require Requests
         if not REQUESTS_AVAILABLE:
@@ -158,10 +186,10 @@ It is now your move. Return exactly one JSON object following the format describ
         # OpenRouter and local providers use OpenAI-compatible format
         return self._get_openai_compatible_params(prompt, game_state)
             
-    def _get_openai_compatible_params(self, prompt, game_state):
+    def _get_openai_compatible_params(self, prompt: PromptDict, game_state: GameState) -> RequestParams:
         """Get parameters for OpenAI-compatible APIs (OpenRouter and local)"""
         # Prepare headers
-        headers = {
+        headers: Dict[str, str] = {
             "Content-Type": "application/json"
         }
         
@@ -171,18 +199,18 @@ It is now your move. Return exactly one JSON object following the format describ
             headers["HTTP-Referer"] = ""
         
         # Prepare request data with the new JSON format for messages
-        system_message = {
+        system_message: Dict[str, str] = {
             "role": "system",
             "content": prompt["system"]
         }
         
-        user_message = {
+        user_message: Dict[str, str] = {
             "role": "user",
             "content": prompt["user"]
         }
         
         # Define the schema for structured output - used for all endpoints
-        schema = {
+        schema: Dict[str, Any] = {
             "type": "object",
             "properties": {
                 "reasoning": {
@@ -212,7 +240,7 @@ It is now your move. Return exactly one JSON object following the format describ
         }
         
         # Prepare the base request data
-        data = {
+        data: Dict[str, Any] = {
             "model": self.model,
             "messages": [system_message, user_message],
             "temperature": 0.7,  # Balanced temperature for creativity in utterances
@@ -263,10 +291,7 @@ It is now your move. Return exactly one JSON object following the format describ
         # Instead, we'll rely on our prompt to get a proper JSON response
         
         # Determine the correct endpoint URL
-        if self.api_url:
-            endpoint_url = self.api_url
-        else:
-            endpoint_url = "https://openrouter.ai/api/v1/chat/completions"
+        endpoint_url: str = self.api_url or "https://openrouter.ai/api/v1/chat/completions"
             
         return {
             "endpoint_url": endpoint_url,
@@ -277,7 +302,7 @@ It is now your move. Return exactly one JSON object following the format describ
         }
         
     
-    def get_ai_decision(self, game_state):
+    def get_ai_decision(self, game_state: GameState) -> Dict[str, Any]:
         """Get a decision from the AI model by calling the API"""
         request_params = self.get_prompt_and_params(game_state)
         provider = request_params["provider"]
@@ -308,7 +333,7 @@ It is now your move. Return exactly one JSON object following the format describ
             return self.process_api_response(response, response_time, game_state)
             
         except Exception as e:
-            error_info = {
+            error_info: Dict[str, Any] = {
                 "model": self.model,
                 "provider": provider,
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -349,13 +374,13 @@ It is now your move. Return exactly one JSON object following the format describ
             raise RuntimeError(f"Error getting AI decision from {provider}: {e}")
             
             
-    def process_api_response(self, response, response_time, game_state):
+    def process_api_response(self, response: 'Response', response_time: float, game_state: GameState) -> Dict[str, Any]:
         """Process the API response with structured output format"""
         # Get the provider from the request params
         provider = game_state.get('provider', self.provider)
         
         # OpenAI-compatible response format (OpenRouter/local)
-        result = response.json()
+        result: Dict[str, Any] = response.json()
         
         # Extract token usage if available
         prompt_tokens = completion_tokens = total_tokens = 0
@@ -375,12 +400,12 @@ It is now your move. Return exactly one JSON object following the format describ
             }
         
         # Get the content from the response which should be a JSON object
-        content = result["choices"][0]["message"]["content"].strip()
+        content: str = result["choices"][0]["message"]["content"].strip()
             
         # Log the response with token information and prompt
         with open("llm_responses.json", "a") as f:
                 # Create response log object
-                response_log = {
+                response_log: Dict[str, Any] = {
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                     "response_text": content,
                     "model": self.model,
@@ -412,7 +437,7 @@ It is now your move. Return exactly one JSON object following the format describ
             
             # First try: direct parse of the whole content (works with structured output)
             try:
-                response_json = json.loads(content)
+                response_json: Dict[str, Any] = json.loads(content)
             except json.JSONDecodeError:
                 # Second try: Remove any markdown backticks and try again
                 try:
@@ -488,7 +513,7 @@ It is now your move. Return exactly one JSON object following the format describ
             print(content)
             
             # Log the error with prompt information
-            invalid_response = {
+            invalid_response: Dict[str, Any] = {
                 "model": self.model,
                 "provider": provider,
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),

@@ -1001,7 +1001,7 @@ class LiarsDice:
         
         # Record the final bid of this round (for calculating average final bid metric)
         if isinstance(previous_player, AIPlayer):
-            self.metrics.record_final_bid(previous_player.model, quantity, self.round_number)
+            self.metrics.record_final_bid(previous_player.model, (quantity, value), self.round_number)
         
         # Update the last liar call with the outcome
         for move in reversed(self.move_history):

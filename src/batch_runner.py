@@ -1082,8 +1082,8 @@ class GameBatchRunner:
             game_state["llm_responses"] = responses
         
         # Write to file
-        with open(filename, 'w') as f:
-            json.dump(game_state, f, indent=2)
+            with open(filename, 'w') as f:
+                json.dump(game_state, f, indent=2, default=lambda o: o.item() if hasattr(o, "item") else str(o))
             
         print(f"Saved game {game_num} data to {filename}")
         return filename
@@ -1202,6 +1202,9 @@ class GameBatchRunner:
                     print(f"Error in game {game_num}: {e}")
                     results.append(None)
             
+            # Final save of updated stats
+            self.update_leaderboard()
+            self.save_tournament_state()
         return results
     
     def run_games_with_asyncio(self, game_nums):
@@ -1262,6 +1265,9 @@ class GameBatchRunner:
                     threading.Thread(target=self.save_tournament_state).start()
             
             # Make sure we processed all games
+                # Final save of updated stats
+                self.update_leaderboard()
+                self.save_tournament_state()
             print(f"Completed all {len(processed_results)} games in async mode")
             return processed_results
         
@@ -1271,6 +1277,8 @@ class GameBatchRunner:
     
     def save_tournament_state(self, filepath=None):
         """Save the current tournament state to a file"""
+        # Refresh all win‐rates and derived stats before saving
+        self.update_leaderboard()
         if filepath is None:
             timestamp = time.strftime("%Y%m%d_%H%M%S")
             filepath = f"liars_dice_save_{timestamp}.json"
@@ -1565,15 +1573,21 @@ class GameBatchRunner:
             
             # Average the metrics by dividing by number of games
             for model, metrics in all_advanced_metrics.items():
+                if model not in self.leaderboard:
+                    continue
                 games_played = self.leaderboard[model]["games_played"]
                 if games_played > 0:
                     for key in metrics:
                         if key != "elo_rating":  # Skip Elo
                             if isinstance(metrics[key], dict):
-                                for subkey in metrics[key]:
-                                    metrics[key][subkey] /= games_played
+                                for subkey in list(metrics[key].keys()):
+                                    value = metrics[key][subkey]
+                                    if isinstance(value, (int, float)):
+                                        metrics[key][subkey] = value / games_played
                             else:
-                                metrics[key] /= games_played
+                                value = metrics[key]
+                                if isinstance(value, (int, float)):
+                                    metrics[key] = value / games_played
             
             for i, (model, stats) in enumerate(sorted_models):
                 model_stats = self.model_stats[model]
@@ -1596,15 +1610,75 @@ class GameBatchRunner:
                 if model in all_advanced_metrics:
                     metrics = all_advanced_metrics[model]
                     f.write(f"   Elo Rating: {metrics['elo_rating']:.1f}\n")
-                    f.write(f"   Bluff Success Rate: {metrics['bluff_success_rate']:.1f}%\n")
-                    f.write(f"   Lie Detection (Precision): {metrics['lie_detection']['precision']:.1f}%\n")
-                    f.write(f"   Lie Detection (Recall): {metrics['lie_detection']['recall']:.1f}%\n")
-                    f.write(f"   Lie Detection (F1): {metrics['lie_detection']['f1_score']:.1f}%\n")
-                    f.write(f"   Average Final Bid: {metrics['average_final_bid']:.2f}\n")
-                    f.write(f"   Bid Optimality: {metrics['bid_optimality']:.1f}%\n")
-                    f.write(f"   Adaptation Score: {metrics['adaptation_score']:.1f}%\n")
-                    f.write(f"   Rule Adherence Rate: {metrics['rule_adherence_rate']:.1f}%\n")
-                    f.write(f"   Avg API Response Time: {metrics['avg_api_response_time']:.2f} seconds\n")
+                    # Write Bluff Success Rate as a percentage, handling numeric and dict formats
+                    bluff = metrics['bluff_success_rate']
+                    if isinstance(bluff, dict):
+                        success = bluff.get('successful', 0)
+                        total = bluff.get('total', 1)
+                        rate = (success / total * 100) if total > 0 else 0
+                    else:
+                        rate = bluff
+                    f.write(f"   Bluff Success Rate: {rate:.1f}%\n")
+                    # Write Lie Detection (Precision), handling dict formats
+                    ld = metrics['lie_detection']
+                    precision = ld.get('precision', 0) if isinstance(ld, dict) else (ld if isinstance(ld, (int, float)) else 0)
+                    f.write(f"   Lie Detection (Precision): {precision:.1f}%\n")
+                    # Write Lie Detection (Recall), handling dict formats
+                    ld = metrics['lie_detection']
+                    recall = ld.get('recall', 0) if isinstance(ld, dict) else (ld if isinstance(ld, (int, float)) else 0)
+                    f.write(f"   Lie Detection (Recall): {recall:.1f}%\n")
+                    # Write Lie Detection (F1), handling dict formats
+                    ld = metrics['lie_detection']
+                    f1 = ld.get('f1_score', 0) if isinstance(ld, dict) else (ld if isinstance(ld, (int, float)) else 0)
+                    f.write(f"   Lie Detection (F1): {f1:.1f}%\n")
+                    # Write Average Final Bid, handling numeric and dict formats
+                    avg_bid = metrics['average_final_bid']
+                    if isinstance(avg_bid, dict):
+                        # Try computing average from 'sum' and 'count'
+                        total = avg_bid.get('sum', None)
+                        count = avg_bid.get('count', None)
+                        if isinstance(total, (int, float)) and isinstance(count, (int, float)) and count > 0:
+                            avg_value = total / count
+                        else:
+                            avg_value = avg_bid.get('value', 0) if isinstance(avg_bid.get('value', 0), (int, float)) else 0
+                    else:
+                        avg_value = avg_bid
+                    f.write(f"   Average Final Bid: {avg_value:.2f}\n")
+                    # Write Bid Optimality as a percentage, handling both numeric and dict formats
+                    bid_opt = metrics['bid_optimality']
+                    if isinstance(bid_opt, dict):
+                        optimal = bid_opt.get('optimal', 0)
+                        total = bid_opt.get('total', 1)
+                        rate = (optimal / total * 100) if total > 0 else 0
+                    else:
+                        rate = bid_opt
+                    f.write(f"   Bid Optimality: {rate:.1f}%\n")
+                    # Write Adaptation Score as a percentage, handling dict formats
+                    adapt = metrics['adaptation_score']
+                    if isinstance(adapt, dict):
+                        adapted = adapt.get('adapted', 0)
+                        opportunities = adapt.get('opportunities', 1)
+                        rate = (adapted / opportunities * 100) if opportunities > 0 else 0
+                    else:
+                        rate = adapt
+                    f.write(f"   Adaptation Score: {rate:.1f}%\n")
+                    # Write Rule Adherence Rate as a percentage, handling numeric and dict formats
+                    rule_adhere = metrics['rule_adherence_rate']
+                    if isinstance(rule_adhere, dict):
+                        valid = rule_adhere.get('valid_actions', 0)
+                        total = rule_adhere.get('total_actions', 1)
+                        rate = (valid / total * 100) if total > 0 else 0
+                    else:
+                        rate = rule_adhere
+                    f.write(f"   Rule Adherence Rate: {rate:.1f}%\n")
+                    # Write Avg API Response Time, handling dict formats
+                    api_time = metrics['avg_api_response_time']
+                    if isinstance(api_time, dict):
+                        avg_time = api_time.get('average', None) or api_time.get('value', 0)
+                        avg_time = avg_time if isinstance(avg_time, (int, float)) else 0
+                    else:
+                        avg_time = api_time if isinstance(api_time, (int, float)) else 0
+                    f.write(f"   Avg API Response Time: {avg_time:.2f} seconds\n")
                     
                     # Add token usage metrics if available
                     if 'token_usage' in metrics:
@@ -1613,7 +1687,9 @@ class GameBatchRunner:
                         f.write(f"     - Total Tokens: {token_usage['total_tokens']}\n")
                         f.write(f"     - Prompt Tokens: {token_usage['total_prompt_tokens']}\n")
                         f.write(f"     - Completion Tokens: {token_usage['total_completion_tokens']}\n")
-                        f.write(f"     - Avg Tokens Per Action: {token_usage['avg_tokens_per_action']:.1f}\n")
+                        avg_tpa = token_usage.get('avg_tokens_per_action', 0)
+                        avg_tpa = avg_tpa if isinstance(avg_tpa, (int, float)) else 0
+                        f.write(f"     - Avg Tokens Per Action: {avg_tpa:.1f}\n")
                 
                 # Original metrics
                 liar_call_success_rate = model_stats['liar_success_rate']
@@ -1671,7 +1747,7 @@ class GameBatchRunner:
                 f.write("=" * 80 + "\n")
                 
                 # Find best models by each advanced metric
-                best_bluffer = max(all_advanced_metrics.items(), key=lambda x: x[1]['bluff_success_rate'])
+                best_bluffer = max(all_advanced_metrics.items(), key=lambda x: x[1].get('bluff_success_rate', 0))
                 best_lie_detector = max(all_advanced_metrics.items(), key=lambda x: x[1]['lie_detection']['f1_score'])
                 most_optimal_bidder = max(all_advanced_metrics.items(), key=lambda x: x[1]['bid_optimality'])
                 most_adaptive = max(all_advanced_metrics.items(), key=lambda x: x[1]['adaptation_score'])
@@ -1945,8 +2021,8 @@ class GameBatchRunner:
             plt.close()
         
         # Generate enhanced visualizations using the MetricsVisualizer
-        if create_visualizations:
-            print(f"\nGenerating enhanced visualizations in {visualization_dir}...")
+        if self.create_visualizations:
+            print(f"\nGenerating enhanced visualizations in {vis_dir}...")
             
             # Create a GameMetrics instance from our tournament data
             metrics = GameMetrics()
@@ -2034,13 +2110,15 @@ class GameBatchRunner:
                                         metrics.api_response_times[model].append(avg_time)
                         
             # Generate comprehensive visualizations
-            generated_files = metrics.create_visualizations(output_dir=visualization_dir, prefix=base_filename)
+            generated_files = metrics.create_visualizations(output_dir=vis_dir, prefix=base_filename)
             
             # Add a note to the text report about visualizations
+            # derive text report filename from base_filename
+            txt_filename = f"{base_filename}.txt"
             with open(txt_filename, 'a') as f:
                 f.write("\n\nENHANCED VISUALIZATIONS\n")
                 f.write("=" * 80 + "\n")
-                f.write(f"Enhanced visualizations have been generated in {visualization_dir}/\n\n")
+                f.write(f"Enhanced visualizations have been generated in {vis_dir}/\n\n")
                 
                 if generated_files:
                     f.write("Generated visualization files:\n")
@@ -2048,7 +2126,7 @@ class GameBatchRunner:
                         filename = os.path.basename(filepath)
                         f.write(f"- {key}: {filename}\n")
             
-            print(f"Enhanced visualizations saved to {visualization_dir}/")
+            print(f"Enhanced visualizations saved to {vis_dir}/")
         
-        print(f"\nTournament results have been saved to {txt_filename} and {csv_filename}")
+        print(f"\nEnhanced visualizations have been saved to {vis_dir}")
         return base_filename

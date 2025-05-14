@@ -5,6 +5,10 @@ import sys
 import argparse
 import os
 
+# Ensure the src directory is in the Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Liar\'s Dice Game')
     parser.add_argument('--load', type=str, help='Load a saved game from file')
@@ -13,49 +17,73 @@ def parse_args():
 
 def main():
     args = parse_args()
-    
-    # If load argument provided, load the game directly
-    if args.load and os.path.exists(args.load):
-        print(f"Loading saved game from {args.load}...")
-        game = LiarsDice(save_file=args.load)
-        game.play_game(load_from=args.load)
+
+    if args.load:
+        game_state = load_game_state(args.load)
+        if game_state:
+            game = LiarsDice.from_state(game_state)
+            print(f"Game loaded from {args.load}")
+            game.play_game()
+        else:
+            print(f"Failed to load game from {args.load}")
         return
-    
-    # If resume-tournament argument provided, resume the tournament
-    if args.resume_tournament and os.path.exists(args.resume_tournament):
-        print(f"Resuming tournament from {args.resume_tournament}...")
-        runner = GameBatchRunner()
-        runner.run_tournament(resume_from=args.resume_tournament)
-        return
-    
-    print_intro()
-    
-    try:
-        while True:
-            choice = print_main_menu()
-            
-            if choice == "1":
-                game = LiarsDice()
-                game.play_game()
-            elif choice == "2":
-                runner = GameBatchRunner()
-                runner.run_tournament()
-            elif choice == "3":
-                # Load a saved game
-                save_file = select_saved_game()
-                if save_file:
-                    game = LiarsDice(save_file=save_file)
-                    result = game.play_game(load_from=save_file)
-                    if result == "paused":
-                        print("Game paused. You can continue later.")
-            elif choice == "4":
-                print("Thanks for playing!")
-                break
+
+    if args.resume_tournament:
+        batch_runner = GameBatchRunner() # Create instance
+        if batch_runner.load_tournament_from_file(args.resume_tournament):
+            print(f"Tournament resumed from {args.resume_tournament}")
+            # The run_tournament method should handle whether to create visualizations based on its internal state
+            batch_runner.run_tournament()
+        else:
+            print(f"Failed to resume tournament from {args.resume_tournament}. Starting new setup.")
+            # Fall through to main menu if resume fails
+        # return # Decide if we should exit or fall through to menu if resume fails
+
+    while True:
+        print("\\n--- Liar's Dice Main Menu ---")
+        print("1. Start New Game (Human vs AI)")
+        print("2. Start New Game (AI vs AI)")
+        print("3. Run AI Model Tournament")
+        print("4. Load Game State")
+        print("5. Resume Tournament")
+        print("6. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            game = LiarsDice()
+            game.play_game()
+        elif choice == '2':
+            game = LiarsDice()
+            game.play_game()
+        elif choice == '3':
+            batch_runner = GameBatchRunner() # Create instance for new tournament
+            if batch_runner.setup_batch(): # Interactive setup
+                # run_tournament should use self.create_visualizations which is set during setup_batch
+                batch_runner.run_tournament()
             else:
-                print("Invalid choice. Please select 1, 2, 3, or 4.")
-    except (KeyboardInterrupt, EOFError):
-        print("\nExiting Liar's Dice. Goodbye!")
-        sys.exit(0)
+                print("Tournament setup failed or was cancelled.")
+        elif choice == '4':
+            filename = input("Enter filename to load game state from (e.g., game_state.json): ").strip()
+            game_state = load_game_state(filename)
+            if game_state:
+                game = LiarsDice.from_state(game_state)
+                print(f"Game loaded from {filename}")
+                game.play_game()
+            else:
+                print(f"Failed to load game from {filename}")
+        elif choice == '5':
+            filename = input("Enter filename to resume tournament from (e.g., tournament_state.json): ").strip()
+            batch_runner = GameBatchRunner() # Create instance
+            if batch_runner.load_tournament_from_file(filename):
+                print(f"Tournament resumed from {filename}")
+                batch_runner.run_tournament()
+            else:
+                print(f"Failed to resume tournament from {filename}.")
+        elif choice == '6':
+            print("Exiting Liar's Dice. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
     main()

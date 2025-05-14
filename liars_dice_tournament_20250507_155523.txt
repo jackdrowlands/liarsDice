@@ -1,0 +1,180 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-05-07 15:55:23
+Total Games: 10
+Models per Game: 2
+
+Providers Used: meta-llama, google
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     meta-llama/llama-3.1-8b-i...  Nicole              984.0     90.0%          9         10        
+2     google/learnlm-1.5-pro-ex...  Daniel              1016.0    10.0%          1         10        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-3.1-8b-instruct (as 'Nicole')
+   Provider: meta-llama
+   Win Rate: 90.0%
+   Games Won: 9 / 10
+   Avg. Rounds per Game: 5.9
+   Elo Rating: 1016.0
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 89.7%
+   Lie Detection (Recall): 100.0%
+   Lie Detection (F1): 94.3%
+   Average Final Bid: 0.47
+   Bid Optimality: 55.4%
+   Adaptation Score: 10.0%
+   Rule Adherence Rate: 56.8%
+   Avg API Response Time: 3.47 seconds
+   Token Usage:
+     - Total Tokens: 31583.1
+     - Prompt Tokens: N/A
+     - Completion Tokens: N/A
+     - Avg Tokens Per Action: 1296.6
+   Liar Call Success Rate: 89.1%
+   Liar Calls: 49 successful, 6 unsuccessful
+   Playing Style: 165 bids, 55 liar calls (25.0% liar calls)
+   Wins by Game Length: 9 early, 0 mid, 0 long
+
+2. google/learnlm-1.5-pro-experimental:free (as 'Daniel')
+   Provider: google
+   Win Rate: 10.0%
+   Games Won: 1 / 10
+   Avg. Rounds per Game: 5.9
+   Elo Rating: 984.0
+   Bluff Success Rate: 5.3%
+   Lie Detection (Precision): 10.0%
+   Lie Detection (Recall): 10.0%
+   Lie Detection (F1): 10.0%
+   Average Final Bid: 3.89
+   Bid Optimality: 0.0%
+   Adaptation Score: 0.0%
+   Rule Adherence Rate: 0.0%
+   Avg API Response Time: 0.00 seconds
+   Token Usage:
+     - Total Tokens: 0.0
+     - Prompt Tokens: N/A
+     - Completion Tokens: N/A
+     - Avg Tokens Per Action: 0.0
+   Liar Call Success Rate: 0.0%
+   Liar Calls: 0 successful, 0 unsuccessful
+   Playing Style: 176 bids, 0 liar calls (0.0% liar calls)
+   Wins by Game Length: 1 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 1:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 6
+  Total Moves: 19
+
+Game 2:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 6
+  Total Moves: 21
+
+Game 9:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 5
+  Total Moves: 34
+
+Game 7:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 6
+  Total Moves: 30
+
+Game 4:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 5
+  Total Moves: 32
+
+Game 8:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 6
+  Total Moves: 33
+
+Game 6:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 5
+  Total Moves: 53
+
+Game 10:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 6
+  Total Moves: 56
+
+Game 5:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Nicole (meta-llama/llama-3.1-8b-instruct)
+  Rounds: 5
+  Total Moves: 57
+
+Game 3:
+  Players:
+    - Daniel (google/learnlm-1.5-pro-experimental:free)
+    - Nicole (meta-llama/llama-3.1-8b-instruct)
+  Winner: Daniel (google/learnlm-1.5-pro-experimental:free)
+  Rounds: 9
+  Total Moves: 61
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: meta-llama/llama-3.1-8b-instruct
+Most Cautious Model: google/learnlm-1.5-pro-experimental:free
+Most Accurate Liar Detector: meta-llama/llama-3.1-8b-instruct (89.1% success rate)
+Model with Shortest Games: google/learnlm-1.5-pro-experimental:free (5.9 rounds avg)
+Model with Longest Games: google/learnlm-1.5-pro-experimental:free (5.9 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: google/learnlm-1.5-pro-experimental:free (5.3% success rate)
+Best Lie Detector: meta-llama/llama-3.1-8b-instruct (F1 score: 94.3%)
+Most Optimal Bidder: meta-llama/llama-3.1-8b-instruct (55.4% optimal bids)
+Most Adaptive Player: meta-llama/llama-3.1-8b-instruct (10.0% adaptation score)
+Most Rule Adherent: meta-llama/llama-3.1-8b-instruct (56.8% adherence rate)
+
+PROVIDER COMPARISON
+================================================================================
+Provider       Win Rate       Avg Elo        Wins      Games     
+-----------------------------------------------------------------
+meta-llama     90.0%          1016.0     9         10        
+google         10.0%          984.0     1         10        
+
+Provider Advanced Metrics Comparison:
+----------------------------------------------------------------------------------------------------
+Provider       Bluff Success  Lie Detection  Bid Optimality Adaptation     Rule Adherence 
+----------------------------------------------------------------------------------------------------
+meta-llama     0.0%          94.3%          55.4%          10.0%          56.8%
+google         5.3%          10.0%          0.0%          0.0%          0.0%

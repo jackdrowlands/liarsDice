@@ -16,8 +16,9 @@ from typing import Dict, List, Tuple, Set, Optional, Union, Any, DefaultDict, Ca
 # Type aliases for better readability
 ModelID = str
 GameID = int
-BluffData = Dict[str, Union[int, float]]
-LieDetectionData = Dict[str, int]
+JsonDict = Dict[str, Any]
+BluffData = DefaultDict[ModelID, JsonDict]
+LieDetectionData = DefaultDict[ModelID, JsonDict]
 BidData = List[Tuple[int, int]]
 OptimalityData = Dict[str, int]
 AdaptationData = Dict[str, int]
@@ -37,14 +38,17 @@ class GameMetrics:
         # Core metrics tracking
         self.elo_ratings: Dict[ModelID, float] = {}        # Track Elo ratings for each model
         self.game_results: List[Dict[str, Any]] = []       # Store game results
-        self.bluff_data: DefaultDict[ModelID, Dict[str, int]] = defaultdict(lambda: {"successful": 0, "total": 0})
-        self.lie_detection_data: DefaultDict[ModelID, Dict[str, int]] = defaultdict(
-            lambda: {"true_positive": 0, "false_positive": 0, "false_negative": 0}
+        self.bluff_data: BluffData = defaultdict(
+            lambda: cast(JsonDict, {"successful": 0, "total": 0})
+        )
+        # allow nested opponent‐maps and reasoning patterns
+        self.lie_detection_data: LieDetectionData = defaultdict(
+            lambda: cast(JsonDict, {"true_positive": 0, "false_positive": 0, "false_negative": 0})
         )
         self.final_bids: DefaultDict[ModelID, List[Tuple[int, int]]] = defaultdict(list)  # Track final bids in rounds
         self.bid_optimality: DefaultDict[ModelID, Dict[str, int]] = defaultdict(lambda: {"optimal": 0, "total": 0})
         self.adaptation_scores: DefaultDict[ModelID, Dict[str, int]] = defaultdict(lambda: {"adapted": 0, "opportunities": 0})
-        self.rule_adherence: DefaultDict[ModelID, Dict[str, int]] = defaultdict(lambda: {"valid_actions": 0, "total_actions": 0})
+        self.rule_adherence: DefaultDict[ModelID, Dict[str, Any]] = defaultdict(lambda: {"valid_actions": 0, "total_actions": 0})
         self.api_response_times: DefaultDict[ModelID, List[float]] = defaultdict(list)  # Track API response times
         
         # Token usage tracking
@@ -247,22 +251,13 @@ class GameMetrics:
             # Track opponent-specific bluffing if opponent is provided
             if "opponent" in game_context:
                 opponent = game_context["opponent"]
-                # Ensure bluff_data is properly initialized for opponents tracking
-                if "opponents" not in self.bluff_data[model_id]:
-                    self.bluff_data[model_id]["opponents"] = {}
-                
-                # Initialize opponent data if needed
-                opponent_data: Dict[str, Dict[str, int]] = cast(Dict[str, Dict[str, int]], self.bluff_data[model_id].get("opponents", {}))
+                opponents = cast(JsonDict, self.bluff_data[model_id].setdefault("opponents", {}))
+                opponent_data: Dict[str, Dict[str, int]] = opponents
                 if opponent not in opponent_data:
                     opponent_data[opponent] = {"total": 0, "successful": 0}
-                
-                # Update opponent bluff stats
-                opponent_data[opponent]["total"] = opponent_data[opponent].get("total", 0) + 1
+                opponent_data[opponent]["total"] += 1
                 if success:
-                    opponent_data[opponent]["successful"] = opponent_data[opponent].get("successful", 0) + 1
-                
-                # Update the bluff_data dictionary with the modified opponent_data
-                self.bluff_data[model_id]["opponents"] = opponent_data
+                    opponent_data[opponent]["successful"] += 1
                     
             # Add full context to the record
             bluff_record.update(game_context)
@@ -578,7 +573,7 @@ class GameMetrics:
         self.initialize_model(model_id)
         
         # Basic metrics
-        metrics = {
+        metrics: JsonDict = {
             "elo_rating": self.elo_ratings.get(model_id, self.default_elo),
             "games_played": len([r for r in self.game_results if r["winner"] == model_id or r["loser"] == model_id]),
             "wins": len([r for r in self.game_results if r["winner"] == model_id]),
@@ -1018,13 +1013,8 @@ class MetricsVisualizer:
             
         # Prepare data for plotting
         num_vars = len(metrics_to_plot)
-        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-        # Manually create a new list with the closing angle to avoid type errors
-        angles_closed: List[float] = []
-        for angle in angles:
-            angles_closed.append(angle)
-        angles_closed.append(angles[0])  # Close the polygon
-        angles = angles_closed
+        angles = cast(List[float], np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist())
+        angles.append(angles[0])
         
         # Set up the figure
         fig, ax = plt.subplots(figsize=(12, 10), subplot_kw=dict(polar=True))
@@ -1051,15 +1041,8 @@ class MetricsVisualizer:
                         values.append(0.0)
             
             # Normalize values to 0-1 scale
-            normalized_values = [v / 100 for v in values]  # Metrics are already in percentages
-            
-            # Manually create a new list with properly typed values to close the polygon
-            values_closed: List[float] = []
-            for val in normalized_values:
-                values_closed.append(val)
-            values_closed.append(normalized_values[0])
-            values = values_closed
-            
+            values = [v / 100 for v in values]
+            values.append(values[0])
             # Plot the model metrics
             ax.plot(angles, values, linewidth=2, label=model_id)
             ax.fill(angles, values, alpha=0.1)

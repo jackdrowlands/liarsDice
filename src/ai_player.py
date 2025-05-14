@@ -534,8 +534,9 @@ It is now your move. Return exactly one JSON object following the format describ
                 json.dump(invalid_response, f)
                 f.write("\n")
                 
-            # Return a valid fallback bid based on current game state
-            if not game_state.get('last_bid'):
+            # pull out last_bid and narrow its type
+            last_bid = game_state.get('last_bid')
+            if last_bid is None:
                 # First bid in the round - make a safe default bid
                 return {
                     "action": "bid", 
@@ -546,7 +547,7 @@ It is now your move. Return exactly one JSON object following the format describ
                 }
             else:
                 # Get the last bid
-                last_quantity, last_value = game_state['last_bid']
+                last_quantity, last_value = last_bid
                 total_dice = game_state.get('total_dice', 0)
                 
                 # If the last bid is implausible (higher than total dice), call liar

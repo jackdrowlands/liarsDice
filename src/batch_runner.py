@@ -38,6 +38,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger("liarsdice")
 
+# Custom Exception for Rate Limiting
+class RateLimitError(Exception):
+    def __init__(self, model_id, message="Rate limit exceeded"):
+        self.model_id = model_id
+        self.message = f"{message} for model: {model_id}"
+        super().__init__(self.message)
+
 class AsyncGameRunner:
     """
     Runs multiple games concurrently using asyncio.
@@ -147,6 +154,12 @@ class AsyncGameRunner:
                     
                 logger.debug(f"API response received from {model} - time: {response_time:.2f}s, status: {response.status_code}")
                 
+                if response.status_code == 429: # Rate limit exceeded
+                    error_msg = f"RATE LIMIT EXCEEDED for {model}: {response.status_code} - {response.text[:200]}"
+                    logger.error(error_msg)
+                    print(f"STOPPING GAME: {error_msg}") # Clear output to console
+                    raise RateLimitError(model_id=model)
+
                 if response.status_code != 200:
                     error_msg = f"API Error for {model}: {response.status_code} - {response.text[:200]}"
                     logger.error(error_msg)
@@ -221,7 +234,28 @@ class AsyncGameRunner:
             
             # Process response just like the original method
             result = response.json()
-            content = result["choices"][0]["message"]["content"].strip()
+            content = ""
+            # Standard OpenAI-like response structure
+            if "choices" in result and result["choices"] and \
+               isinstance(result["choices"][0], dict) and \
+               "message" in result["choices"][0] and \
+               isinstance(result["choices"][0]["message"], dict) and \
+               "content" in result["choices"][0]["message"]:
+                content = result["choices"][0]["message"]["content"].strip()
+            # Handle Google's Gemini specific response structure (common alternative)
+            elif "candidates" in result and result.get("candidates") and \
+                 isinstance(result["candidates"][0], dict) and \
+                 "content" in result["candidates"][0] and \
+                 isinstance(result["candidates"][0]["content"], dict) and \
+                 "parts" in result["candidates"][0]["content"] and \
+                 result["candidates"][0]["content"].get("parts") and \
+                 isinstance(result["candidates"][0]["content"]["parts"][0], dict) and \
+                 "text" in result["candidates"][0]["content"]["parts"][0]:
+                content = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+            else:
+                logger.error(f"Unrecognized API response structure for {model_id}: {str(result)[:500]}")
+                # Fallback or raise error if content cannot be extracted
+                raise ValueError(f"Could not extract content from API response for {model_id}")
             
             # Extract token usage if available
             prompt_tokens = completion_tokens = total_tokens = 0
@@ -266,13 +300,41 @@ class AsyncGameRunner:
                 # Add truncated prompt information to save space
                 if "data" in request_params and "messages" in request_params["data"] and len(request_params["data"]["messages"]) >= 2:
                     # Include system prompt (usually smaller)
-                    response_log["prompt_system"] = request_params["data"]["messages"][0]["content"]
-                    
+                    if isinstance(request_params["data"]["messages"][0].get("content"), str): # Check if content is a string
+                        response_log["prompt_system"] = request_params["data"]["messages"][0]["content"]
+                    elif isinstance(request_params["data"]["messages"][0].get("content"), list): # Handle list of content parts (e.g. for some multimodal models)
+                         # Try to concatenate text parts if they exist
+                        system_prompt_parts = []
+                        for part in request_params["data"]["messages"][0]["content"]:
+                            if isinstance(part, dict) and "text" in part:
+                                system_prompt_parts.append(part["text"])
+                        if system_prompt_parts:
+                            response_log["prompt_system"] = " ".join(system_prompt_parts)
+                        else:
+                            response_log["prompt_system"] = "[Non-text system prompt content]"
+                    else:
+                        response_log["prompt_system"] = "[Unknown system prompt format]"
+
                     # Truncate user prompt if large
-                    user_prompt = request_params["data"]["messages"][1]["content"]
-                    if len(user_prompt) > 500:
-                        user_prompt = user_prompt[:500] + "... [truncated]"
-                    response_log["prompt_user"] = user_prompt 
+                    user_prompt_content = request_params["data"]["messages"][1]["content"]
+                    user_prompt_str = ""
+                    if isinstance(user_prompt_content, str):
+                        user_prompt_str = user_prompt_content
+                    elif isinstance(user_prompt_content, list):
+                        user_prompt_parts = []
+                        for part in user_prompt_content:
+                            if isinstance(part, dict) and "text" in part:
+                                user_prompt_parts.append(part["text"])
+                        if user_prompt_parts:
+                            user_prompt_str = " ".join(user_prompt_parts)
+                        else:
+                            user_prompt_str = "[Non-text user prompt content]"
+                    else:
+                        user_prompt_str = "[Unknown user prompt format]"
+
+                    if len(user_prompt_str) > 500:
+                        user_prompt_str = user_prompt_str[:500] + "... [truncated]"
+                    response_log["prompt_user"] = user_prompt_str 
                 # Alternatively, try to get it from the player
                 elif hasattr(player, 'get_prompt_for_game'):
                     try:
@@ -671,6 +733,22 @@ class AsyncGameRunner:
                 "game_num": game_num
             }
         
+        except RateLimitError as rle:
+            # Restore output in case of rate limit error
+            if not self.batch_runner.verbose_output:
+                sys.stdout = original_stdout
+            print(f"Game {game_num} ABORTED: {rle.message}")
+            logger.error(f"Game {game_num} ABORTED due to RateLimitError: {rle.message}")
+            self.game_timing_stats[game_num]["error"] = f"RateLimitError: {rle.message}"
+            self.game_timing_stats[game_num]["aborted_due_to_rate_limit"] = True
+
+            return {
+                "winner": None,
+                "game": game, # game might exist but be incomplete
+                "game_num": game_num,
+                "error": f"RateLimitError: {rle.message}",
+                "aborted_due_to_rate_limit": True
+            }
         except asyncio.TimeoutError:
             # Restore output in case of timeout
             if not self.batch_runner.verbose_output:
@@ -740,40 +818,48 @@ class GameBatchRunner:
         self.leaderboard = {}
         self.game_results = []
         self.total_games = 0
-        self.model_stats = {}
+        self.models_per_game = 2
+        self.selected_models = [] # Stores model_info dicts
+        self.auto_mode = True
+        self.verbose_output = False
+        self.use_async = True
+        self.enable_autosaves = False
+        self.save_individual_games = False
+        self.create_visualizations = True
         self.use_local_endpoint = False
-        self.local_endpoint_url = None
-        self.local_models = []
-        self.enable_autosaves = True  # Default to enabled
-        self.save_individual_games = True  # Save individual games by default
-        self.create_visualizations = True  # Create enhanced visualizations by default
+        self.openrouter_api_key = None # Will be set in setup_batch
+        self.available_models = []   # Will be populated in setup_batch
+        self.model_stats = {}
+        # self.local_endpoint_url = None # Potentially set in setup_batch if local is used
+        # self.local_models = [] # Potentially populated in setup_batch if local is used
     
     def setup_batch(self):
-        """Setup a batch of games to run"""
+        """Setup a batch of games to run interactively"""
         if not REQUESTS_AVAILABLE:
             print("API requests are not available.")
             print("Install the required package with: pip install requests")
             return False
         
-        print("\n" + "=" * 70)
-        print("LIARS DICE MODEL TOURNAMENT")
+        print("\\n" + "=" * 70)
+        print("LIARS DICE MODEL TOURNAMENT SETUP")
         print("=" * 70)
         
-        # Ask if user wants to use a local LLM server
-        self.use_local_endpoint = input("Do you want to use a local LLM server at http://127.0.0.1:1234? (y/n): ").lower().strip() == 'y'
-        
-        # Get OpenRouter API key (for OpenRouter models)
-        self.openrouter_api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        if not self.openrouter_api_key and not self.use_local_endpoint:
-            self.openrouter_api_key = input("Enter your OpenRouter API key: ")
-            os.environ["OPENROUTER_API_KEY"] = self.openrouter_api_key
-        elif not self.openrouter_api_key and self.use_local_endpoint:
-            print("No OpenRouter API key provided. Will use local models.")
-        
+        self.use_local_endpoint = input("Do you want to use a local LLM server (e.g., at http://127.0.0.1:1234)? (y/n): ").lower().strip() == 'y'
+
+        if not self.use_local_endpoint:
+            self.openrouter_api_key = os.environ.get("OPENROUTER_API_KEY")
+            if not self.openrouter_api_key:
+                self.openrouter_api_key = input("Enter your OpenRouter API key: ")
+                os.environ["OPENROUTER_API_KEY"] = self.openrouter_api_key
+            else:
+                print("Using OpenRouter API key from environment variable.")
+        else:
+            print("Using local LLM server. Ensure it's running and configured.")
+
         # Get the number of games to run
         while True:
             try:
-                self.total_games = int(input("\nHow many games to run in the tournament? "))
+                self.total_games = int(input("How many games to run in the tournament? (e.g., 10): "))
                 if self.total_games < 1:
                     print("Please enter a positive number.")
                     continue
@@ -784,7 +870,7 @@ class GameBatchRunner:
         # Get the number of models per game
         while True:
             try:
-                self.models_per_game = int(input("How many models per game? (2-6 recommended): "))
+                self.models_per_game = int(input(f"How many models per game? (2-{min(6, len(self.available_models) if self.available_models else 6)} recommended): "))
                 if self.models_per_game < 2:
                     print("You need at least 2 models per game.")
                     continue
@@ -793,115 +879,104 @@ class GameBatchRunner:
                 print("Please enter a valid number.")
         
         # Get available models (including local models if enabled)
-        game = LiarsDice()
-        self.available_models = game.get_available_models(self.use_local_endpoint, False)
+        game_for_models = LiarsDice() # Helper instance to call get_available_models
+        self.available_models = game_for_models.get_available_models(self.use_local_endpoint, False)
         
         if not self.available_models:
-            print("No models available. Check your API key and connection.")
+            print("No models available. Check your API key and connection, or local server setup.")
             return False
         
-        self.selected_models = []
-        
-        # Show available models
-        print("\nAvailable models:")
+        print("\\nAvailable models:")
         for i, model in enumerate(self.available_models):
-            provider = model["provider"]
-            model_id = model["id"]
+            provider = model.get("provider", "Unknown")
+            model_id = model.get("id", "Unknown ID")
             provider_label = ""
             if provider == PROVIDER_LOCAL:
                 provider_label = " (Local)"
             print(f"{i+1}. {model_id}{provider_label}")
         
-        # Select models to include
-        print("\nSelect models to include (enter model numbers separated by spaces, or 'all'):")
-        selection = input("> ").strip()
-        
-        if selection.lower() == "all":
-            self.selected_models = self.available_models.copy()
-        else:
-            selection = selection.split()
-            for idx_str in selection:
+        self.selected_models = []
+        print("\\nSelect models to include (enter model numbers separated by spaces, or 'all'):")
+        while True:
+            selection = input("> ").strip()
+            if selection.lower() == "all":
+                self.selected_models = self.available_models.copy()
+                break
+            else:
                 try:
-                    idx = int(idx_str) - 1
-                    if 0 <= idx < len(self.available_models):
-                        self.selected_models.append(self.available_models[idx])
+                    selected_indices = [int(idx_str) - 1 for idx_str in selection.split()]
+                    self.selected_models = []
+                    valid_selection = True
+                    for idx in selected_indices:
+                        if 0 <= idx < len(self.available_models):
+                            if self.available_models[idx] not in self.selected_models:
+                                self.selected_models.append(self.available_models[idx])
+                        else:
+                            print(f"Invalid model number: {idx+1}")
+                            valid_selection = False
+                            break
+                    if valid_selection and self.selected_models:
+                        break
+                    elif not self.selected_models:
+                        print("Please select at least one model.")
                 except ValueError:
-                    continue
+                    print("Invalid input. Please enter numbers separated by spaces or 'all'.")
         
-        # Make sure we have at least 2 models
-        if len(self.selected_models) < 2:
-            print("You need to select at least 2 models. Using the first two available models.")
-            self.selected_models = self.available_models[:2]
+        if len(self.selected_models) < self.models_per_game:
+            print(f"Error: You selected {len(self.selected_models)} model(s), but need at least {self.models_per_game} for each game.")
+            # Optionally, prompt again or return False
+            return False
+
+        print("\\nSelected models for tournament:")
+        for model_info in self.selected_models:
+            model_id = model_info.get("id", "Unknown ID")
+            provider = model_info.get("provider", "Unknown")
+            print(f"- {model_id}{' (Local)' if provider == PROVIDER_LOCAL else ''}")
         
-        # Print selected models
-        print("\nSelected models for tournament:")
-        for model in self.selected_models:
-            provider = model["provider"]
-            model_id = model["id"]
-            print(f"- {model_id}{' (Local)' if provider == 'local' else ''}")
-        
-        # Initialize leaderboard and stats for all models
-        for model in self.selected_models:
-            model_id = model["id"]
+        # Initialize leaderboard and stats for all selected models
+        self.leaderboard = {}
+        self.model_stats = {}
+        for model_info in self.selected_models:
+            model_id = model_info["id"]
             self.leaderboard[model_id] = {
-                "wins": 0,
-                "games_played": 0,
-                "win_rate": 0.0,
-                "model": model_id
+                "wins": 0, "games_played": 0, "win_rate": 0.0, "model": model_id
             }
-            
             self.model_stats[model_id] = {
-                "total_rounds_played": 0,
-                "avg_rounds_survived": 0,
-                "total_bids": 0,
-                "total_liar_calls": 0,
-                "successful_liar_calls": 0,
-                "unsuccessful_liar_calls": 0,
-                "liar_success_rate": 0.0,
-                "avg_rounds_per_game": 0.0,
-                "early_game_wins": 0,    # Wins in games with fewer than 10 rounds
-                "mid_game_wins": 0,      # Wins in games with 10-20 rounds
-                "long_game_wins": 0      # Wins in games with more than 20 rounds
+                "total_rounds_played": 0, "avg_rounds_survived": 0, "total_bids": 0,
+                "total_liar_calls": 0, "successful_liar_calls": 0, "unsuccessful_liar_calls": 0,
+                "liar_success_rate": 0.0, "avg_rounds_per_game": 0.0,
+                "early_game_wins": 0, "mid_game_wins": 0, "long_game_wins": 0
             }
         
-        # Ask about auto mode
-        self.auto_mode = input("\nRun all games in automatic mode? (y/n): ").lower().strip() == 'y'
+        self.auto_mode = input("\\nRun all games in automatic mode (AI vs AI, no human interaction during games)? (y/n): ").lower().strip() == 'y'
+        self.verbose_output = input("Show detailed game-by-game output in the console? (y/n): ").lower().strip() == 'y'
         
-        # Ask about detailed output
-        self.verbose_output = input("Show detailed output for each game? (y/n): ").lower().strip() == 'y'
-        
-        # Ask about execution mode
-        self.use_async = input("\nUse asynchronous game execution? (y/n): ").lower().strip() == 'y'
-        if self.use_async:
-            print("Using asynchronous execution for improved performance.")
+        async_choice = input("\\nUse asynchronous game execution (recommended for speed with API calls)? (y/n): ").lower().strip()
+        if async_choice == 'y':
             try:
                 import httpx
+                self.use_async = True
+                print("Using asynchronous execution.")
             except ImportError:
-                print("httpx package not installed. Installing it is required for async execution.")
+                print("httpx package not installed. It is required for async execution.")
                 print("Install with: pip install httpx")
                 self.use_async = False
-                print("Falling back to threaded execution.")
+                print("Falling back to threaded (synchronous) execution.")
+        else:
+            self.use_async = False
+            print("Using threaded (synchronous) execution.")
         
-        # Ask about enabling autosaves
-        self.enable_autosaves = input("Enable periodic autosaves? (y/n): ").lower().strip() == 'y'
+        self.enable_autosaves = input("Enable periodic autosaves of tournament progress? (y/n): ").lower().strip() == 'y'
         if self.enable_autosaves:
             print("Autosaves enabled - tournament state will be saved periodically.")
-        else:
-            print("Autosaves disabled - tournament state will not be saved until completion.")
-            
-        # Ask about saving individual games
-        self.save_individual_games = input("Save individual game data after each game? (y/n): ").lower().strip() == 'y'
+        
+        self.save_individual_games = input("Save detailed data for each individual game? (y/n): ").lower().strip() == 'y'
         if self.save_individual_games:
-            print("Individual game saving enabled - each game will be saved to a separate file with complete move history.")
-        else:
-            print("Individual game saving disabled - only tournament summary will be saved.")
+            print("Individual game saving enabled.")
             
-        # Ask about generating enhanced visualizations
-        self.create_visualizations = input("Generate enhanced visualizations after tournament? (y/n): ").lower().strip() == 'y'
+        self.create_visualizations = input("Generate enhanced visualizations after the tournament? (y/n): ").lower().strip() == 'y'
         if self.create_visualizations:
-            print("Enhanced visualizations enabled - publication-quality charts and graphs will be generated.")
-        else:
-            print("Enhanced visualizations disabled - only basic visualizations will be included.")
+            print("Enhanced visualizations will be generated.")
         
         return True
     
@@ -1681,15 +1756,18 @@ class GameBatchRunner:
                     f.write(f"   Avg API Response Time: {avg_time:.2f} seconds\n")
                     
                     # Add token usage metrics if available
-                    if 'token_usage' in metrics:
+                    if 'token_usage' in metrics and isinstance(metrics['token_usage'], dict):
                         token_usage = metrics['token_usage']
                         f.write(f"   Token Usage:\n")
-                        f.write(f"     - Total Tokens: {token_usage['total_tokens']}\n")
-                        f.write(f"     - Prompt Tokens: {token_usage['total_prompt_tokens']}\n")
-                        f.write(f"     - Completion Tokens: {token_usage['total_completion_tokens']}\n")
-                        avg_tpa = token_usage.get('avg_tokens_per_action', 0)
-                        avg_tpa = avg_tpa if isinstance(avg_tpa, (int, float)) else 0
-                        f.write(f"     - Avg Tokens Per Action: {avg_tpa:.1f}\n")
+                        f.write(f"     - Total Tokens: {token_usage.get('total_tokens', 'N/A')}\n")
+                        f.write(f"     - Prompt Tokens: {token_usage.get('total_prompt_tokens', 'N/A')}\n")
+                        f.write(f"     - Completion Tokens: {token_usage.get('total_completion_tokens', 'N/A')}\n")
+                        avg_tpa = token_usage.get('avg_tokens_per_action', 'N/A')
+                        # Ensure avg_tpa is formatted correctly if it's a number
+                        avg_tpa_display = f"{avg_tpa:.1f}" if isinstance(avg_tpa, (int, float)) else avg_tpa
+                        f.write(f"     - Avg Tokens Per Action: {avg_tpa_display}\n")
+                    else:
+                        f.write(f"   Token Usage: N/A\n")
                 
                 # Original metrics
                 liar_call_success_rate = model_stats['liar_success_rate']

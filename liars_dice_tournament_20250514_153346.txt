@@ -1,0 +1,108 @@
+LIARS DICE MODEL TOURNAMENT RESULTS
+================================================================================
+Date: 2025-05-14 15:33:46
+Total Games: 2
+Models per Game: 2
+
+Providers Used: meta-llama
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     meta-llama/llama-4-maveri...  Emily               1016.0    50.0%          1         2         
+2     meta-llama/llama-4-scout:...  David               984.0     50.0%          1         2         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-4-maverick:free (as 'Emily')
+   Provider: meta-llama
+   Win Rate: 50.0%
+   Games Won: 1 / 2
+   Avg. Rounds per Game: 6.5
+   Elo Rating: 984.0
+   Bluff Success Rate: 26.7%
+   Lie Detection (Precision): 75.0%
+   Lie Detection (Recall): 60.0%
+   Lie Detection (F1): 64.3%
+   Average Final Bid: 3.85
+   Bid Optimality: 66.6%
+   Adaptation Score: 50.0%
+   Rule Adherence Rate: 44.6%
+   Avg API Response Time: 3.60 seconds
+   Token Usage:
+     - Total Tokens: 15629.5
+     - Prompt Tokens: N/A
+     - Completion Tokens: N/A
+     - Avg Tokens Per Action: 1244.6
+   Liar Call Success Rate: 83.3%
+   Liar Calls: 5 successful, 1 unsuccessful
+   Playing Style: 50 bids, 6 liar calls (10.7% liar calls)
+   Wins by Game Length: 1 early, 0 mid, 0 long
+
+2. meta-llama/llama-4-scout:free (as 'David')
+   Provider: meta-llama
+   Win Rate: 50.0%
+   Games Won: 1 / 2
+   Avg. Rounds per Game: 6.5
+   Elo Rating: 1016.0
+   Bluff Success Rate: 0.0%
+   Lie Detection (Precision): 66.7%
+   Lie Detection (Recall): 66.7%
+   Lie Detection (F1): 66.7%
+   Average Final Bid: 4.67
+   Bid Optimality: 32.7%
+   Adaptation Score: 100.0%
+   Rule Adherence Rate: 38.2%
+   Avg API Response Time: 3.19 seconds
+   Token Usage:
+     - Total Tokens: 15832.0
+     - Prompt Tokens: N/A
+     - Completion Tokens: N/A
+     - Avg Tokens Per Action: 1266.1
+   Liar Call Success Rate: 60.0%
+   Liar Calls: 3 successful, 2 unsuccessful
+   Playing Style: 46 bids, 5 liar calls (9.8% liar calls)
+   Wins by Game Length: 1 early, 0 mid, 0 long
+
+GAME RESULTS
+================================================================================
+Game 2:
+  Players:
+    - Emily (meta-llama/llama-4-maverick:free)
+    - David (meta-llama/llama-4-scout:free)
+  Winner: David (meta-llama/llama-4-scout:free)
+  Rounds: 6
+  Total Moves: 55
+
+Game 1:
+  Players:
+    - Emily (meta-llama/llama-4-maverick:free)
+    - David (meta-llama/llama-4-scout:free)
+  Winner: Emily (meta-llama/llama-4-maverick:free)
+  Rounds: 7
+  Total Moves: 52
+
+
+MODEL ANALYSIS
+================================================================================
+Most Aggressive Model: meta-llama/llama-4-maverick:free
+Most Cautious Model: meta-llama/llama-4-scout:free
+Most Accurate Liar Detector: meta-llama/llama-4-maverick:free (83.3% success rate)
+Model with Shortest Games: meta-llama/llama-4-maverick:free (6.5 rounds avg)
+Model with Longest Games: meta-llama/llama-4-maverick:free (6.5 rounds avg)
+
+ADVANCED METRICS ANALYSIS
+================================================================================
+Best Bluffer: meta-llama/llama-4-maverick:free (26.7% success rate)
+Best Lie Detector: meta-llama/llama-4-scout:free (F1 score: 66.7%)
+Most Optimal Bidder: meta-llama/llama-4-maverick:free (66.6% optimal bids)
+Most Adaptive Player: meta-llama/llama-4-scout:free (100.0% adaptation score)
+Most Rule Adherent: meta-llama/llama-4-maverick:free (44.6% adherence rate)
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Enhanced visualizations have been generated in liars_dice_tournament_20250514_153346_visualizations/
+

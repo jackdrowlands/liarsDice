@@ -1,0 +1,3 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
+meta-llama/llama-4-scout:free,Rachel,meta-llama,1016.0,100.0,2,2,16.666666666666664,90.0,100.0,94.44444444444444,6.166666666666666,54.16666666666667,0.0,20.578231292517003,2.970803773403168,7.0,2,0,0
+meta-llama/llama-4-maverick:free,Ashley,meta-llama,984.0,0.0,0,2,8.333333333333332,83.33333333333333,36.666666666666664,50.0,3.416666666666667,49.2063492063492,0.0,16.666666666666668,3.330700659751892,7.0,0,0,0

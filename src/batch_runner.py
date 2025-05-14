@@ -2188,7 +2188,30 @@ class GameBatchRunner:
                                         metrics.api_response_times[model].append(avg_time)
                         
             # Generate comprehensive visualizations
-            generated_files = metrics.create_visualizations(output_dir=vis_dir, prefix=base_filename)
+            visualizer = MetricsVisualizer(metrics) # Create MetricsVisualizer instance
+            generated_files = {}
+            try:
+                elo_chart_path = visualizer.generate_elo_rating_chart(output_file=f"{prefix}_elo_progression.png")
+                if elo_chart_path and os.path.exists(os.path.join(output_dir, elo_chart_path)): # Check if path relative to output_dir
+                     generated_files["Elo Rating Progression Chart"] = elo_chart_path
+                elif elo_chart_path and os.path.exists(elo_chart_path): # Check if absolute path
+                     generated_files["Elo Rating Progression Chart"] = os.path.basename(elo_chart_path)
+
+                radar_chart_path = visualizer.generate_metric_comparison_radar(output_file=f"{prefix}_metrics_radar.png")
+                if radar_chart_path and os.path.exists(os.path.join(output_dir, radar_chart_path)):
+                    generated_files["Metric Comparison Radar Chart"] = radar_chart_path
+                elif radar_chart_path and os.path.exists(radar_chart_path):
+                     generated_files["Metric Comparison Radar Chart"] = os.path.basename(radar_chart_path)
+
+                heatmap_path = visualizer.generate_win_matrix_heatmap(output_file=f"{prefix}_win_matrix.png")
+                if heatmap_path and os.path.exists(os.path.join(output_dir, heatmap_path)):
+                    generated_files["Win Matrix Heatmap"] = heatmap_path
+                elif heatmap_path and os.path.exists(heatmap_path):
+                     generated_files["Win Matrix Heatmap"] = os.path.basename(heatmap_path)
+
+            except Exception as e:
+                print(f"Error during enhanced visualization generation: {e}")
+                # Potentially log this error more formally
             
             # Add a note to the text report about visualizations
             # derive text report filename from base_filename

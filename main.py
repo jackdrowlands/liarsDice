@@ -30,7 +30,7 @@ def main():
 
     if args.resume_tournament:
         batch_runner = GameBatchRunner() # Create instance
-        if batch_runner.load_tournament_from_file(args.resume_tournament):
+        if batch_runner.load_tournament_state(args.resume_tournament):
             print(f"Tournament resumed from {args.resume_tournament}")
             # The run_tournament method should handle whether to create visualizations based on its internal state
             batch_runner.run_tournament()
@@ -74,7 +74,7 @@ def main():
         elif choice == '5':
             filename = input("Enter filename to resume tournament from (e.g., tournament_state.json): ").strip()
             batch_runner = GameBatchRunner() # Create instance
-            if batch_runner.load_tournament_from_file(filename):
+            if batch_runner.load_tournament_state(filename):
                 print(f"Tournament resumed from {filename}")
                 batch_runner.run_tournament()
             else:

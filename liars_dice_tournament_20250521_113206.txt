@@ -1,0 +1,123 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-05-21 11:32:06
+Total Games: 10
+Models/Game: 6
+Providers: qwen, meta-llama, mistralai, cohere, google
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     meta-llama/llama-3.1-8b-i...  John                986.7     60.0%          3         5         
+2     mistralai/mistral-small-3...  Sarah               1073.0     40.0%          2         5         
+3     qwen/qwen-2.5-7b-instruct     Jessica             1073.0     33.3%          2         6         
+4     mistralai/mistral-7b-inst...  Amanda              985.4     14.3%          1         7         
+5     mistralai/mistral-nemo        Kevin               986.1     11.1%          1         9         
+6     google/gemini-flash-1.5-8b    John                984.0     11.1%          1         9         
+7     mistralai/mistral-7b-inst...  Daniel              986.1     0.0%          0         6         
+8     mistralai/ministral-3b        Laura               984.7     0.0%          0         5         
+9     cohere/command-r7b-12-2024    Megan               986.7     0.0%          0         2         
+10    google/gemini-2.0-flash-l...  Amanda              985.4     0.0%          0         6         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-3.1-8b-instruct (as 'John')
+   Provider: meta-llama
+   Win Rate: 60.0% (3/5)
+   Elo: 986.7
+   Bluff Success: 6.7%
+   Lie Detection (F1): 51.7%
+   Avg. Rounds/Game: 28.8
+   Liar Call Success: 53.3%
+
+2. mistralai/mistral-small-3.1-24b-instruct (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 40.0% (2/5)
+   Elo: 1073.0
+   Bluff Success: 24.2%
+   Lie Detection (F1): 49.7%
+   Avg. Rounds/Game: 28.4
+   Liar Call Success: 65.2%
+
+3. qwen/qwen-2.5-7b-instruct (as 'Jessica')
+   Provider: qwen
+   Win Rate: 33.3% (2/6)
+   Elo: 1073.0
+   Bluff Success: 23.5%
+   Lie Detection (F1): 19.2%
+   Avg. Rounds/Game: 28.2
+   Liar Call Success: 100.0%
+
+4. mistralai/mistral-7b-instruct (as 'Amanda')
+   Provider: mistralai
+   Win Rate: 14.3% (1/7)
+   Elo: 985.4
+   Bluff Success: 47.4%
+   Lie Detection (F1): 54.4%
+   Avg. Rounds/Game: 28.1
+   Liar Call Success: 71.4%
+
+5. mistralai/mistral-nemo (as 'Kevin')
+   Provider: mistralai
+   Win Rate: 11.1% (1/9)
+   Elo: 986.1
+   Bluff Success: 39.6%
+   Lie Detection (F1): 24.5%
+   Avg. Rounds/Game: 28.1
+   Liar Call Success: 42.4%
+
+6. google/gemini-flash-1.5-8b (as 'John')
+   Provider: google
+   Win Rate: 11.1% (1/9)
+   Elo: 984.0
+   Bluff Success: 29.2%
+   Lie Detection (F1): 22.8%
+   Avg. Rounds/Game: 28.1
+   Liar Call Success: 80.0%
+
+7. mistralai/mistral-7b-instruct-v0.3 (as 'Daniel')
+   Provider: mistralai
+   Win Rate: 0.0% (0/6)
+   Elo: 986.1
+   Bluff Success: 16.7%
+   Lie Detection (F1): 28.6%
+   Avg. Rounds/Game: 28.2
+   Liar Call Success: 45.2%
+
+8. mistralai/ministral-3b (as 'Laura')
+   Provider: mistralai
+   Win Rate: 0.0% (0/5)
+   Elo: 984.7
+   Bluff Success: 35.0%
+   Lie Detection (F1): 23.9%
+   Avg. Rounds/Game: 28.2
+   Liar Call Success: 47.4%
+
+9. cohere/command-r7b-12-2024 (as 'Megan')
+   Provider: cohere
+   Win Rate: 0.0% (0/2)
+   Elo: 986.7
+   Bluff Success: 12.5%
+   Lie Detection (F1): 31.3%
+   Avg. Rounds/Game: 28.0
+   Liar Call Success: 60.0%
+
+10. google/gemini-2.0-flash-lite-001 (as 'Amanda')
+   Provider: google
+   Win Rate: 0.0% (0/6)
+   Elo: 985.4
+   Bluff Success: 33.3%
+   Lie Detection (F1): 33.5%
+   Avg. Rounds/Game: 28.0
+   Liar Call Success: 45.5%
+
+GAME RESULTS, MODEL ANALYSIS etc. would be here...
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250521_113206_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png

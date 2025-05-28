@@ -1,0 +1,126 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-05-21 12:33:54
+Total Games: 1
+Models/Game: 2
+Providers: qwen, cohere, mistralai, google, meta-llama
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     google/gemini-2.0-flash-l...  Amanda              1016.0     100.0%          1         1         
+2     mistralai/mistral-7b-inst...  Nico Riley          1000.0     0.0%          0         0         
+3     mistralai/mistral-7b-inst...  Michael             984.0     0.0%          0         1         
+4     meta-llama/llama-3.1-8b-i...  Nico Riley          1000.0     0.0%          0         0         
+5     mistralai/mistral-nemo        Vaughn Miller       1000.0     0.0%          0         0         
+6     mistralai/ministral-3b        Sidney Shaw         1000.0     0.0%          0         0         
+7     qwen/qwen-2.5-7b-instruct     Vaughn Miller       1000.0     0.0%          0         0         
+8     cohere/command-r7b-12-2024    Indigo Carter       1000.0     0.0%          0         0         
+9     google/gemini-flash-1.5-8b    Taylor Wright       1000.0     0.0%          0         0         
+10    mistralai/mistral-small-3...  Logan Bailey        1000.0     0.0%          0         0         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. google/gemini-2.0-flash-lite-001 (as 'Amanda')
+   Provider: google
+   Win Rate: 100.0% (1/1)
+   Elo: 1016.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 80.0%
+   Avg. Rounds/Game: 8.0
+   Liar Call Success: 66.7%
+
+2. mistralai/mistral-7b-instruct-v0.3 (as 'Nico Riley')
+   Provider: mistralai
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+3. mistralai/mistral-7b-instruct (as 'Michael')
+   Provider: mistralai
+   Win Rate: 0.0% (0/1)
+   Elo: 984.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 66.7%
+   Avg. Rounds/Game: 8.0
+   Liar Call Success: 100.0%
+
+4. meta-llama/llama-3.1-8b-instruct (as 'Nico Riley')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+5. mistralai/mistral-nemo (as 'Vaughn Miller')
+   Provider: mistralai
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+6. mistralai/ministral-3b (as 'Sidney Shaw')
+   Provider: mistralai
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+7. qwen/qwen-2.5-7b-instruct (as 'Vaughn Miller')
+   Provider: qwen
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+8. cohere/command-r7b-12-2024 (as 'Indigo Carter')
+   Provider: cohere
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+9. google/gemini-flash-1.5-8b (as 'Taylor Wright')
+   Provider: google
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+10. mistralai/mistral-small-3.1-24b-instruct (as 'Logan Bailey')
+   Provider: mistralai
+   Win Rate: 0.0% (0/0)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+GAME RESULTS, MODEL ANALYSIS etc. would be here...
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250521_123354_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250521_123354_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250521_123354_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250521_123354_win_matrix_heatmap.png

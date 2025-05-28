@@ -1,0 +1,11 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection F1
+mistralai/mistral-nemo,Thomas,mistralai,1016.0,100.0,1,1,0.0,83.33333333333333
+mistralai/mistral-7b-instruct-v0.3,Indigo Carter,mistralai,1000.0,0,0,0,0,0
+mistralai/mistral-7b-instruct,Jordan Smith,mistralai,1000.0,0,0,0,0,0
+meta-llama/llama-3.1-8b-instruct,Vaughn Miller,meta-llama,1000.0,0,0,0,0,0
+mistralai/ministral-3b,Sarah,mistralai,984.0,0.0,0,1,16.666666666666664,40.0
+qwen/qwen-2.5-7b-instruct,Kennedy Ross,qwen,1000.0,0,0,0,0,0
+cohere/command-r7b-12-2024,Ellis Jordan,cohere,1000.0,0,0,0,0,0
+google/gemini-flash-1.5-8b,Gray Wilson,google,1000.0,0,0,0,0,0
+mistralai/mistral-small-3.1-24b-instruct,Harper Lee,mistralai,1000.0,0,0,0,0,0
+google/gemini-2.0-flash-lite-001,Jordan Smith,google,1000.0,0,0,0,0,0

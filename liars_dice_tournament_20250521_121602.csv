@@ -1,0 +1,11 @@
+Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection F1
+mistralai/mistral-7b-instruct-v0.3,Ashley,mistralai,1073.00566158348,50.0,1,2,0.0,51.388888888888886
+google/gemini-2.0-flash-lite-001,Emily,google,1073.00566158348,50.0,1,2,0.0,52.5
+mistralai/ministral-3b,Daniel,mistralai,986.0982942088476,40.0,2,5,33.33333333333333,57.87376048817697
+mistralai/mistral-7b-instruct,Nicole,mistralai,984.736306793522,25.0,1,4,22.916666666666664,42.69230769230769
+meta-llama/llama-3.1-8b-instruct,Daniel,meta-llama,986.723864535874,0.0,0,4,47.10317460317461,20.833333333333332
+mistralai/mistral-nemo,James,mistralai,985.4358728782763,0.0,0,1,0.0,0.0
+qwen/qwen-2.5-7b-instruct,Brian,qwen,984.0,0.0,0,3,31.48148148148148,0.0
+cohere/command-r7b-12-2024,Thomas,cohere,984.0,0.0,0,3,39.25925925925926,49.36507936507937
+google/gemini-flash-1.5-8b,Michael,google,985.4358728782763,0.0,0,3,33.98148148148148,11.111111111111109
+mistralai/mistral-small-3.1-24b-instruct,Daniel,mistralai,986.723864535874,0.0,0,3,8.333333333333334,29.019607843137255

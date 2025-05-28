@@ -1,0 +1,35 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-05-21 12:26:36
+Total Games: 1
+Models/Game: 2
+Providers: qwen, mistralai, meta-llama, cohere, google
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     mistralai/mistral-small-3...  Harper Lee          1016.0     100.0%          1         1         
+2     mistralai/mistral-7b-inst...  Nico Riley          1000.0     0.0%          0         0         
+3     mistralai/mistral-7b-inst...  Reese Johnson       1000.0     0.0%          0         0         
+4     meta-llama/llama-3.1-8b-i...  Amanda              984.0     0.0%          0         1         
+5     mistralai/mistral-nemo        Blake Taylor        1000.0     0.0%          0         0         
+6     mistralai/ministral-3b        Blake Taylor        1000.0     0.0%          0         0         
+7     qwen/qwen-2.5-7b-instruct     Vaughn Miller       1000.0     0.0%          0         0         
+8     cohere/command-r7b-12-2024    Parker Quinn        1000.0     0.0%          0         0         
+9     google/gemini-flash-1.5-8b    Finley Quinn        1000.0     0.0%          0         0         
+10    google/gemini-2.0-flash-l...  Nico Riley          1000.0     0.0%          0         0         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. mistralai/mistral-small-3.1-24b-instruct (as 'Harper Lee')
+   Provider: mistralai
+   Win Rate: 100.0% (1/1)
+   Elo: 1016.0
+   Bluff Success: 25.0%
+   Lie Detection (F1): 88.9%
+   Avg. Rounds/Game: 9.0
+   Liar Call Success: 80.0%
+
+2. mistralai/mistral-7b-instruct-v0.3 (as 'Nico Riley')

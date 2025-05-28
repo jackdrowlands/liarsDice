@@ -1029,9 +1029,15 @@ class GameBatchRunner:
                 # Simplified for restoration - uses all_adv_metrics where possible
                 m_s = self.model_stats.get(model_id, {}); adv_m = all_adv_metrics.get(model_id, {})
                 f.write(f"\n{i+1}. {model_id} (as '{name_map.get(model_id,'N/A')}')\n")
-                f.write(f"   Provider: {model_id.split('/')[0] if '/' in model_id else 'N/A'}\n   Win Rate: {stats['win_rate']:.1f}% ({stats['wins']}/{stats['games_played']})\n   Elo: {adv_m.get('elo_rating', 'N/A'):.1f}\n")
+                elo_rating_val = adv_m.get('elo_rating', 'N/A')
+                elo_rating_str = f"{elo_rating_val:.1f}" if isinstance(elo_rating_val, (int, float)) else str(elo_rating_val)
+                f.write(f"   Provider: {model_id.split('/')[0] if '/' in model_id else 'N/A'}\n   Win Rate: {stats['win_rate']:.1f}% ({stats['wins']}/{stats['games_played']})\n   Elo: {elo_rating_str}\n")
                 # Add more detailed stats using adv_m, example:
-                f.write(f"   Bluff Success: {adv_m.get('bluff_success_rate',0):.1f}%\n   Lie Detection (F1): {adv_m.get('lie_detection',{}).get('f1_score',0):.1f}%\n")
+                bluff_success_val = adv_m.get('bluff_success_rate',0)
+                bluff_success_str = f"{bluff_success_val:.1f}%" if isinstance(bluff_success_val, (int, float)) else str(bluff_success_val)
+                lie_detection_f1_val = adv_m.get('lie_detection',{}).get('f1_score',0)
+                lie_detection_f1_str = f"{lie_detection_f1_val:.1f}%" if isinstance(lie_detection_f1_val, (int, float)) else str(lie_detection_f1_val)
+                f.write(f"   Bluff Success: {bluff_success_str}\n   Lie Detection (F1): {lie_detection_f1_str}\n")
                 # ... continue for other adv_metrics ...
                 f.write(f"   Avg. Rounds/Game: {m_s.get('avg_rounds_per_game',0):.1f}\n   Liar Call Success: {m_s.get('liar_success_rate',0):.1f}%\n")
             # ... (Game Results, Model Analysis, Advanced Metrics Analysis, Provider Comparison simplified for brevity) ...
@@ -1095,15 +1101,97 @@ class GameBatchRunner:
         metrics_agg = GameMetrics()
         for m_id in self.leaderboard: metrics_agg.initialize_model(m_id)
         # ... (Simplified metric aggregation for MetricsVisualizer) ...
+
+        # Populate metrics_agg with detailed data before initializing MetricsVisualizer
+        # Temporary structures to hold aggregated data
+        temp_all_elo_data = defaultdict(list)
+        temp_win_matrix_data = defaultdict(lambda: defaultdict(int))
+
+        for gr in self.game_results:
+            game_obj = gr.get("game_obj")
+            game_num = gr.get("game_number")
+
+            if game_obj and game_num is not None:
+                # 1. Aggregate ELO data
+                # Prefer using game_obj.metrics.elo_ratings_over_time if it contains (overall_game_num, elo)
+                # For this fix, we'll use the robust method of taking final ELO after each game via game_obj.get_metrics()
+                # as the exact structure of game_obj.metrics.elo_ratings_over_time isn't confirmed for historical global game numbers.
+                game_metrics_dict = game_obj.get_metrics() # Dict: {model_id: {stats}}
+                for model_id_in_game, model_stats_dict in game_metrics_dict.items():
+                    if 'elo_rating' in model_stats_dict:
+                        temp_all_elo_data[model_id_in_game].append((game_num, model_stats_dict['elo_rating']))
+                
+                # 2. Aggregate Win Matrix data
+                winner_model_in_game = gr.get("winner_model")
+                player_infos = gr.get("players", []) 
+                player_models_in_game = [p['model'] for p in player_infos if 'model' in p]
+
+                if winner_model_in_game and player_models_in_game:
+                    for p_model in player_models_in_game:
+                        if p_model != winner_model_in_game:
+                            temp_win_matrix_data[winner_model_in_game][p_model] += 1
+        
+        # Process and store aggregated ELO data in metrics_agg
+        for model_id, data_points in temp_all_elo_data.items():
+            # Assumes metrics_agg.initialize_model might set an initial Elo point e.g. (0, 1000)
+            # We combine, sort, and unique-ify
+            current_elo_history = metrics_agg.elo_ratings_over_time.get(model_id, [])
+            combined_points = current_elo_history + data_points
+            
+            if combined_points:
+                # Sort by game number to ensure chronological order
+                # Deduplicate by taking the last entry for a given game_num
+                unique_points_dict = {}
+                for game_n, elo_val in sorted(combined_points, key=lambda x: x[0]):
+                    unique_points_dict[game_n] = elo_val
+                
+                metrics_agg.elo_ratings_over_time[model_id] = sorted(unique_points_dict.items())
+
+
+        # Populate win_matrix in metrics_agg
+        # This assumes GameMetrics class has a 'win_matrix' attribute of type defaultdict(lambda: defaultdict(int))
+        # If not, GameMetrics needs to be adapted, or MetricsVisualizer needs to accept this data differently.
+        if hasattr(metrics_agg, 'win_matrix'):
+            for winner_model, loser_map in temp_win_matrix_data.items():
+                for loser_model, count in loser_map.items():
+                    metrics_agg.win_matrix[winner_model][loser_model] = count
+        else:
+            # If GameMetrics doesn't have a win_matrix, we might need to log a warning or pass it to visualizer if possible.
+            # For now, we assume it exists or the visualizer method can handle its absence / get it differently.
+            # Alternatively, store it on metrics_agg dynamically if Python allows and visualizer expects it.
+            setattr(metrics_agg, 'computed_win_matrix', temp_win_matrix_data) # Example: dynamically add if not predefined
+            logger.info("GameMetrics does not have a 'win_matrix' attribute. Storing win data as 'computed_win_matrix'. Heatmap might need adjustment.")
+
+
         visualizer = MetricsVisualizer(metrics_agg); mv_prefix = base_filename
+        
+        # Ensure the directory for MetricsVisualizer outputs exists
+        # These methods seem to prepend "metrics_visualizations/" to the path constructed from vis_dir
+        metrics_visualizer_output_base_dir = os.path.join("metrics_visualizations", vis_dir)
+        os.makedirs(metrics_visualizer_output_base_dir, exist_ok=True)
+        
         try:
-            for chart_type, method_name, f_suffix, desc in [
-                ("elo_prog", visualizer.generate_elo_rating_chart, "elo_progression.png", "Elo Progression (Enhanced)"),
-                ("radar", visualizer.generate_metric_comparison_radar, "metrics_radar_enhanced.png", "Metrics Radar (Enhanced)"),
-                ("heatmap", visualizer.generate_win_matrix_heatmap, "win_matrix_heatmap.png", "Win Matrix (Enhanced)")
+            for chart_type, method_name_str, f_suffix, desc in [
+                ("elo_prog", "generate_elo_rating_chart", "elo_progression.png", "Elo Progression (Enhanced)"),
+                ("radar", "generate_metric_comparison_radar", "metrics_radar_enhanced.png", "Metrics Radar (Enhanced)"),
+                ("heatmap", "generate_win_matrix_heatmap", "win_matrix_heatmap.png", "Win Matrix (Enhanced)")
             ]:
-                path = getattr(visualizer, method_name)(output_file=f"{mv_prefix}_{f_suffix}")
-                if path and os.path.exists(os.path.join(vis_dir, os.path.basename(path))): generated_files[desc] = os.path.basename(path)
-                elif path and os.path.exists(path): generated_files[desc] = os.path.basename(path)
+                method_to_call = getattr(visualizer, method_name_str)
+                # The output_file arg is relative to where metrics.py will prepend "metrics_visualizations/"
+                # So, we pass "vis_dir/filename_suffix.png"
+                # metrics.py is expected to save to "metrics_visualizations/vis_dir/filename_suffix.png"
+                output_file_argument = os.path.join(vis_dir, f"{mv_prefix}_{f_suffix}")
+                
+                path_returned = ""
+                if chart_type == "radar":
+                    path_returned = method_to_call(output_file=output_file_argument, direct_model_metrics=all_advanced_metrics)
+                else:
+                    path_returned = method_to_call(output_file=output_file_argument)
+                
+                if path_returned and os.path.exists(path_returned):
+                    generated_files[desc] = os.path.basename(path_returned)
+                # else:
+                #    logger.warning(f"Visualization file not found at expected path: {path_returned} for {desc}")
+
         except Exception as e: print(f"MetricsVisualizer error: {traceback.format_exc()}")
         return generated_files

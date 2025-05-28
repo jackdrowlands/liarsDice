@@ -6,12 +6,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import os
+import logging
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Set, Optional, Union, Any, DefaultDict, Callable, TypeVar, Generic, Deque, cast
+
+logger = logging.getLogger(__name__) # Initialized module-level logger
 
 # Type aliases for better readability
 ModelID = str
@@ -59,6 +62,10 @@ class GameMetrics:
         # For tracking Elo
         self.k_factor: int = 32  # Standard K-factor for Elo calculation
         self.default_elo: int = 1000  # Starting Elo rating
+        
+        # Attributes for batch runner aggregated data
+        self.elo_ratings_over_time: DefaultDict[ModelID, List[Tuple[int, float]]] = defaultdict(list) # (game_num, elo_score)
+        self.win_matrix: DefaultDict[ModelID, DefaultDict[ModelID, int]] = defaultdict(lambda: defaultdict(int)) # winner -> loser -> count
         
         # Advanced metrics tracking
         self.historical_metrics: DefaultDict[ModelID, DefaultDict[str, List[Dict[str, Any]]]] = defaultdict(
@@ -938,52 +945,81 @@ class MetricsVisualizer:
         os.makedirs(self.output_dir, exist_ok=True)
         
     def generate_elo_rating_chart(self, output_file: str = "elo_ratings.png") -> str:
-        """
-        Generate a chart showing Elo rating progression over time
+        """Generate a chart showing Elo rating progression for all models over games."""
+        plt.style.use('seaborn-v0_8-darkgrid') # Using a seaborn style for better aesthetics
+        fig, ax = plt.subplots(figsize=(14, 8))
         
-        Returns:
-            Path to the generated chart image
-        """
-        plt.figure(figsize=(12, 8))
+        all_game_numbers = set()
+        model_elo_trajectories = defaultdict(dict)
+
+        # Use the new elo_ratings_over_time attribute populated by BatchRunner
+        for model_id, elo_data_points in self.metrics.elo_ratings_over_time.items():
+            if not elo_data_points:
+                continue
+            # elo_data_points is expected to be List[Tuple[int, float]] -> [(game_num, elo)]
+            sorted_points = sorted(elo_data_points, key=lambda x: x[0]) # Sort by game_number
+            game_nums = [point[0] for point in sorted_points]
+            elos = [point[1] for point in sorted_points]
+            
+            for gn, elo in zip(game_nums, elos):
+                all_game_numbers.add(gn)
+                model_elo_trajectories[model_id][gn] = elo
+            
+            ax.plot(game_nums, elos, marker='o', linestyle='-', label=model_id, markersize=5, linewidth=2)
+
+        if not all_game_numbers:
+            logger.warning("No Elo data available to generate chart.")
+            plt.close(fig)
+            return ""
+
+        # Determine a sensible set of x-ticks
+        sorted_game_numbers = sorted(list(all_game_numbers))
+        if len(sorted_game_numbers) > 20: # If too many game numbers, sample or use major ticks
+            step = max(1, len(sorted_game_numbers) // 15) # Show around 15 ticks
+            x_ticks = sorted_game_numbers[::step]
+            if sorted_game_numbers[-1] not in x_ticks: # Ensure last game number is a tick
+                x_ticks.append(sorted_game_numbers[-1])
+        elif sorted_game_numbers:
+            x_ticks = sorted_game_numbers
+        else:
+            x_ticks = []
+
+        ax.set_xlabel("Game Number", fontsize=14)
+        ax.set_ylabel("Elo Rating", fontsize=14)
+        ax.set_title("Elo Rating Progression Over Games", fontsize=18, fontweight='bold')
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=10)
+        ax.tick_params(axis='both', which='major', labelsize=12)
+        if x_ticks:
+            ax.set_xticks(x_ticks)
+            ax.set_xticklabels(x_ticks, rotation=45, ha="right")
         
-        for model_id, historical in self.metrics.historical_metrics.items():
-            if "elo" in historical and historical["elo"]:
-                # Extract timestamps and values
-                timestamps = [entry["timestamp"] for entry in historical["elo"]]
-                values = [entry["value"] for entry in historical["elo"]]
-                
-                # Normalize timestamps to start from 0
-                if timestamps:
-                    start_time = min(timestamps)
-                    norm_timestamps = [(t - start_time) / 3600 for t in timestamps]  # Hours since start
-                    
-                    # Plot
-                    plt.plot(norm_timestamps, values, marker='o', label=model_id, linewidth=2)
+        plt.grid(True, which='major', linestyle='--', linewidth=0.5)
+        plt.tight_layout(rect=[0, 0, 0.85, 1]) # Adjust layout to make space for legend
         
-        plt.title("Model Elo Ratings Over Time", fontsize=16)
-        plt.xlabel("Hours Since First Game", fontsize=12)
-        plt.ylabel("Elo Rating", fontsize=12)
-        plt.legend(fontsize=10)
-        plt.grid(True, alpha=0.3)
+        # Ensure the output directory exists
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        plt.savefig(output_file)
+        plt.close(fig)
+        logger.info(f"Elo rating chart saved to {output_file}")
+        return output_file
         
-        # Add horizontal line for the starting Elo
-        plt.axhline(y=self.metrics.default_elo, color='gray', linestyle='--', alpha=0.5)
-        
-        output_path = os.path.join(self.output_dir, output_file)
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return output_path
-        
-    def generate_metric_comparison_radar(self, output_file: str = "radar_metrics.png") -> str:
+    def generate_metric_comparison_radar(self, output_file: str = "radar_metrics.png", direct_model_metrics: Optional[Dict[ModelID, Dict[str, Any]]] = None) -> str:
         """
         Generate a radar chart comparing all models across key metrics
         
+        Args:
+            output_file: The path to save the radar chart image.
+            direct_model_metrics: Optional pre-computed dictionary of model metrics. 
+                                  If None, self.metrics.get_all_metrics() is used.
+
         Returns:
-            Path to the generated chart image
+            Path to the generated chart image or an error message string.
         """
         # Get all model metrics
-        all_metrics = self.metrics.get_all_metrics()
+        if direct_model_metrics is not None:
+            all_metrics = direct_model_metrics
+        else:
+            all_metrics = self.metrics.get_all_metrics()
         
         # Select metrics for radar chart
         metrics_to_plot = [
@@ -1066,73 +1102,71 @@ class MetricsVisualizer:
         return output_path
         
     def generate_win_matrix_heatmap(self, output_file: str = "win_matrix.png") -> str:
-        """
-        Generate a heatmap showing win rates between different models
+        """Generate a heatmap showing win/loss records between models."""
+        # Use the win_matrix attribute populated by BatchRunner
+        win_matrix_data = self.metrics.win_matrix
         
-        Returns:
-            Path to the generated chart image
-        """
-        model_ids = list(self.metrics.elo_ratings.keys())
+        if not win_matrix_data:
+            logger.warning("No win matrix data available to generate heatmap.")
+            return ""
+
+        # Convert win_matrix_data (DefaultDict[ModelID, DefaultDict[ModelID, int]]) to a DataFrame
+        # Rows: Winners, Columns: Losers, Values: Number of wins
+        # We need to get all unique model IDs that participated in any game recorded in the win_matrix
+        all_models_in_matrix = set()
+        for winner_model, loser_map in win_matrix_data.items():
+            all_models_in_matrix.add(winner_model)
+            for loser_model in loser_map.keys():
+                all_models_in_matrix.add(loser_model)
         
-        if len(model_ids) < 2:
-            return "Not enough models to generate win matrix"
-            
-        # Create win rate matrix
-        win_matrix = np.zeros((len(model_ids), len(model_ids)))
-        
-        for i, model1 in enumerate(model_ids):
-            for j, model2 in enumerate(model_ids):
-                if i == j:
-                    # Diagonal is not applicable
-                    win_matrix[i, j] = np.nan
+        sorted_model_ids = sorted(list(all_models_in_matrix))
+        df_data = []
+        for winner_id in sorted_model_ids:
+            row = []
+            for loser_id in sorted_model_ids:
+                if winner_id == loser_id:
+                    row.append(0) # Or np.nan if you prefer to show diagonals differently
                 else:
-                    # Get matchup stats safely with proper type annotation
-                    model1_matchups: Dict[str, Dict[str, Union[int, float]]] = cast(Dict[str, Dict[str, Union[int, float]]], self.metrics.matchup_stats.get(model1, {}))
-                    if isinstance(model1_matchups, dict):
-                        model2_stats = model1_matchups.get(model2, {})
-                        if isinstance(model2_stats, dict):
-                            games = int(model2_stats.get("games", 0))
-                            wins = int(model2_stats.get("wins", 0))
-                        else:
-                            games = 0
-                            wins = 0
-                    else:
-                        games = 0
-                        wins = 0
-                    
-                    if games > 0:
-                        win_matrix[i, j] = wins / games * 100
-                    else:
-                        win_matrix[i, j] = np.nan
+                    row.append(win_matrix_data.get(winner_id, {}).get(loser_id, 0))
+            df_data.append(row)
+            
+        if not df_data:
+            logger.warning("Could not form DataFrame for win matrix heatmap.")
+            return ""
+
+        df = pd.DataFrame(df_data, index=sorted_model_ids, columns=sorted_model_ids)
+
+        plt.style.use('seaborn-v0_8-whitegrid')
+        fig, ax = plt.subplots(figsize=(max(10, len(sorted_model_ids) * 0.8), max(8, len(sorted_model_ids) * 0.7)))
         
-        # Create heatmap
-        plt.figure(figsize=(12, 10))
-        mask = np.isnan(win_matrix)
+        # Using a sequential colormap (e.g., Blues, Reds)
+        cmap = sns.color_palette("Blues", as_cmap=True)
         
-        # Use a colormap that goes from red (0%) to green (100%)
-        cmap = LinearSegmentedColormap.from_list("win_rate", [(0.8, 0, 0), (1, 1, 0.7), (0, 0.7, 0)])
+        sns.heatmap(df, annot=True, fmt="d", cmap=cmap, linewidths=.5, ax=ax, cbar_kws={'label': 'Number of Wins'})
         
-        sns.heatmap(win_matrix, 
-                   annot=True, 
-                   fmt=".1f", 
-                   cmap=cmap, 
-                   mask=mask,
-                   linewidths=0.5, 
-                   vmin=0, 
-                   vmax=100,
-                   xticklabels=model_ids, 
-                   yticklabels=model_ids)
+        ax.set_title('Model vs. Model Win Matrix Heatmap', fontsize=18, fontweight='bold', pad=20)
+        ax.set_xlabel('Losing Model', fontsize=14, labelpad=15)
+        ax.set_ylabel('Winning Model', fontsize=14, labelpad=15)
         
-        plt.title("Win Rate Matrix (Row vs Column)", fontsize=16)
-        plt.xlabel("Opponent Model", fontsize=12)
-        plt.ylabel("Model", fontsize=12)
+        # Set x-axis tick parameters
+        ax.tick_params(axis='x', labelsize=12, labelrotation=45)
+        for label in ax.get_xticklabels():
+            label.set_ha('right') # Set horizontal alignment for rotated labels
+            
+        ax.tick_params(axis='y', rotation=0, labelsize=12) # rotation=0 is default but kept for clarity
         
-        # Rotate x-axis labels if they're too long
-        plt.xticks(rotation=45, ha='right', fontsize=10)
-        plt.yticks(fontsize=10)
+        plt.tight_layout()
         
-        output_path = os.path.join(self.output_dir, output_file)
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return output_path
+        # Ensure the output directory exists
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        plt.savefig(output_file)
+        plt.close(fig)
+        logger.info(f"Win matrix heatmap saved to {output_file}")
+        return output_file
+
+    def generate_performance_distribution_plot(self, metric_name: str, output_file: str = "performance_dist.png") -> str:
+        # Implementation of generate_performance_distribution_plot method
+        # This method is not provided in the original file or the code block
+        # It's assumed to exist as it's called in the generate_win_matrix_heatmap method
+        # Placeholder return, actual implementation needed
+        return ""

@@ -19,9 +19,8 @@ def main():
     args = parse_args()
 
     if args.load:
-        game_state = load_game_state(args.load)
-        if game_state:
-            game = LiarsDice.from_state(game_state)
+        game = LiarsDice() # Create an instance of LiarsDice
+        if game.load_game_state(args.load): # Call load_game_state on the instance
             print(f"Game loaded from {args.load}")
             game.play_game()
         else:
@@ -64,9 +63,8 @@ def main():
                 print("Tournament setup failed or was cancelled.")
         elif choice == '4':
             filename = input("Enter filename to load game state from (e.g., game_state.json): ").strip()
-            game_state = load_game_state(filename)
-            if game_state:
-                game = LiarsDice.from_state(game_state)
+            game = LiarsDice() # Create an instance of LiarsDice
+            if game.load_game_state(filename): # Call load_game_state on the instance
                 print(f"Game loaded from {filename}")
                 game.play_game()
             else:

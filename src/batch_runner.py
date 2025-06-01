@@ -21,6 +21,7 @@ from .ai_player import (
     PROVIDER_OPENROUTER, PROVIDER_LOCAL
 )
 from .metrics import GameMetrics, MetricsVisualizer
+from .event_logger import EventLoggerFactory, log_tournament_start, log_tournament_end, log_game_start, log_game_end, log_round_start, log_round_end
 
 # Set up logging directories
 os.makedirs("logs", exist_ok=True)
@@ -443,6 +444,11 @@ class AsyncGameRunner:
                 decision_task = asyncio.create_task(self.get_ai_decision_async(player, game_state))
                 try:
                     decision = await asyncio.wait_for(decision_task, timeout=turn_timeout)
+                    
+                    # Log the move event (need game_num from context)
+                    game_num = getattr(game, '_current_game_num', 0)
+                    game._log_move_if_enabled(game_num, player, game_state, decision)
+                    
                     if 'response_time' in game_state:
                         game.metrics.record_api_response_time(player.model, game_state['response_time'])
                         self.timing_data[f"api_time_{player.model}"].append(game_state['response_time'])
@@ -494,6 +500,11 @@ class AsyncGameRunner:
         game.roll_all_dice()
         print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
         logger.debug(f"Game {game_num} Round {game.round_number} starting")
+        
+        # Log round start event
+        if EventLoggerFactory.is_enabled():
+            log_round_start(game_num, game.round_number, game.total_dice_in_game)
+        
         turn_count = 0
         while not game.game_over:
             turn_count += 1
@@ -507,20 +518,33 @@ class AsyncGameRunner:
             if turn_duration > 60: logger.warning(f"LONG TURN: Game {game_num} Round {game.round_number} - {current_player.name} took {turn_duration:.2f}s")
             if is_calling_liar:
                 logger.debug(f"Game {game_num} Round {game.round_number}: {current_player.name} called liar")
-                game.handle_liar_call(auto_continue=auto_mode)
+                game.handle_liar_call(auto_continue=auto_mode, game_num=game_num)
                 if game.check_game_over():
                     logger.info(f"Game {game_num} ended on round {game.round_number} after liar call")
                     break
+                
+                # Log round end before starting new round
+                if EventLoggerFactory.is_enabled():
+                    surviving_players = [p.name for p in game.players if p.get_dice_count() > 0]
+                    log_round_end(game_num, game.round_number, surviving_players)
+                
                 game.round_number += 1
                 print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")
                 game.roll_all_dice()
                 logger.debug(f"Game {game_num} Round {game.round_number} starting")
+                
+                # Log new round start
+                if EventLoggerFactory.is_enabled():
+                    log_round_start(game_num, game.round_number, game.total_dice_in_game)
+                
                 continue
             logger.debug(f"Game {game_num} Round {game.round_number}: Advancing to next player after {current_player.name}")
             game.next_player()
 
     async def play_single_game_async(self, game_num):
         game, game_models = self.batch_runner.setup_game(game_num)
+        # Set game number for logging
+        game._current_game_num = game_num
         self.timing_data = defaultdict(list); self.api_call_counts = defaultdict(int); self.timing_data["round_times"] = []
         for player in game.players: 
             if isinstance(player, AIPlayer): self.timing_data[f"model_{player.model}_times"] = []; self.timing_data[f"player_{player.name}_times"] = []
@@ -596,6 +620,7 @@ class GameBatchRunner:
         self.openrouter_api_key = None
         self.available_models = []
         self.model_stats = {}
+        self.raw_logging_enabled = True  # Enable raw tournament data capture by default
 
     def setup_batch(self):
         """Setup a batch of games to run interactively"""
@@ -768,7 +793,8 @@ class GameBatchRunner:
             ('_use_async_set_in_session', 'use_async', True, "\nUse asynchronous game execution (recommended for speed with API calls)? (y/n): "),
             ('_enable_autosaves_set_in_session', 'enable_autosaves', False, "Enable periodic autosaves of tournament progress? (y/n): "),
             ('_save_individual_games_set_in_session', 'save_individual_games', False, "Save detailed data for each individual game? (y/n): "),
-            ('_create_visualizations_set_in_session', 'create_visualizations', True, "Generate enhanced visualizations after the tournament? (y/n): ")
+            ('_create_visualizations_set_in_session', 'create_visualizations', True, "Generate enhanced visualizations after the tournament? (y/n): "),
+            ('_raw_logging_set_in_session', 'raw_logging_enabled', True, "Enable raw tournament data capture for replay analysis? (y/n): ")
         ]
 
         for flag_name, attr_name, default_val, prompt_text in settings_prompts:
@@ -823,6 +849,28 @@ class GameBatchRunner:
             game.add_ai_player(name=player_name, model=model_id, provider=model_info["provider"], api_key=model_info.get("api_key"), api_url=model_info.get("api_url"), project_id=model_info.get("project_id"), region=model_info.get("region"))
             self.leaderboard[model_id]["games_played"] += 1
         game.current_player_idx = random.randint(0, len(game_models) - 1)
+        
+        # Log game start event
+        if self.raw_logging_enabled:
+            player_roster = []
+            starting_elos = {}
+            for player in game.players:
+                if isinstance(player, AIPlayer):
+                    player_info = {
+                        "name": player.name,
+                        "model_id": player.model,
+                        "provider": player.provider,
+                        "initial_dice": 5  # Standard starting dice count
+                    }
+                    player_roster.append(player_info)
+                    # Get current Elo rating for this model
+                    if hasattr(game.metrics, 'elo_ratings') and player.model in game.metrics.elo_ratings:
+                        starting_elos[player.name] = game.metrics.elo_ratings[player.model]
+                    else:
+                        starting_elos[player.name] = 1000.0  # Default Elo
+            
+            log_game_start(game_num, player_roster, starting_elos)
+        
         return game, game_models
 
     def run_single_game(self, game_num):
@@ -875,6 +923,12 @@ class GameBatchRunner:
                             elif move.get("outcome")=="failure": unsucc_liar+=1
                 self.model_stats[model_id]["total_bids"]+=bids; self.model_stats[model_id]["total_liar_calls"]+=liar_calls; self.model_stats[model_id]["successful_liar_calls"]+=succ_liar; self.model_stats[model_id]["unsuccessful_liar_calls"]+=unsucc_liar; self.model_stats[model_id]["total_rounds_played"]+=game.round_number
         self.game_results.append({"game_number": game_num, "players": [{"name":p.name, "model":p.model} for p in game.players if isinstance(p,AIPlayer)], "winner": game.winner.name if game.winner else "N/A", "winner_model":winner_model, "rounds":game.round_number, "move_history": [move.copy() for move in game.move_history], "game_obj":game})
+        
+        # Log game end event
+        if self.raw_logging_enabled:
+            final_winner = game.winner.name if game.winner else "N/A"
+            log_game_end(game_num, final_winner, game.round_number)
+        
         self.save_individual_game(game, game_num); return winner_model
 
     def run_multiple_games_batch(self, game_nums):
@@ -917,7 +971,7 @@ class GameBatchRunner:
         if filepath is None: filepath = f"liars_dice_save_{time.strftime('%Y%m%d_%H%M%S')}.json"
         print(f"Saving tournament state to {filepath}...")
         minimal_game_results = [{"game_number": r["game_number"], "winner": r["winner"], "winner_model": r["winner_model"], "rounds": r["rounds"]} for r in self.game_results]
-        state = {"leaderboard": self.leaderboard, "game_results": minimal_game_results, "total_games": self.total_games, "model_stats": self.model_stats, "completed_games": len(self.game_results), "models_per_game": self.models_per_game, "selected_models": self.selected_models, "use_local_endpoint": self.use_local_endpoint, "enable_autosaves": self.enable_autosaves, "save_individual_games": self.save_individual_games, "use_async": self.use_async, "auto_mode": self.auto_mode, "verbose_output": self.verbose_output, "create_visualizations": self.create_visualizations}
+        state = {"leaderboard": self.leaderboard, "game_results": minimal_game_results, "total_games": self.total_games, "model_stats": self.model_stats, "completed_games": len(self.game_results), "models_per_game": self.models_per_game, "selected_models": self.selected_models, "use_local_endpoint": self.use_local_endpoint, "enable_autosaves": self.enable_autosaves, "save_individual_games": self.save_individual_games, "use_async": self.use_async, "auto_mode": self.auto_mode, "verbose_output": self.verbose_output, "create_visualizations": self.create_visualizations, "raw_logging_enabled": self.raw_logging_enabled}
         with open(filepath, 'w') as f: json.dump(state, f, indent=2) # Added indent for readability
         print(f"Tournament state saved to {filepath}"); return filepath
 
@@ -944,6 +998,9 @@ class GameBatchRunner:
             if "save_individual_games" in state: self.save_individual_games = state["save_individual_games"]
             else: self.save_individual_games = input("Save individual games? (y/n): ").lower().strip() == 'y'
             print(f"Save Individual Games: {'Enabled' if self.save_individual_games else 'Disabled'}")
+            if "raw_logging_enabled" in state: self.raw_logging_enabled = state["raw_logging_enabled"]
+            else: self.raw_logging_enabled = input("Enable raw tournament data capture? (y/n): ").lower().strip() == 'y'
+            print(f"Raw Logging: {'Enabled' if self.raw_logging_enabled else 'Disabled'}")
             
             for r in self.game_results: r.setdefault('move_history', []); r.setdefault('players', []) # Ensure keys exist
             print(f"Successfully loaded {state.get('completed_games',0)} completed games.")
@@ -1071,12 +1128,42 @@ class GameBatchRunner:
         else:
             if not self.setup_batch(): return
             start_game = 1
+        
+        # Initialize event logger if enabled
+        if self.raw_logging_enabled:
+            EventLoggerFactory.set_enabled(True)
+            event_logger = EventLoggerFactory.create_logger()
+            cli_settings = {
+                "total_games": self.total_games,
+                "models_per_game": self.models_per_game,
+                "selected_models": [m["id"] for m in self.selected_models],
+                "use_async": self.use_async,
+                "auto_mode": self.auto_mode,
+                "verbose_output": self.verbose_output,
+                "enable_autosaves": self.enable_autosaves,
+                "save_individual_games": self.save_individual_games,
+                "create_visualizations": self.create_visualizations,
+                "use_local_endpoint": self.use_local_endpoint
+            }
+            log_tournament_start(cli_settings, random_seed=random.getstate()[1][0])
+            print(f"Raw tournament data logging enabled. Data will be saved to: {event_logger.tournament_dir}")
+        else:
+            EventLoggerFactory.set_enabled(False)
+            print("Raw tournament data logging disabled.")
+        
         print(f"\nStarting tournament from game {start_game}...")
         game_nums = list(range(start_game, self.total_games + 1))
         if not game_nums: print("No games to run."); self.save_results(); return
-        if self.use_async: self.run_games_with_asyncio(game_nums)
-        else: self.run_multiple_games_batch(game_nums)
-        self.update_leaderboard(); print("\nTournament complete!"); self.display_leaderboard(); self.save_results()
+        
+        try:
+            if self.use_async: self.run_games_with_asyncio(game_nums)
+            else: self.run_multiple_games_batch(game_nums)
+            self.update_leaderboard(); print("\nTournament complete!"); self.display_leaderboard(); self.save_results()
+        finally:
+            # Log tournament end and close logger
+            if self.raw_logging_enabled:
+                log_tournament_end({"leaderboard": self.leaderboard, "total_games": len(self.game_results)})
+                EventLoggerFactory.close_current()
 
     def generate_visualizations(self, base_filename, all_advanced_metrics=None):
         vis_dir = f"{base_filename}_visualizations"; os.makedirs(vis_dir, exist_ok=True)

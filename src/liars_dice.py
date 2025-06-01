@@ -20,6 +20,7 @@ from .ai_player import (
     PROVIDER_OPENROUTER, PROVIDER_LOCAL
 )
 from .metrics import GameMetrics, BidAnalyzer
+from .event_logger import EventLoggerFactory, log_round_start, log_round_end, log_move, log_liar_resolution
 
 class LiarsDice:
     def __init__(self, save_file=None):
@@ -481,6 +482,41 @@ class LiarsDice:
             "round_number": self.round_number
         }
     
+    def _log_move_if_enabled(self, game_num, player, game_state, decision):
+        """Log move event if raw logging is enabled"""
+        if not EventLoggerFactory.is_enabled():
+            return
+        
+        # Create player snapshot for the move
+        player_snapshot = {
+            "player_order": [p.name for p in self.players if p.get_dice_count() > 0],
+            "dice_by_player": {p.name: p.dice for p in self.players if p.get_dice_count() > 0},
+            "counts": {str(face): self.count_dice(face) for face in range(1, 7)},
+            "total_dice": self.total_dice_in_game,
+            "last_bid": list(self.last_bid) if self.last_bid else None,
+            "current_player": player.name,
+            "round": self.round_number,
+            "game_id": game_num
+        }
+        
+        # Extract data from decision and game_state
+        raw_prompt = game_state.get('raw_prompt', '')
+        raw_response = game_state.get('raw_response', '')
+        response_time = game_state.get('response_time', 0.0)
+        token_usage = game_state.get('token_usage', {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0})
+        
+        parsed_action = decision.get('action', 'unknown')
+        parsed_quantity = decision.get('quantity', None)
+        parsed_face = decision.get('face', None)
+        utterance = decision.get('utterance', '')
+        
+        log_move(
+            game_num, self.round_number, player_snapshot,
+            player.name, player.model if isinstance(player, AIPlayer) else 'human',
+            raw_prompt, raw_response, parsed_action, parsed_quantity, parsed_face,
+            utterance, response_time, token_usage
+        )
+    
     def get_ai_decisions_parallel(self, players, max_workers=None):
         """Get AI decisions for multiple players in parallel"""
         if not players:
@@ -700,7 +736,7 @@ class LiarsDice:
             print(f"{player.name} says: \"{utterance}\"")
             return False
     
-    def get_player_bid(self, player_idx):
+    def get_player_bid(self, player_idx, game_num=0):
         player = self.players[player_idx]
         
         # If the player is an AI
@@ -716,6 +752,9 @@ class LiarsDice:
             try:
                 # Get AI decision which now includes reasoning and utterance
                 decision = player.get_ai_decision(game_state)
+                
+                # Log the move event
+                self._log_move_if_enabled(game_num, player, game_state, decision)
                 
                 # Record API response time if available
                 if isinstance(player, AIPlayer) and 'response_time' in game_state:
@@ -920,7 +959,7 @@ class LiarsDice:
                         print(f"   Result: {move['player']} was wrong! {move['player']} lost a die.")
         print("=======================")
     
-    def handle_liar_call(self, auto_continue=False):
+    def handle_liar_call(self, auto_continue=False, game_num=0):
         calling_player = self.players[self.current_player_idx]
         
         # Determine the actual previous player who made the last bid
@@ -1003,6 +1042,14 @@ class LiarsDice:
         if isinstance(previous_player, AIPlayer):
             self.metrics.record_final_bid(previous_player.model, (quantity, value), self.round_number)
         
+        # Log liar resolution event
+        if EventLoggerFactory.is_enabled():
+            all_players_dice = {p.name: p.dice for p in self.players if p.get_dice_count() > 0}
+            log_liar_resolution(
+                game_num, self.round_number, calling_player.name, previous_player.name,
+                self.last_bid, actual_count, outcome, all_players_dice
+            )
+        
         # Update the last liar call with the outcome
         for move in reversed(self.move_history):
             if move["action"] == "liar":
@@ -1083,6 +1130,10 @@ class LiarsDice:
         self.roll_all_dice()
         print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
         
+        # Log round start event
+        if EventLoggerFactory.is_enabled():
+            log_round_start(game_num, self.round_number, self.total_dice_in_game)
+        
         while not self.game_over:
             current_player = self.players[self.current_player_idx]
             self.show_dice_to_player(self.current_player_idx)
@@ -1142,18 +1193,28 @@ class LiarsDice:
                     continue
             else:
                 # For AI players, get decision
-                is_calling_liar = self.get_player_bid(self.current_player_idx)
+                is_calling_liar = self.get_player_bid(self.current_player_idx, game_num)
             
             if is_calling_liar:
-                self.handle_liar_call(auto_continue=auto_mode)
+                self.handle_liar_call(auto_continue=auto_mode, game_num=game_num)
                 
                 if self.check_game_over():
                     break
+                
+                # Log round end before starting new round
+                if EventLoggerFactory.is_enabled():
+                    surviving_players = [p.name for p in self.players if p.get_dice_count() > 0]
+                    log_round_end(game_num, self.round_number, surviving_players)
                 
                 # Start new round
                 self.round_number += 1
                 print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")
                 self.roll_all_dice()
+                
+                # Log new round start
+                if EventLoggerFactory.is_enabled():
+                    log_round_start(game_num, self.round_number, self.total_dice_in_game)
+                
                 continue
             
             # Advance to next player

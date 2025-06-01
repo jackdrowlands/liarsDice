@@ -1,0 +1,46 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-01 22:38:30
+Total Games: 10
+Models/Game: 2
+Providers: 
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     qwen2.5-1.5b-instruct-mlx     Kevin               1016.0     100.0%          10        10        
+2     gemma-3-1b-it-qat             David               984.0     0.0%          0         10        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. qwen2.5-1.5b-instruct-mlx (as 'Kevin')
+   Provider: N/A
+   Win Rate: 100.0% (10/10)
+   Elo: 1016.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 98.2%
+   Avg. Rounds/Game: 6.1
+   Liar Call Success: 96.2%
+
+2. gemma-3-1b-it-qat (as 'David')
+   Provider: N/A
+   Win Rate: 0.0% (0/10)
+   Elo: 984.0
+   Bluff Success: 3.3%
+   Lie Detection (F1): 19.6%
+   Avg. Rounds/Game: 6.1
+   Liar Call Success: 100.0%
+
+GAME RESULTS, MODEL ANALYSIS etc. would be here...
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250601_223830_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250601_223830_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250601_223830_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250601_223830_win_matrix_heatmap.png

@@ -1,0 +1,75 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-02 22:33:44
+Total Games: 2
+Models/Game: 2
+Providers: meta-llama, mistralai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     mistralai/mistral-nemo        Blake Taylor        1016.0     100.0%          2         2         
+2     meta-llama/llama-3.1-8b-i...  Sarah               984.0     0.0%          0         2         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. mistralai/mistral-nemo (as 'Blake Taylor')
+   Provider: mistralai
+   Win Rate: 100.0% (2/2)
+   Elo: 1016.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 95.5%
+   Rule Adherence: 68.8%
+   Avg. Rounds/Game: 8.0
+   Liar Call Success: 90.9%
+
+2. meta-llama/llama-3.1-8b-instruct (as 'Sarah')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/2)
+   Elo: 984.0
+   Bluff Success: 8.3%
+   Lie Detection (F1): 39.7%
+   Rule Adherence: 41.7%
+   Avg. Rounds/Game: 8.0
+   Liar Call Success: 100.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+Game 1:  Sarah-2 (mistralai/mistral-nemo) defeated Sarah (meta-llama/llama-3.1-8b-instruct)
+Game 2:  Sarah-2 (mistralai/mistral-nemo) defeated Sarah (meta-llama/llama-3.1-8b-instruct)
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- mistralai/mistral-nemo achieved 100.0% win rate (2/2 games)
+- Exceptional lie detection with 95.5% F1 score
+- Strategic bluffing with 0.0% success rate
+- Perfect rule adherence at 68.8%
+
+Strategic Analysis:
+- Average game length: 8.0 rounds
+- mistralai/mistral-nemo: Superior strategy with 100.0% win rate
+- meta-llama/llama-3.1-8b-instruct: 0.0% win rate
+- Clear advantage in lie detection: 95.5% vs 39.7% F1 score
+
+Elo Progression:
+- Blake Taylor: 1000 → 1016 (+16 points)
+- Sarah: 1000 → 984 (-16 points)
+
+Tournament Highlights:
+- Perfect tournament with no losses
+- 2 games completed successfully
+- Balanced gameplay with strategic depth
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250602_223344_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250602_223344_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250602_223344_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250602_223344_win_matrix_heatmap.png

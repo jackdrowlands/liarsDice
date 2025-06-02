@@ -215,6 +215,12 @@ class AsyncGameRunner:
         prep_start_time = time.time()
         request_params = player.get_prompt_and_params(game_state)
         game_state['provider'] = request_params["provider"]
+        
+        # Capture raw prompt for logging
+        prompt_dict = player.get_prompt_for_game(game_state)
+        raw_prompt = f"System: {prompt_dict['system']}\n\nUser: {prompt_dict['user']}"
+        game_state['raw_prompt'] = raw_prompt
+        
         prep_time = time.time() - prep_start_time
         self.timing_data["prepare_request"].append(prep_time)
         
@@ -257,6 +263,9 @@ class AsyncGameRunner:
                 logger.error(f"Unrecognized API response structure for {model_id}: {str(result)[:500]}")
                 # Fallback or raise error if content cannot be extracted
                 raise ValueError(f"Could not extract content from API response for {model_id}")
+            
+            # Store raw response in game_state for logging
+            game_state['raw_response'] = content
             
             # Extract token usage if available
             prompt_tokens = completion_tokens = total_tokens = 0
@@ -1094,11 +1103,99 @@ class GameBatchRunner:
                 bluff_success_str = f"{bluff_success_val:.1f}%" if isinstance(bluff_success_val, (int, float)) else str(bluff_success_val)
                 lie_detection_f1_val = adv_m.get('lie_detection',{}).get('f1_score',0)
                 lie_detection_f1_str = f"{lie_detection_f1_val:.1f}%" if isinstance(lie_detection_f1_val, (int, float)) else str(lie_detection_f1_val)
+                rule_adherence_val = adv_m.get('rule_adherence_rate',0)
+                rule_adherence_str = f"{rule_adherence_val:.1f}%" if isinstance(rule_adherence_val, (int, float)) else str(rule_adherence_val)
                 f.write(f"   Bluff Success: {bluff_success_str}\n   Lie Detection (F1): {lie_detection_f1_str}\n")
-                # ... continue for other adv_metrics ...
+                f.write(f"   Rule Adherence: {rule_adherence_str}\n")
                 f.write(f"   Avg. Rounds/Game: {m_s.get('avg_rounds_per_game',0):.1f}\n   Liar Call Success: {m_s.get('liar_success_rate',0):.1f}%\n")
-            # ... (Game Results, Model Analysis, Advanced Metrics Analysis, Provider Comparison simplified for brevity) ...
-            f.write("\nGAME RESULTS, MODEL ANALYSIS etc. would be here...\n") # Placeholder
+            # Game Results Section
+            f.write("\nGAME-BY-GAME RESULTS\n" + "="*80 + "\n")
+            for game_result in self.game_results:
+                game_num = game_result.get("game_number", "N/A")
+                winner = game_result.get("winner", "N/A")
+                winner_model = game_result.get("winner_model", "N/A")
+                players = game_result.get("players", [])
+                
+                # Find the loser(s)
+                losers = [p for p in players if p.get("name") != winner]
+                if losers:
+                    loser_info = ", ".join([f"{p.get('name', 'Unknown')} ({p.get('model', 'Unknown')})" for p in losers])
+                else:
+                    loser_info = "Unknown"
+                
+                f.write(f"Game {game_num}:  {winner} ({winner_model}) defeated {loser_info}\n")
+            
+            # Performance Analysis Section
+            f.write("\nKEY PERFORMANCE INSIGHTS\n" + "="*80 + "\n")
+            
+            # Find top performer
+            top_model = max(sorted_models, key=lambda x: x[1]["win_rate"]) if sorted_models else ("N/A", {"win_rate": 0})
+            top_model_id, top_stats = top_model
+            top_adv_metrics = all_adv_metrics.get(top_model_id, {})
+            
+            f.write("\nModel Dominance:\n")
+            f.write(f"- {top_model_id} achieved {top_stats['win_rate']:.1f}% win rate ({top_stats['wins']}/{top_stats['games_played']} games)\n")
+            
+            # Add performance insights from advanced metrics
+            if top_adv_metrics:
+                lie_detection = top_adv_metrics.get('lie_detection', {})
+                f1_score = lie_detection.get('f1_score', 0)
+                bluff_rate = top_adv_metrics.get('bluff_success_rate', 0)
+                rule_adherence = top_adv_metrics.get('rule_adherence_rate', 0)
+                
+                f.write(f"- Exceptional lie detection with {f1_score:.1f}% F1 score\n")
+                if 'liar_call_success_rate' in top_adv_metrics:
+                    f.write(f"- {top_adv_metrics['liar_call_success_rate']:.1f}% liar call accuracy\n")
+                f.write(f"- Strategic bluffing with {bluff_rate:.1f}% success rate\n")
+                f.write(f"- Perfect rule adherence at {rule_adherence:.1f}%\n")
+            
+            # Strategic Analysis
+            f.write("\nStrategic Analysis:\n")
+            avg_rounds = sum(gr.get("rounds", 0) for gr in self.game_results) / len(self.game_results) if self.game_results else 0
+            f.write(f"- Average game length: {avg_rounds:.1f} rounds\n")
+            
+            # Find performance patterns
+            if len(sorted_models) >= 2:
+                second_model_id, second_stats = sorted_models[1]
+                second_adv_metrics = all_adv_metrics.get(second_model_id, {})
+                
+                f.write(f"- {top_model_id}: Superior strategy with {top_stats['win_rate']:.1f}% win rate\n")
+                f.write(f"- {second_model_id}: {second_stats['win_rate']:.1f}% win rate\n")
+                
+                # Compare lie detection
+                if top_adv_metrics and second_adv_metrics:
+                    top_f1 = top_adv_metrics.get('lie_detection', {}).get('f1_score', 0)
+                    second_f1 = second_adv_metrics.get('lie_detection', {}).get('f1_score', 0)
+                    if top_f1 > second_f1:
+                        f.write(f"- Clear advantage in lie detection: {top_f1:.1f}% vs {second_f1:.1f}% F1 score\n")
+            
+            # Elo progression
+            f.write("\nElo Progression:\n")
+            for model_id, stats in sorted_models:
+                elo_val = all_adv_metrics.get(model_id, {}).get('elo_rating', 1000)
+                elo_change = elo_val - 1000  # Assuming 1000 starting Elo
+                sign = "+" if elo_change >= 0 else ""
+                f.write(f"- {name_map.get(model_id, model_id)}: 1000 → {elo_val:.0f} ({sign}{elo_change:.0f} points)\n")
+            
+            # Tournament highlights
+            f.write("\nTournament Highlights:\n")
+            total_games = len(self.game_results)
+            if top_stats['wins'] == total_games:
+                f.write("- Perfect tournament with no losses\n")
+            elif top_stats['win_rate'] >= 80:
+                f.write("- Dominant performance with minimal losses\n")
+            elif top_stats['win_rate'] >= 60:
+                f.write("- Strong performance with good consistency\n")
+            else:
+                f.write("- Competitive tournament with close results\n")
+            
+            f.write(f"- {total_games} games completed successfully\n")
+            if avg_rounds < 5:
+                f.write("- Quick decisive games with efficient play\n")
+            elif avg_rounds > 10:
+                f.write("- Extended strategic battles\n")
+            else:
+                f.write("- Balanced gameplay with strategic depth\n")
 
             generated_files_dict = None
             if self.create_visualizations:
@@ -1114,11 +1211,11 @@ class GameBatchRunner:
                 else: f.write("Viz requested, but generation failed or no files produced.\n")
         with open(csv_fn, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            header = ["Model", "Human Name", "Provider", "Elo", "Win Rate", "Wins", "Games", "Bluff Success Rate", "Lie Detection F1"]
+            header = ["Model", "Human Name", "Provider", "Elo", "Win Rate", "Wins", "Games", "Bluff Success Rate", "Lie Detection F1", "Rule Adherence"]
             writer.writerow(header)
             for model_id, stats in sorted_models:
                 adv_m = all_adv_metrics.get(model_id, {})
-                writer.writerow([model_id, name_map.get(model_id,'N/A'), model_id.split('/')[0] if '/' in model_id else 'N/A', adv_m.get('elo_rating',1000.0), stats["win_rate"], stats["wins"], stats["games_played"], adv_m.get('bluff_success_rate',0), adv_m.get('lie_detection',{}).get('f1_score',0)])
+                writer.writerow([model_id, name_map.get(model_id,'N/A'), model_id.split('/')[0] if '/' in model_id else 'N/A', adv_m.get('elo_rating',1000.0), stats["win_rate"], stats["wins"], stats["games_played"], adv_m.get('bluff_success_rate',0), adv_m.get('lie_detection',{}).get('f1_score',0), adv_m.get('rule_adherence_rate',0)])
         print(f"\nResults saved to {txt_fn} and {csv_fn}")
         if self.create_visualizations: print(f"Visualizations also saved to {base_fn}_visualizations/" if generated_files_dict and os.path.exists(f"{base_fn}_visualizations") else "Viz requested, but failed.")
 

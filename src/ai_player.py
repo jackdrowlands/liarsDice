@@ -247,7 +247,7 @@ It is now your move. Return exactly one JSON object following the format describ
         }
         
         # For OpenRouter, include structured output format 
-        if not self.is_local_endpoint and self.provider == PROVIDER_OPENROUTER:
+        if self.is_local_endpoint or self.provider == PROVIDER_OPENROUTER:
             # OpenRouter structured output configuration
             data["response_format"] = {
                 "type": "json_schema",
@@ -309,6 +309,11 @@ It is now your move. Return exactly one JSON object following the format describ
         
         # Store provider in game_state for use in process_api_response
         game_state['provider'] = provider
+        
+        # Capture raw prompt for logging
+        prompt_dict = self.get_prompt_for_game(game_state)
+        raw_prompt = f"System: {prompt_dict['system']}\n\nUser: {prompt_dict['user']}"
+        game_state['raw_prompt'] = raw_prompt
         
         # Handle REST API based calls
         endpoint_url = request_params["endpoint_url"]
@@ -401,6 +406,9 @@ It is now your move. Return exactly one JSON object following the format describ
         
         # Get the content from the response which should be a JSON object
         content: str = result["choices"][0]["message"]["content"].strip()
+        
+        # Store raw response in game_state for logging
+        game_state['raw_response'] = content
             
         # Log the response with token information and prompt
         with open("llm_responses.json", "a") as f:

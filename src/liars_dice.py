@@ -1287,6 +1287,8 @@ class LiarsDice:
                     surviving_players = [p.name for p in self.players if p.get_dice_count() > 0]
                     log_round_end(game_num, self.round_number, surviving_players)
                 
+                self.move_history = [] # Reset move history for the new round
+                
                 # Start new round
                 self.round_number += 1
                 print(f"\n===== GAME {game_num} | ROUND {self.round_number} =====")

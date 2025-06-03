@@ -277,7 +277,9 @@ class EventLogger:
     def log_move(self, game_id: int, round_number: int, player_snapshot: Dict[str, Any], 
                  actor_name: str, actor_model: str, raw_prompt: str, raw_model_response: str,
                  parsed_action: str, parsed_quantity: Optional[int], parsed_face: Optional[int],
-                 utterance: str, response_time: float, token_usage: Dict[str, int]):
+                 utterance: str, response_time: float, token_usage: Dict[str, int],
+                 invalid_bid_corrected: bool = False, original_quantity: Optional[int] = None,
+                 original_face: Optional[int] = None):
         """Log player move event."""
         event = {
             "type": "move",
@@ -296,6 +298,13 @@ class EventLogger:
             "response_time": response_time,
             "token_usage": token_usage
         }
+        
+        # Add invalid bid correction fields if applicable
+        if invalid_bid_corrected:
+            event["invalid_bid_corrected"] = True
+            event["original_quantity"] = original_quantity
+            event["original_face"] = original_face
+        
         self.log_event(event)
     
     def log_liar_resolution(self, game_id: int, round_number: int, calling_player: str,
@@ -437,10 +446,13 @@ def log_round_end(logger: EventLogger, game_id: int, round_number: int, survivin
 def log_move(logger: EventLogger, game_id: int, round_number: int, player_snapshot: Dict[str, Any], 
              actor_name: str, actor_model: str, raw_prompt: str, raw_model_response: str,
              parsed_action: str, parsed_quantity: Optional[int], parsed_face: Optional[int],
-             utterance: str, response_time: float, token_usage: Dict[str, int]):
+             utterance: str, response_time: float, token_usage: Dict[str, int],
+             invalid_bid_corrected: bool = False, original_quantity: Optional[int] = None,
+             original_face: Optional[int] = None):
     logger.log_move(game_id, round_number, player_snapshot, actor_name, actor_model, 
                    raw_prompt, raw_model_response, parsed_action, parsed_quantity, 
-                   parsed_face, utterance, response_time, token_usage)
+                   parsed_face, utterance, response_time, token_usage,
+                   invalid_bid_corrected, original_quantity, original_face)
 
 @log_if_enabled
 def log_liar_resolution(logger: EventLogger, game_id: int, round_number: int, calling_player: str,

@@ -141,6 +141,34 @@ tournament_<timestamp>/
 }
 ```
 
+**move** (Invalid Bid Correction Example)
+```json
+{
+  "type": "move",
+  "timestamp": 1640995203.456,
+  "game_id": 1,
+  "round_number": 1,
+  "player_snapshot": { ... },
+  "actor_name": "Bob",
+  "actor_model": "anthropic/claude-3-sonnet",
+  "raw_prompt": "You are playing Liar's Dice...",
+  "raw_model_response": "{\"action\": \"bid\", \"quantity\": 2, \"face\": 3}",
+  "parsed_action": "bid",
+  "parsed_quantity": 3,
+  "parsed_face": 4,
+  "utterance": "I make this bid.",
+  "response_time": 1.567,
+  "token_usage": {
+    "prompt_tokens": 140,
+    "completion_tokens": 20,
+    "total_tokens": 160
+  },
+  "invalid_bid_corrected": true,
+  "original_quantity": 2,
+  "original_face": 3
+}
+```
+
 **liar_resolution**
 ```json
 {
@@ -159,6 +187,21 @@ tournament_<timestamp>/
   }
 }
 ```
+
+### Invalid Bid Correction Fields
+
+The move event includes optional fields to track when AI players make invalid bids that are automatically corrected:
+
+- **`invalid_bid_corrected`** (boolean): True if the AI made an invalid bid that was corrected
+- **`original_quantity`** (integer): The original (invalid) quantity the AI attempted to bid
+- **`original_face`** (integer): The original (invalid) face value the AI attempted to bid
+
+When `invalid_bid_corrected` is true:
+- `parsed_quantity` and `parsed_face` contain the corrected bid values
+- `original_quantity` and `original_face` contain the AI's original invalid attempt
+- This allows analysis of AI rule adherence and the frequency of invalid bid attempts
+
+These fields are only present when an invalid bid correction occurs, making them fully optional in the schema.
 
 ## Configuration
 

@@ -482,7 +482,8 @@ class LiarsDice:
             "round_number": self.round_number
         }
     
-    def _log_move_if_enabled(self, game_num, player, game_state, decision):
+    def _log_move_if_enabled(self, game_num, player, game_state, decision, 
+                            invalid_bid_corrected=False, original_quantity=None, original_face=None):
         """Log move event if raw logging is enabled"""
         if not EventLoggerFactory.is_enabled():
             return
@@ -514,7 +515,8 @@ class LiarsDice:
             game_num, self.round_number, player_snapshot,
             player.name, player.model if isinstance(player, AIPlayer) else 'human',
             raw_prompt, raw_response, parsed_action, parsed_quantity, parsed_face,
-            utterance, response_time, token_usage
+            utterance, response_time, token_usage,
+            invalid_bid_corrected, original_quantity, original_face
         )
     
     def get_ai_decisions_parallel(self, players, max_workers=None):
@@ -713,6 +715,9 @@ class LiarsDice:
             if isinstance(player, AIPlayer):
                 self.metrics.record_rule_adherence(player.model, False)
             
+            utterance = "I make this bid."
+            reasoning = "I made an invalid bid, so I corrected it to {self.last_bid[0]} {self.last_bid[1]}'s"
+            
             # Record move in history with the invalid bid info
             move_data = {
                 "round": len(self.move_history) + 1,
@@ -732,8 +737,8 @@ class LiarsDice:
             self.player_history[player.name].append(move_data)
             
             print(f"{player.name} attempted invalid bid ({quantity} {value}'s), corrected to {self.last_bid[0]} {self.last_bid[1]}'s")
-            print(f"Reasoning: {reasoning}")
-            print(f"{player.name} says: \"{utterance}\"")
+            print(f"Reasoning: I made an invalid bid, so I corrected it to {self.last_bid[0]} {self.last_bid[1]}'s")
+            print(f"{player.name} says: \"I make this bid.\"")
             return False
     
     def get_player_bid(self, player_idx, game_num=0):
@@ -753,9 +758,6 @@ class LiarsDice:
                 # Get AI decision which now includes reasoning and utterance
                 decision = player.get_ai_decision(game_state)
                 
-                # Log the move event
-                self._log_move_if_enabled(game_num, player, game_state, decision)
-                
                 # Record API response time if available
                 if isinstance(player, AIPlayer) and 'response_time' in game_state:
                     self.metrics.record_api_response_time(player.model, game_state['response_time'])
@@ -770,11 +772,39 @@ class LiarsDice:
                         usage.get('total_tokens', 0)
                     )
                 
-                # Process the AI decision based on action type
+                # Process the AI decision based on action type and capture any corrections
+                invalid_bid_corrected = False
+                original_quantity = None
+                original_face = None
+                
                 if decision["action"] == "liar":
-                    return self._process_ai_liar_call(player, decision)
+                    result = self._process_ai_liar_call(player, decision)
                 else:
-                    return self._process_ai_bid(player, decision)
+                    # For bid actions, check if we need to correct an invalid bid
+                    original_quantity = decision.get("quantity")
+                    original_face = decision.get("face")
+                    
+                    # Check if this would be an invalid bid
+                    valid_bid = True
+                    if original_quantity < 1 or original_face < 1 or original_face > 6:
+                        valid_bid = False
+                    
+                    # Check if bid is higher than the last bid
+                    if self.last_bid and valid_bid:
+                        last_quantity, last_value = self.last_bid
+                        if original_quantity < last_quantity or (original_quantity == last_quantity and original_face <= last_value):
+                            valid_bid = False
+                    
+                    if not valid_bid:
+                        invalid_bid_corrected = True
+                    
+                    result = self._process_ai_bid(player, decision)
+                
+                # Log the move event after processing, with correction information
+                self._log_move_if_enabled(game_num, player, game_state, decision,
+                                        invalid_bid_corrected, original_quantity, original_face)
+                
+                return result
                     
             except Exception as e:
                 print(f"Error with AI decision: {e}")
@@ -823,6 +853,23 @@ class LiarsDice:
                 
                 # Track in player history
                 self.player_history[player.name].append(move_data)
+                
+                # Log the error fallback move to raw logging
+                if EventLoggerFactory.is_enabled():
+                    fallback_decision = {
+                        "action": "bid",
+                        "quantity": self.last_bid[0],
+                        "face": self.last_bid[1],
+                        "reasoning": "Error processing response, using default bid.",
+                        "utterance": "I'll make this bid."
+                    }
+                    fallback_game_state = {
+                        'raw_prompt': 'Error during processing',
+                        'raw_response': f'Error: {str(e)}',
+                        'response_time': 0.0,
+                        'token_usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
+                    }
+                    self._log_move_if_enabled(game_num, player, fallback_game_state, fallback_decision)
                 
                 print(f"{player.name} bids {self.last_bid[0]} {self.last_bid[1]}'s (fallback)")
                 print("Reasoning: Error processing model response, using default bid.")
@@ -875,6 +922,23 @@ class LiarsDice:
                     self.player_history[player.name] = []
                 self.player_history[player.name].append(move_data)
                 
+                # Log human player liar call to raw logging
+                if EventLoggerFactory.is_enabled():
+                    human_decision = {
+                        "action": "liar",
+                        "quantity": None,
+                        "face": None,
+                        "reasoning": reasoning if reasoning else "Human player called liar.",
+                        "utterance": utterance if utterance else "I call liar!"
+                    }
+                    human_game_state = {
+                        'raw_prompt': 'Human player input',
+                        'raw_response': 'Human chose to call liar',
+                        'response_time': 0.0,
+                        'token_usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
+                    }
+                    self._log_move_if_enabled(game_num, player, human_game_state, human_decision)
+                
                 return True
                 
             else:
@@ -917,6 +981,23 @@ class LiarsDice:
                 if player.name not in self.player_history:
                     self.player_history[player.name] = []
                 self.player_history[player.name].append(move_data)
+                
+                # Log human player bid to raw logging
+                if EventLoggerFactory.is_enabled():
+                    human_decision = {
+                        "action": "bid",
+                        "quantity": quantity,
+                        "face": value,
+                        "reasoning": reasoning if reasoning else "Human player bid.",
+                        "utterance": utterance if utterance else "I make this bid."
+                    }
+                    human_game_state = {
+                        'raw_prompt': 'Human player input',
+                        'raw_response': f'Human chose to bid {quantity} {value}s',
+                        'response_time': 0.0,
+                        'token_usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
+                    }
+                    self._log_move_if_enabled(game_num, player, human_game_state, human_decision)
                 
                 return False  # Not calling liar
         except ValueError:

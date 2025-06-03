@@ -1,0 +1,74 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-03 21:26:36
+Total Games: 1
+Models/Game: 2
+Providers: meta-llama, mistralai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     mistralai/mistral-nemo        Nicole              1016.0     100.0%          1         1         
+2     meta-llama/llama-3.1-8b-i...  Rachel              984.0     0.0%          0         1         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. mistralai/mistral-nemo (as 'Nicole')
+   Provider: mistralai
+   Win Rate: 100.0% (1/1)
+   Elo: 1016.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 100.0%
+   Rule Adherence: 64.3%
+   Avg. Rounds/Game: 5.0
+   Liar Call Success: 100.0%
+
+2. meta-llama/llama-3.1-8b-instruct (as 'Rachel')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/1)
+   Elo: 984.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Rule Adherence: 45.5%
+   Avg. Rounds/Game: 5.0
+   Liar Call Success: 0.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+Game 1:  Nicole (mistralai/mistral-nemo) defeated Rachel (meta-llama/llama-3.1-8b-instruct)
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- mistralai/mistral-nemo achieved 100.0% win rate (1/1 games)
+- Exceptional lie detection with 100.0% F1 score
+- Strategic bluffing with 0.0% success rate
+- Perfect rule adherence at 64.3%
+
+Strategic Analysis:
+- Average game length: 5.0 rounds
+- mistralai/mistral-nemo: Superior strategy with 100.0% win rate
+- meta-llama/llama-3.1-8b-instruct: 0.0% win rate
+- Clear advantage in lie detection: 100.0% vs 0.0% F1 score
+
+Elo Progression:
+- Nicole: 1000 → 1016 (+16 points)
+- Rachel: 1000 → 984 (-16 points)
+
+Tournament Highlights:
+- Perfect tournament with no losses
+- 1 games completed successfully
+- Balanced gameplay with strategic depth
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250603_212636_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250603_212636_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250603_212636_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250603_212636_win_matrix_heatmap.png

@@ -454,10 +454,6 @@ class AsyncGameRunner:
                 try:
                     decision = await asyncio.wait_for(decision_task, timeout=turn_timeout)
                     
-                    # Log the move event (need game_num from context)
-                    game_num = getattr(game, '_current_game_num', 0)
-                    game._log_move_if_enabled(game_num, player, game_state, decision)
-                    
                     if 'response_time' in game_state:
                         game.metrics.record_api_response_time(player.model, game_state['response_time'])
                         self.timing_data[f"api_time_{player.model}"].append(game_state['response_time'])
@@ -469,12 +465,42 @@ class AsyncGameRunner:
                             usage.get('completion_tokens', 0),
                             usage.get('total_tokens', 0)
                         )
+                    
+                    # Process the AI decision and capture any corrections
+                    invalid_bid_corrected = False
+                    original_quantity = None
+                    original_face = None
+                    
                     if decision["action"] == "liar":
                         is_liar_call = game._process_ai_liar_call(player, decision)
                         action_type = "liar call" if is_liar_call else "bid (from liar)"
                     else:
+                        # For bid actions, check if we need to correct an invalid bid
+                        original_quantity = decision.get("quantity")
+                        original_face = decision.get("face")
+                        
+                        # Check if this would be an invalid bid
+                        valid_bid = True
+                        if original_quantity < 1 or original_face < 1 or original_face > 6:
+                            valid_bid = False
+                        
+                        # Check if bid is higher than the last bid
+                        if game.last_bid and valid_bid:
+                            last_quantity, last_value = game.last_bid
+                            if original_quantity < last_quantity or (original_quantity == last_quantity and original_face <= last_value):
+                                valid_bid = False
+                        
+                        if not valid_bid:
+                            invalid_bid_corrected = True
+                        
                         is_liar_call = game._process_ai_bid(player, decision)
                         action_type = "bid"
+                    
+                    # Log the move event after processing, with correction information
+                    game_num = getattr(game, '_current_game_num', 0)
+                    game._log_move_if_enabled(game_num, player, game_state, decision,
+                                            invalid_bid_corrected, original_quantity, original_face)
+                    
                     turn_time = time.time() - turn_start_time
                     self.timing_data[f"player_{player.name}_times"].append(turn_time)
                     self.timing_data[f"model_{player.model}_times"].append(turn_time)
@@ -499,6 +525,25 @@ class AsyncGameRunner:
                 move_data = {"round": len(game.move_history) + 1, "player": player.name, "action": "bid", "quantity": game.last_bid[0], "value": game.last_bid[1], "error_fallback": True, "error_message": str(e)}
                 game.move_history.append(move_data)
                 game.player_history[player.name].append(move_data)
+                
+                # Log the async error fallback move to raw logging
+                if EventLoggerFactory.is_enabled():
+                    fallback_decision = {
+                        "action": "bid",
+                        "quantity": game.last_bid[0],
+                        "face": game.last_bid[1],
+                        "reasoning": "Async error processing response, using default bid.",
+                        "utterance": "I'll make this bid."
+                    }
+                    fallback_game_state = {
+                        'raw_prompt': 'Async error during processing',
+                        'raw_response': f'Error: {str(e)}',
+                        'response_time': error_time,
+                        'token_usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0}
+                    }
+                    game_num = getattr(game, '_current_game_num', 0)
+                    game._log_move_if_enabled(game_num, player, fallback_game_state, fallback_decision)
+                
                 logger.info(f"Fallback bid for {player.name}: {game.last_bid[0]} {game.last_bid[1]}'s")
                 print(f"{player.name} bids {game.last_bid[0]} {game.last_bid[1]}'s")
                 self.timing_data[f"player_{player.name}_error_times"].append(time.time() - turn_start_time)

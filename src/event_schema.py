@@ -84,6 +84,10 @@ MOVE_SCHEMA = {
     "utterance": str,
     "response_time": (int, float),
     "token_usage": dict,
+    # Optional fields for invalid bid correction tracking
+    "invalid_bid_corrected": bool,
+    "original_quantity": (int, type(None)),
+    "original_face": (int, type(None)),
 }
 
 # Liar resolution events
@@ -265,8 +269,16 @@ def validate_event(event: Dict[str, Any]) -> bool:
     
     schema = EVENT_SCHEMAS[event_type]
     
+    # For move events, some fields are optional
+    optional_fields = set()
+    if event_type == "move":
+        optional_fields = {"invalid_bid_corrected", "original_quantity", "original_face"}
+    
     # Check all required fields are present and have correct types
     for field, expected_type in schema.items():
+        if field in optional_fields and field not in event:
+            continue  # Skip optional fields that are not present
+            
         if field not in event:
             raise EventValidationError(f"Event '{event_type}' missing required field: {field}")
         
@@ -301,6 +313,15 @@ def validate_event(event: Dict[str, Any]) -> bool:
                 raise EventValidationError("Bid quantity must be positive")
             if not (1 <= event["parsed_face"] <= 6):
                 raise EventValidationError("Bid face must be between 1 and 6")
+        
+        # Validate invalid bid correction fields if present
+        if "invalid_bid_corrected" in event:
+            if event["invalid_bid_corrected"]:
+                # If bid was corrected, original fields should be present
+                if "original_quantity" not in event or "original_face" not in event:
+                    raise EventValidationError("Invalid bid correction requires original_quantity and original_face")
+                # Note: We don't validate original_quantity and original_face ranges here because
+                # they are allowed to be invalid values - that's the whole point of tracking corrections!
     
     elif event_type == "liar_resolution":
         if not validate_last_bid_dict(event["last_bid"]):

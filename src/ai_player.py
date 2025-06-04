@@ -115,7 +115,7 @@ CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after 
                 player_name = move['player']
                 
                 if move["action"] == "bid":
-                    action_summary = f"{player_name}: {{\"action\": \"bid\", \"quantity\": {move['quantity']}, \"face\": {move['value']}"
+                    action_summary = f"{player_name}: {{\"action\": \"bid\", \"quantity\": {move['quantity']}, \"face\": {move['face']}}}"
                     # Add utterance if available in the future
                     if "utterance" in move:
                         action_summary += f", \"utterance\": \"{move['utterance']}\""
@@ -544,22 +544,34 @@ It is now your move. Return exactly one JSON object following the format describ
                 
             # pull out last_bid and narrow its type
             last_bid = game_state.get('last_bid')
+            total_dice = game_state.get('total_dice', 1) # Default to 1 if somehow missing, though it should be there.
+
             if last_bid is None:
                 # First bid in the round - make a safe default bid
+                fallback_qty = 1
+                if total_dice == 0: # No dice in game, technically no bid possible.
+                    # This state should ideally be prevented by game logic ending the round/game.
+                    # If forced to bid, a (0,0) or (1,1) subject to main game correction might be needed.
+                    # For now, make it 1, and LiarsDice class will handle clamping if total_dice is 0.
+                    print(f"AI Fallback Warning (first bid): total_dice is 0. Defaulting to 1x4. Game logic should catch this.")
+                    fallback_qty = 1 # Or perhaps 0, but action 'bid' with qty 0 is often problematic.
+                elif fallback_qty > total_dice and total_dice > 0 : # total_dice must be > 0 for this
+                     fallback_qty = total_dice # This case (1 > total_dice > 0) implies total_dice must be 0, already handled.
+
                 return {
                     "action": "bid", 
-                    "quantity": 1, 
-                    "face": 4,
+                    "quantity": fallback_qty, 
+                    "face": 4, # Default face
                     "reasoning": "Error processing response, using default bid.",
                     "utterance": "I'll make a simple bid."
                 }
             else:
                 # Get the last bid
                 last_quantity, last_value = last_bid
-                total_dice = game_state.get('total_dice', 0)
                 
                 # If the last bid is implausible (higher than total dice), call liar
-                if last_quantity > total_dice:
+                # This check is on the *previous* player's bid.
+                if last_quantity > total_dice and total_dice > 0:
                     return {
                         "action": "liar",
                         "quantity": 0,
@@ -569,21 +581,72 @@ It is now your move. Return exactly one JSON object following the format describ
                     }
                 # Otherwise make a valid higher bid
                 else:
+                    fallback_reasoning = "Error processing response, making minimal valid higher bid."
+                    fallback_utterance_bid = "Let me increase that bid."
+                    fallback_utterance_raise = "I'll raise the quantity."
+
                     if last_value < 6:
-                        # Increase face value
+                        # Try to increase face value
+                        new_quantity = last_quantity
+                        
+                        # Clamp quantity against total_dice, even if only face is changing.
+                        if new_quantity > total_dice and total_dice > 0:
+                            print(f"AI Fallback Warning (face increase): Clamping bid quantity from {new_quantity} to {total_dice} (total dice).")
+                            new_quantity = total_dice
+                        elif new_quantity <= 0 and total_dice > 0: # Ensure quantity is at least 1 if dice exist
+                            print(f"AI Fallback Warning (face increase): Corrected quantity from {new_quantity} to 1.")
+                            new_quantity = 1
+                        elif total_dice == 0: # No dice left, cannot make a bid
+                             print(f"AI Fallback Info (face increase): total_dice is 0. Cannot make a bid. Calling liar.")
+                             return {
+                                "action": "liar", "quantity": 0, "face": 0,
+                                "reasoning": "Error processing response. No dice left to make a higher bid. Calling liar.",
+                                "utterance": "No dice left! I have to call."
+                            }
+
+
                         return {
                             "action": "bid", 
-                            "quantity": last_quantity, 
+                            "quantity": new_quantity, 
                             "face": last_value + 1,
-                            "reasoning": "Error processing response, making minimal valid higher bid.",
-                            "utterance": "Let me increase that bid."
+                            "reasoning": fallback_reasoning,
+                            "utterance": fallback_utterance_bid
                         }
-                    else:
-                        # Increase quantity, reset face to 1
+                    else: # last_value == 6, try to increase quantity
+                        new_quantity = last_quantity + 1
+                        
+                        if new_quantity > total_dice and total_dice > 0:
+                            print(f"AI Fallback Warning (quantity increase): Clamping bid quantity from {new_quantity} to {total_dice} (total dice).")
+                            new_quantity = total_dice
+                        elif new_quantity <= 0 and total_dice > 0: # Ensure quantity is at least 1
+                            print(f"AI Fallback Warning (quantity increase): Corrected quantity from {new_quantity} to 1.")
+                            new_quantity = 1
+                        elif total_dice == 0: # No dice left
+                            print(f"AI Fallback Info (quantity increase): total_dice is 0. Cannot make a bid. Calling liar.")
+                            return {
+                                "action": "liar", "quantity": 0, "face": 0,
+                                "reasoning": "Error processing response. No dice left to make a higher bid. Calling liar.",
+                                "utterance": "Game's over for bids, I call."
+                            }
+
+                        # If, after potential clamping, new_quantity is not strictly greater than last_quantity
+                        # (this implies last_quantity was already == total_dice),
+                        # then a bid of (new_quantity, 1) is not higher than (last_quantity, 6).
+                        # In this situation, the AI cannot make a valid higher bid.
+                        if new_quantity <= last_quantity : # True if last_quantity == total_dice and new_quantity got clamped to total_dice
+                            print(f"AI Fallback Info: Cannot make a higher bid than ({last_quantity}x{last_value}) with total_dice {total_dice}. Fallback to liar call.")
+                            return {
+                                "action": "liar",
+                                "quantity": 0,
+                                "face": 0,
+                                "reasoning": "Error processing response. Cannot make a valid higher bid with current dice. Calling liar.",
+                                "utterance": "I can't beat that bid, so I'll call!"
+                            }
+
                         return {
                             "action": "bid", 
-                            "quantity": last_quantity + 1, 
-                            "face": 1,
-                            "reasoning": "Error processing response, making minimal valid higher bid.",
-                            "utterance": "I'll raise the quantity."
+                            "quantity": new_quantity, 
+                            "face": 1, # Reset face to 1
+                            "reasoning": fallback_reasoning,
+                            "utterance": fallback_utterance_raise
                         }

@@ -136,7 +136,11 @@ CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after 
         else:
             call_liar_note = f"\nNOTE: You can either make a higher bid than {current_bid}, or call 'liar' to challenge the previous bid."
         
-        user_prompt = f"""### Your private dice (keep secret)
+        user_prompt = f"""### Game history
+{move_history_text if move_history_text else "(No previous moves)"}
+{call_liar_note}
+
+### Your private dice (keep secret)
 {sorted(self.dice)}
 
 ### Game state
@@ -144,10 +148,6 @@ Players: {player_names}
 Dice counts: {dice_counts}
 Current bid: {current_bid}
 Eliminated players: {eliminated_text}
-
-### Game history
-{move_history_text if move_history_text else "(No previous moves)"}
-{call_liar_note}
 
 ### Your turn
 It is now your move. Return exactly one JSON object following the format described above."""
@@ -318,7 +318,10 @@ It is now your move. Return exactly one JSON object following the format describ
         data: Dict[str, Any] = {
             "model": self.model,
             "messages": [system_message, user_message],
-            "temperature": 0.7,  # Balanced temperature for creativity in utterances
+            "usage": {
+                "include_prompt": True,
+            }
+            # "temperature": 0.7,  # Balanced temperature for creativity in utterances
         }
         
         # For OpenRouter, include structured output format 
@@ -464,6 +467,7 @@ It is now your move. Return exactly one JSON object following the format describ
         
         # Extract token usage if available
         prompt_tokens = completion_tokens = total_tokens = 0
+        cached_tokens = reasoning_tokens = cost = 0
         
         # Check for token usage in response (OpenAI/OpenRouter format)
         if "usage" in result:
@@ -471,12 +475,23 @@ It is now your move. Return exactly one JSON object following the format describ
             prompt_tokens = usage.get("prompt_tokens", 0)
             completion_tokens = usage.get("completion_tokens", 0)
             total_tokens = usage.get("total_tokens", 0)
+            cost = usage.get("cost", 0)
+            
+            # Extract detailed token information if available
+            if "prompt_tokens_details" in usage:
+                cached_tokens = usage["prompt_tokens_details"].get("cached_tokens", 0)
+            
+            if "completion_tokens_details" in usage:
+                reasoning_tokens = usage["completion_tokens_details"].get("reasoning_tokens", 0)
             
             # Store token usage in game state for metrics collection
             game_state['token_usage'] = {
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
-                "total_tokens": total_tokens
+                "total_tokens": total_tokens,
+                "cached_tokens": cached_tokens,
+                "reasoning_tokens": reasoning_tokens,
+                "cost": cost
             }
         
         # Get the content from the response which should be a JSON object
@@ -497,6 +512,9 @@ It is now your move. Return exactly one JSON object following the format describ
                     "prompt_tokens": prompt_tokens,
                     "completion_tokens": completion_tokens,
                     "total_tokens": total_tokens,
+                    "cached_tokens": cached_tokens,
+                    "reasoning_tokens": reasoning_tokens,
+                    "cost": cost,
                     "system_prompt": result["choices"][0]["message"].get("system_fingerprint", "")
                 }
                 

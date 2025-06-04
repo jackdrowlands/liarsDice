@@ -580,6 +580,10 @@ class AsyncGameRunner:
             if turn_duration > 60: logger.warning(f"LONG TURN: Game {game_num} Round {game.round_number} - {current_player.name} took {turn_duration:.2f}s")
             if is_calling_liar:
                 logger.debug(f"Game {game_num} Round {game.round_number}: {current_player.name} called liar")
+                
+                # Store the loser before handling the liar call
+                pre_call_player_counts = {p.name: p.get_dice_count() for p in game.players}
+                
                 game.handle_liar_call(auto_continue=auto_mode, game_num=game_num)
                 if game.check_game_over():
                     logger.info(f"Game {game_num} ended on round {game.round_number} after liar call")
@@ -589,6 +593,25 @@ class AsyncGameRunner:
                 if EventLoggerFactory.is_enabled():
                     surviving_players = [p.name for p in game.players if p.get_dice_count() > 0]
                     log_round_end(game_num, game.round_number, surviving_players)
+                
+                # Determine who lost a die and set the next starting player
+                loser_name = None
+                for p in game.players:
+                    if p.get_dice_count() < pre_call_player_counts[p.name]:
+                        loser_name = p.name
+                        break
+                
+                # Set starting player for next round (player after the loser)
+                if loser_name:
+                    loser_idx = next(i for i, p in enumerate(game.players) if p.name == loser_name)
+                    # Get the next player after the loser (wrapping around)
+                    next_player_idx = (loser_idx + 1) % len(game.players)
+                    # Skip eliminated players
+                    while game.players[next_player_idx].get_dice_count() == 0:
+                        next_player_idx = (next_player_idx + 1) % len(game.players)
+                    game.current_player_idx = next_player_idx
+                
+                game.move_history = []  # Reset move history for the new round
                 
                 game.round_number += 1
                 print(f"\n===== GAME {game_num} | ROUND {game.round_number} =====")

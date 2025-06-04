@@ -1,0 +1,2 @@
+{"type":"game_start","timestamp":1749012285.113801,"game_id":2,"player_roster":[{"name":"Rachel","model_id":"meta-llama/llama-3.1-8b-instruct","provider":"openrouter","initial_dice":5},{"name":"Brian","model_id":"mistralai/mistral-nemo","provider":"openrouter","initial_dice":5}],"starting_elos":{"Rachel":1000,"Brian":1000}}
+{"type":"round_start","timestamp":1749012285.114101,"game_id":2,"round_number":1,"total_dice_count":10}

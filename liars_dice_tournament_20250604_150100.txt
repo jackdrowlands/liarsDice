@@ -1,0 +1,64 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-04 15:01:00
+Total Games: 1
+Models/Game: 2
+Providers: mistralai, meta-llama
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     meta-llama/llama-3.1-8b-i...  Cameron Reed        1000.0     0.0%          0         1         
+2     mistralai/mistral-nemo        Indigo Carter       1000.0     0.0%          0         1         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. meta-llama/llama-3.1-8b-instruct (as 'Cameron Reed')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/1)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Rule Adherence: 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+2. mistralai/mistral-nemo (as 'Indigo Carter')
+   Provider: mistralai
+   Win Rate: 0.0% (0/1)
+   Elo: N/A
+   Bluff Success: 0.0%
+   Lie Detection (F1): 0.0%
+   Rule Adherence: 0.0%
+   Avg. Rounds/Game: 0.0
+   Liar Call Success: 0.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- meta-llama/llama-3.1-8b-instruct achieved 0.0% win rate (0/1 games)
+
+Strategic Analysis:
+- Average game length: 0.0 rounds
+- meta-llama/llama-3.1-8b-instruct: Superior strategy with 0.0% win rate
+- mistralai/mistral-nemo: 0.0% win rate
+
+Elo Progression:
+- Cameron Reed: 1000 → 1000 (+0 points)
+- Indigo Carter: 1000 → 1000 (+0 points)
+
+Tournament Highlights:
+- Perfect tournament with no losses
+- 0 games completed successfully
+- Quick decisive games with efficient play
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Viz requested, but generation failed or no files produced.

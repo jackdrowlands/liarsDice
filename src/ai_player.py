@@ -148,12 +148,20 @@ CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after 
         
         # Current bid info
         current_bid = "0 × 0"
+        can_call_liar = False
         if game_state.get('last_bid') is not None:
             last_bid = game_state['last_bid']
             if last_bid is not None:  # Extra check for type checker
                 current_bid = f"{last_bid[0]} × {last_bid[1]}"
+                can_call_liar = True
         
         # Create the user prompt in the exact format from the request
+        call_liar_note = ""
+        if not can_call_liar:
+            call_liar_note = "\nNOTE: You CANNOT call 'liar' because there is no previous bid to challenge. You MUST make a bid."
+        else:
+            call_liar_note = f"\nNOTE: You can either make a higher bid than {current_bid}, or call 'liar' to challenge the previous bid."
+        
         user_prompt = f"""### Your private dice (keep secret)
 {sorted(self.dice)}
 
@@ -163,7 +171,7 @@ Dice counts: {dice_counts}
 Current bid: {current_bid}
 Eliminated players: {eliminated_text}
 Turns so far this round (latest last):
-{move_history_text}
+{move_history_text}{call_liar_note}
 
 ### Your turn
 It is now your move. Return exactly one JSON object following the format described above."""
@@ -604,6 +612,17 @@ It is now your move. Return exactly one JSON object following the format describ
                                 "utterance": "No dice left! I have to call."
                             }
 
+                        # Additional check: ensure the new bid is actually higher than the last bid
+                        # This should be guaranteed by the logic above, but adding as a safety check
+                        if not (new_quantity > last_quantity or (new_quantity == last_quantity and (last_value + 1) > last_value)):
+                            print(f"AI Fallback Error: Computed bid ({new_quantity}x{last_value + 1}) is not higher than ({last_quantity}x{last_value}). Calling liar instead.")
+                            return {
+                                "action": "liar",
+                                "quantity": 0,
+                                "face": 0,
+                                "reasoning": "Error processing response. Cannot create valid higher bid. Calling liar.",
+                                "utterance": "I have to call!"
+                            }
 
                         return {
                             "action": "bid", 
@@ -641,6 +660,18 @@ It is now your move. Return exactly one JSON object following the format describ
                                 "face": 0,
                                 "reasoning": "Error processing response. Cannot make a valid higher bid with current dice. Calling liar.",
                                 "utterance": "I can't beat that bid, so I'll call!"
+                            }
+                        
+                        # Additional check: ensure the new bid is actually higher than the last bid
+                        # This should be guaranteed by the logic above, but adding as a safety check
+                        if not (new_quantity > last_quantity or (new_quantity == last_quantity and 1 > last_value)):
+                            print(f"AI Fallback Error: Computed bid ({new_quantity}x1) is not higher than ({last_quantity}x{last_value}). Calling liar instead.")
+                            return {
+                                "action": "liar",
+                                "quantity": 0,
+                                "face": 0,
+                                "reasoning": "Error processing response. Cannot create valid higher bid. Calling liar.",
+                                "utterance": "I have to call!"
                             }
 
                         return {

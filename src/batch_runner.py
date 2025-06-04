@@ -38,6 +38,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger("liarsdice")
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 # Custom Exception for Rate Limiting
 class RateLimitError(Exception):
@@ -485,6 +486,10 @@ class AsyncGameRunner:
                         # Check if this would be an invalid bid
                         valid_bid = True
                         if original_quantity < 1 or original_face < 1 or original_face > 6:
+                            valid_bid = False
+                        
+                        # Also check if quantity exceeds total dice (critical missing check)
+                        if valid_bid and original_quantity > game.total_dice_in_game:
                             valid_bid = False
                         
                         # Check if bid is higher than the last bid

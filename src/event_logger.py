@@ -278,10 +278,10 @@ class EventLogger:
                  actor_name: str, actor_model: str, raw_prompt: str, raw_model_response: str,
                  parsed_action: str, parsed_quantity: Optional[int], parsed_face: Optional[int],
                  utterance: str, response_time: float, token_usage: Dict[str, int],
-                 invalid_bid_corrected: bool = False, original_quantity: Optional[int] = None,
-                 original_face: Optional[int] = None):
-        """Log player move event."""
-        event = {
+                 invalid_bid_corrected: bool = False, original_action: Optional[str] = None,
+                 original_quantity: Optional[int] = None, original_face: Optional[int] = None):
+        """Logs a player's move, including AI's raw thought process and response."""
+        event_data: Dict[str, Any] = {
             "type": "move",
             "timestamp": time.time(),
             "game_id": game_id,
@@ -296,16 +296,19 @@ class EventLogger:
             "parsed_face": parsed_face,
             "utterance": utterance,
             "response_time": response_time,
-            "token_usage": token_usage
+            "token_usage": token_usage,
+            "invalid_bid_corrected": invalid_bid_corrected
         }
-        
-        # Add invalid bid correction fields if applicable
         if invalid_bid_corrected:
-            event["invalid_bid_corrected"] = True
-            event["original_quantity"] = original_quantity
-            event["original_face"] = original_face
+            # Only add original fields if a correction actually occurred
+            if original_action is not None:
+                event_data["original_action"] = original_action
+            if original_quantity is not None:
+                event_data["original_quantity"] = original_quantity
+            if original_face is not None:
+                event_data["original_face"] = original_face
         
-        self.log_event(event)
+        self.log_event(event_data)
     
     def log_liar_resolution(self, game_id: int, round_number: int, calling_player: str,
                            target_player: str, last_bid: tuple, actual_face_count: int,
@@ -447,12 +450,13 @@ def log_move(logger: EventLogger, game_id: int, round_number: int, player_snapsh
              actor_name: str, actor_model: str, raw_prompt: str, raw_model_response: str,
              parsed_action: str, parsed_quantity: Optional[int], parsed_face: Optional[int],
              utterance: str, response_time: float, token_usage: Dict[str, int],
-             invalid_bid_corrected: bool = False, original_quantity: Optional[int] = None,
-             original_face: Optional[int] = None):
-    logger.log_move(game_id, round_number, player_snapshot, actor_name, actor_model, 
-                   raw_prompt, raw_model_response, parsed_action, parsed_quantity, 
-                   parsed_face, utterance, response_time, token_usage,
-                   invalid_bid_corrected, original_quantity, original_face)
+             invalid_bid_corrected: bool = False, original_action: Optional[str] = None,
+             original_quantity: Optional[int] = None, original_face: Optional[int] = None):
+    """Wrapper for EventLogger.log_move for easier procedural calls."""
+    logger.log_move(game_id, round_number, player_snapshot, actor_name, actor_model,
+                    raw_prompt, raw_model_response, parsed_action, parsed_quantity,
+                    parsed_face, utterance, response_time, token_usage,
+                    invalid_bid_corrected, original_action, original_quantity, original_face)
 
 @log_if_enabled
 def log_liar_resolution(logger: EventLogger, game_id: int, round_number: int, calling_player: str,

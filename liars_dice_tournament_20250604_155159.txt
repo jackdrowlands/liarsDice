@@ -1,0 +1,73 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-04 15:51:59
+Total Games: 1
+Models/Game: 2
+Providers: meta-llama, mistralai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     mistralai/mistral-nemo        Ashley              1016.0     100.0%          1         1         
+2     meta-llama/llama-3.1-8b-i...  Thomas              984.0     0.0%          0         1         
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. mistralai/mistral-nemo (as 'Ashley')
+   Provider: mistralai
+   Win Rate: 100.0% (1/1)
+   Elo: 1016.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 100.0%
+   Rule Adherence: 100.0%
+   Avg. Rounds/Game: 6.0
+   Liar Call Success: 100.0%
+
+2. meta-llama/llama-3.1-8b-instruct (as 'Thomas')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/1)
+   Elo: 984.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 100.0%
+   Rule Adherence: 83.3%
+   Avg. Rounds/Game: 6.0
+   Liar Call Success: 100.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+Game 1:  Ashley (mistralai/mistral-nemo) defeated Thomas (meta-llama/llama-3.1-8b-instruct)
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- mistralai/mistral-nemo achieved 100.0% win rate (1/1 games)
+- Exceptional lie detection with 100.0% F1 score
+- Strategic bluffing with 0.0% success rate
+- Perfect rule adherence at 100.0%
+
+Strategic Analysis:
+- Average game length: 6.0 rounds
+- mistralai/mistral-nemo: Superior strategy with 100.0% win rate
+- meta-llama/llama-3.1-8b-instruct: 0.0% win rate
+
+Elo Progression:
+- Ashley: 1000 → 1016 (+16 points)
+- Thomas: 1000 → 984 (-16 points)
+
+Tournament Highlights:
+- Perfect tournament with no losses
+- 1 games completed successfully
+- Balanced gameplay with strategic depth
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250604_155159_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250604_155159_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250604_155159_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250604_155159_win_matrix_heatmap.png

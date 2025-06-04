@@ -483,18 +483,27 @@ class LiarsDice:
         }
     
     def _log_move_if_enabled(self, game_num, player, game_state, decision, 
-                            invalid_bid_corrected=False, original_quantity=None, original_face=None):
+                            invalid_bid_corrected=False, original_action=None, 
+                            original_quantity=None, original_face=None):
         """Log move event if raw logging is enabled"""
         if not EventLoggerFactory.is_enabled():
             return
         
         # Create player snapshot for the move
+        # last_bid should represent the bid the current player is responding to,
+        # not the bid they are about to make
+        current_last_bid = self.last_bid
+        parsed_action = decision.get('action', 'unknown')
+        if parsed_action == 'bid' and invalid_bid_corrected:
+            # If this is a corrected bid, use the previous last_bid
+            pass  # current_last_bid is already correct
+        
         player_snapshot = {
             "player_order": [p.name for p in self.players if p.get_dice_count() > 0],
             "dice_by_player": {p.name: p.dice for p in self.players if p.get_dice_count() > 0},
             "counts": {str(face): self.count_dice(face) for face in range(1, 7)},
             "total_dice": self.total_dice_in_game,
-            "last_bid": list(self.last_bid) if self.last_bid else None,
+            "last_bid": list(current_last_bid) if current_last_bid else None,
             "current_player": player.name,
             "round": self.round_number,
             "game_id": game_num
@@ -516,7 +525,7 @@ class LiarsDice:
             player.name, player.model if isinstance(player, AIPlayer) else 'human',
             raw_prompt, raw_response, parsed_action, parsed_quantity, parsed_face,
             utterance, response_time, token_usage,
-            invalid_bid_corrected, original_quantity, original_face
+            invalid_bid_corrected, original_action, original_quantity, original_face
         )
     
     def get_ai_decisions_parallel(self, players, max_workers=None):
@@ -682,8 +691,6 @@ class LiarsDice:
         if valid_bid and quantity > self.total_dice_in_game: # Check quantity against total dice
             print(f"Debug: AI bid quantity {quantity} exceeds total dice {self.total_dice_in_game}. Marking invalid.")
             valid_bid = False
-            # Optionally, store a more specific reason if your logging needs it
-            # decision['invalid_reason'] = "Bid quantity exceeds total dice in game."
         
         # Check if bid is higher than the last bid
         if self.last_bid and valid_bid:
@@ -739,85 +746,77 @@ class LiarsDice:
             print(f"{player.name} says: \"{utterance}\"")
             return False
         else:
-            # AI made an invalid bid (could be too low, bad format, or qty > total_dice)
-            # Attempt to make a safe, valid, corrected bid.
-            
+            # AI made an invalid bid - attempt correction
             corrected_quantity_for_state = 0
             corrected_face_for_state = 0
+            correction_successful = False
 
             if self.last_bid: # If there was a previous bid to base correction on
                 prev_q_state, prev_f_state = self.last_bid
                 
+                # Try to make the minimal valid higher bid
                 if prev_f_state < 6:
+                    # Can increase face value while keeping same quantity
                     corrected_quantity_for_state = prev_q_state
                     corrected_face_for_state = prev_f_state + 1
-                else: # prev_f_state == 6
+                else: # prev_f_state == 6, need to increase quantity and reset face to 1
                     corrected_quantity_for_state = prev_q_state + 1
                     corrected_face_for_state = 1
-            else: # No previous bid, AI's first bid was invalid (e.g. qty=0 or qty > total_dice initially)
-                corrected_quantity_for_state = 1
-                # Use a common face like 1 or a random one for a corrected first bid
-                corrected_face_for_state = random.randint(1,6) 
-
-            # CRITICAL: Clamp the corrected quantity against total_dice_in_game
-            if corrected_quantity_for_state > self.total_dice_in_game:
-                print(f"  Correction Clamping: Auto-corrected bid quantity from {corrected_quantity_for_state} to {self.total_dice_in_game} (total dice).")
-                corrected_quantity_for_state = self.total_dice_in_game
-            
-            # If clamping made quantity 0 (e.g., total_dice_in_game was 0, though game logic should prevent this state usually)
-            # or if the corrected bid is not actually higher than the last bid (e.g. prev was (4,6), total 4, corrected (4,1) not higher)
-            # this correction logic might still be imperfect for game flow, but it ensures self.last_bid is sane.
-            if corrected_quantity_for_state == 0 and self.total_dice_in_game > 0:
-                print(f"  Correction Warning: Auto-corrected bid quantity became 0 despite total_dice={self.total_dice_in_game}. Forcing to minimal (1,1). This may not be a valid higher bid.")
-                corrected_quantity_for_state = 1 
-                corrected_face_for_state = 1 # Needs to be higher than self.last_bid if possible
-
-            # Ensure the corrected bid is actually higher than the original self.last_bid if self.last_bid existed.
-            # If not, this "correction" might lead to a stuck game state or invalid progression.
-            # This is a deeper issue with "simple" correction. For now, we prioritize a sane self.last_bid state.
-            if self.last_bid:
-                prev_q_state, prev_f_state = self.last_bid
-                if not (corrected_quantity_for_state > prev_q_state or \
-                       (corrected_quantity_for_state == prev_q_state and corrected_face_for_state > prev_f_state)):
-                    print(f"  Correction Warning: Final corrected bid ({corrected_quantity_for_state}x{corrected_face_for_state}) is not higher than previous actual bid ({prev_q_state}x{prev_f_state}). AI may be stuck.")
-                    # To avoid game getting stuck, if correction is not higher, what to do?
-                    # The original code just set it. We are at least clamping quantity.
-                    # The current primary goal is to ensure self.last_bid has quantity <= total_dice.
-
-
-            if corrected_quantity_for_state > 0 : # Only set if a positive quantity bid could be formed
-                self.last_bid = (corrected_quantity_for_state, corrected_face_for_state)
-            else:
-                # This case means total_dice_in_game is likely 0, or correction failed badly.
-                # A bid of 0 is not allowed. The game should likely have ended.
-                # If forced to make *some* bid, and previous was (say) (1,1) and total_dice became 0,
-                # it's an impossible situation for _process_ai_bid.
-                # For robustness, if self.last_bid wasn't updated, ensure it reflects something,
-                # or accept that the AI turn might effectively be skipped if no valid state can be set.
-                # However, the function expects to set self.last_bid and return False for a bid.
-                # If total_dice_in_game > 0, we must set a bid.
-                if self.total_dice_in_game > 0:
-                    print(f"  Correction Critical Warning: Corrected quantity is {corrected_quantity_for_state} with total dice {self.total_dice_in_game}. Defaulting to (1,1) as last resort.")
-                    self.last_bid = (1,1) # This is a last resort and might not be a valid *higher* bid.
+                
+                # Check if the corrected bid is possible given total dice
+                if corrected_quantity_for_state <= self.total_dice_in_game:
+                    correction_successful = True
                 else:
-                    # If total_dice_in_game is 0, no bid can be made.
-                    # This state should ideally be caught before calling _process_ai_bid.
-                    # For now, leave self.last_bid as is or handle as an error state.
-                    # Let's assume if total_dice_in_game is 0, _process_ai_bid shouldn't be called
-                    # or game should end. If it IS called, and we must set self.last_bid:
-                    pass # Rely on self.last_bid being (1,1) if this block is reached from above logic.
+                    # Cannot make a valid higher bid - the previous bid was already at or near the limit
+                    print(f"  Correction Error: Cannot create valid higher bid than ({prev_q_state}x{prev_f_state}) with only {self.total_dice_in_game} total dice.")
+                    correction_successful = False
+                    
+            else: # No previous bid, AI's first bid was invalid (e.g. qty=0 or qty > total_dice initially)
+                if self.total_dice_in_game > 0:
+                    corrected_quantity_for_state = 1
+                    corrected_face_for_state = random.randint(1,6) 
+                    correction_successful = True
+                else:
+                    correction_successful = False
 
+            if correction_successful:
+                self.last_bid = (corrected_quantity_for_state, corrected_face_for_state)
+                print(f"  Correction Success: Invalid bid corrected to {corrected_quantity_for_state}x{corrected_face_for_state}")
+                
+                # Update the decision object to reflect what was actually used by the game
+                decision["quantity"] = corrected_quantity_for_state
+                decision["face"] = corrected_face_for_state
+                decision["reasoning"] = f"AI original bid ({quantity}x{value}) was invalid. Game corrected to {corrected_quantity_for_state}x{corrected_face_for_state}."
+                decision["utterance"] = "I make this bid."
+            else:
+                # Cannot create a valid higher bid - force AI to call liar instead
+                print(f"  Correction Failed: Cannot create valid higher bid. AI should call liar instead.")
+                
+                # Force the AI to call liar instead of making an invalid bid
+                # Update decision object to reflect the liar call
+                decision["action"] = "liar"
+                decision["quantity"] = 0
+                decision["face"] = 0
+                decision["reasoning"] = f"AI attempted invalid bid ({quantity}x{value}), forced to call liar instead."
+                decision["utterance"] = "I can't make a valid bid, so I call liar!"
+                
+                # Record as a liar call in move history
+                move_data = {
+                    "round": self.round_number,
+                    "player": player.name,
+                    "action": "liar",
+                    "target_player": self.players[(self.current_player_idx - 1) % len(self.players)].name if self.last_bid else "N/A",
+                    "reasoning": decision["reasoning"],
+                    "utterance": decision["utterance"]
+                }
+                self.move_history.append(move_data)
+                self.player_history[player.name].append(move_data)
+                
+                print(f"{player.name} attempted invalid bid ({quantity} {value}'s), forced to call liar instead")
+                return True  # Return True to indicate a liar call
 
-            # Record in metrics that AI made an invalid bid (already done above by valid_bid check)
-            # if isinstance(player, AIPlayer):
-            #     self.metrics.record_rule_adherence(player.model, False) # This was already done
-            
-            # The `quantity` and `value` below are the AI's *original* (invalid) bid.
-            # The `self.last_bid[0]` and `self.last_bid[1]` are the *corrected* values for the log.
-            corrected_utterance = "I make this bid." # Generic utterance for a corrected bid
-            corrected_reasoning = f"AI original bid ({quantity}x{value}) was invalid. Game corrected to {self.last_bid[0]}x{self.last_bid[1]}."
-            
-            # Record move in history with the invalid bid info
+            # If we get here, correction was successful - record the corrected bid
+            # Record move in history with the corrected bid info
             move_data = {
                 "round": self.round_number,
                 "player": player.name,
@@ -827,8 +826,8 @@ class LiarsDice:
                 "invalid_bid_corrected": True,
                 "original_quantity": quantity, # Log the AI's original attempted quantity
                 "original_face": value,       # Log the AI's original attempted value
-                "reasoning": corrected_reasoning, # Explain the correction
-                "utterance": corrected_utterance
+                "reasoning": decision["reasoning"], # Use updated reasoning
+                "utterance": decision["utterance"]  # Use updated utterance
             }
             self.move_history.append(move_data)
             
@@ -836,8 +835,8 @@ class LiarsDice:
             self.player_history[player.name].append(move_data)
             
             print(f"{player.name} attempted invalid bid ({quantity} {value}'s), corrected to {self.last_bid[0]} {self.last_bid[1]}'s")
-            print(f"Reasoning: {corrected_reasoning}")
-            print(f"{player.name} says: \"{corrected_utterance}\"")
+            print(f"Reasoning: {decision['reasoning']}")
+            print(f"{player.name} says: \"{decision['utterance']}\"")
             return False
     
     def get_player_bid(self, player_idx, game_num=0):
@@ -871,56 +870,76 @@ class LiarsDice:
                         usage.get('total_tokens', 0)
                     )
                 
-                # Process the AI decision based on action type and capture any corrections
-                # This 'decision' object can be modified by _process_ai_liar_call or _process_ai_bid
-                # if corrections occur.
+                # Capture initial AI output for logging originals if a correction occurs
+                initial_ai_action = decision.get("action")
+                initial_ai_quantity = decision.get("quantity") # Can be None if action is 'liar'
+                initial_ai_face = decision.get("face")       # Can be None if action is 'liar'
+
+                # Variables to store original values if a correction occurs
+                final_original_action_for_log = None
+                final_original_quantity_for_log = None
+                final_original_face_for_log = None
                 
                 invalid_bid_corrected_for_logger = False 
-                original_quantity_for_logger = None
-                original_face_for_logger = None
                 
-                # Store the decision object that might be modified by processing functions
-                # This is the object that will be passed to the logger.
+                # This 'processed_decision' object starts as the AI's raw decision
+                # and can be modified by _process_ai_liar_call or _process_ai_bid if corrections occur.
+                # It represents the decision that the game engine will ultimately use.
                 processed_decision = decision 
 
-                if processed_decision["action"] == "liar":
+                if initial_ai_action == "liar":
+                    # _process_ai_liar_call might modify processed_decision if it's an invalid liar call (e.g. first turn)
                     result = self._process_ai_liar_call(player, processed_decision) 
-                    # ^ processed_decision is passed by reference and can be modified inside
                     
                     if processed_decision.get('correction_made_internally_from_liar_to_bid'):
                         invalid_bid_corrected_for_logger = True
-                        # Original action was 'liar', which has no quantity/face
-                        original_quantity_for_logger = 0 
-                        original_face_for_logger = 0
-                        # The 'processed_decision' now reflects the corrected "bid" action.
-                else: # Original action was "bid"
-                    original_quantity_for_logger = processed_decision.get("quantity")
-                    original_face_for_logger = processed_decision.get("face")
+                        final_original_action_for_log = "liar" 
+                        final_original_quantity_for_log = 0    # Standard for original 'liar' action
+                        final_original_face_for_log = 0
+
+                elif initial_ai_action == "bid":
+                    # Validate the original bid from the AI before _process_ai_bid makes corrections
+                    is_valid_structural_bid = (initial_ai_quantity is not None and isinstance(initial_ai_quantity, int) and initial_ai_quantity >= 1 and
+                                               initial_ai_face is not None and isinstance(initial_ai_face, int) and 1 <= initial_ai_face <= 6)
                     
-                    # Perform validation for the AI's bid attempt before calling _process_ai_bid
-                    is_ai_bid_attempt_valid = True
-                    if not (original_quantity_for_logger and isinstance(original_quantity_for_logger, int) and original_quantity_for_logger >= 1 and \
-                            original_face_for_logger and isinstance(original_face_for_logger, int) and 1 <= original_face_for_logger <= 6):
-                        is_ai_bid_attempt_valid = False
+                    # Also check if quantity exceeds total dice (critical missing check)
+                    if is_valid_structural_bid and initial_ai_quantity > self.total_dice_in_game:
+                        is_valid_structural_bid = False
                     
-                    if self.last_bid and is_ai_bid_attempt_valid:
+                    is_logically_higher_bid = True # Assume true if no prior bid or if structurally invalid
+                    if self.last_bid and is_valid_structural_bid:
                         last_q, last_v = self.last_bid
-                        if original_quantity_for_logger < last_q or \
-                           (original_quantity_for_logger == last_q and original_face_for_logger <= last_v):
-                            is_ai_bid_attempt_valid = False
+                        if initial_ai_quantity < last_q or \
+                           (initial_ai_quantity == last_q and initial_ai_face <= last_v):
+                            is_logically_higher_bid = False
                     
-                    if not is_ai_bid_attempt_valid:
+                    if not (is_valid_structural_bid and is_logically_higher_bid):
                         invalid_bid_corrected_for_logger = True
+                        final_original_action_for_log = "bid"
+                        final_original_quantity_for_log = initial_ai_quantity
+                        final_original_face_for_log = initial_ai_face
+                        # _process_ai_bid will now be responsible for correcting 'processed_decision'
                     
-                    # _process_ai_bid will handle the actual correction logic if is_ai_bid_attempt_valid is False.
-                    # It also modifies 'processed_decision' (its 'decision' param) if it corrects the bid.
-                    result = self._process_ai_bid(player, processed_decision) 
+                    result = self._process_ai_bid(player, processed_decision)
                 
-                # Log the move event after processing, using the potentially modified 'processed_decision'
+                else: # AI returned an unknown action
+                    print(f"Error: AI {player.name} returned an unknown action: '{initial_ai_action}'. Fallback will be attempted.")
+                    result = False # Indicate failure to get a valid bid, will trigger fallback logic later
+                    invalid_bid_corrected_for_logger = True 
+                    final_original_action_for_log = initial_ai_action
+                    final_original_quantity_for_log = initial_ai_quantity
+                    final_original_face_for_log = initial_ai_face
+                    # Fallback logic in the except block or later in play_round will handle setting a valid move.
+                    # For logging, processed_decision still holds the AI's problematic decision.
+
+                # Log the move event after processing.
+                # 'processed_decision' contains the action/qty/face that the game engine used.
+                # 'final_original_action_for_log', etc., contain the AI's initial output if a correction occurred.
                 self._log_move_if_enabled(game_num, player, game_state, processed_decision,
                                         invalid_bid_corrected_for_logger, 
-                                        original_quantity_for_logger, 
-                                        original_face_for_logger)
+                                        final_original_action_for_log, 
+                                        final_original_quantity_for_log, 
+                                        final_original_face_for_log)
                 
                 return result
                     
@@ -1210,6 +1229,13 @@ class LiarsDice:
         if last_bid_move and "reasoning" in last_bid_move:
             print(f"\n{previous_player.name}'s reasoning for the bid: {last_bid_move['reasoning']}")
         
+        # Capture dice BEFORE any die is removed for logging
+        all_players_dice_before_loss = {}
+        if EventLoggerFactory.is_enabled():
+            for p in self.players:
+                if p.get_dice_count() > 0:
+                    all_players_dice_before_loss[p.name] = p.dice.copy()
+        
         if actual_count >= quantity:
             # Bid was valid, calling player loses a die
             print(f"{calling_player.name} was wrong! {previous_player.name}'s bid was valid.")
@@ -1247,10 +1273,9 @@ class LiarsDice:
         
         # Log liar resolution event
         if EventLoggerFactory.is_enabled():
-            all_players_dice = {p.name: p.dice for p in self.players if p.get_dice_count() > 0}
             log_liar_resolution(
                 game_num, self.round_number, calling_player.name, previous_player.name,
-                self.last_bid, actual_count, outcome, all_players_dice
+                self.last_bid, actual_count, outcome, all_players_dice_before_loss
             )
         
         # Update the last liar call with the outcome
@@ -1399,6 +1424,9 @@ class LiarsDice:
                 is_calling_liar = self.get_player_bid(self.current_player_idx, game_num)
             
             if is_calling_liar:
+                # Store the loser before handling the liar call
+                pre_call_player_counts = {p.name: p.get_dice_count() for p in self.players}
+                
                 self.handle_liar_call(auto_continue=auto_mode, game_num=game_num)
                 
                 if self.check_game_over():
@@ -1408,6 +1436,23 @@ class LiarsDice:
                 if EventLoggerFactory.is_enabled():
                     surviving_players = [p.name for p in self.players if p.get_dice_count() > 0]
                     log_round_end(game_num, self.round_number, surviving_players)
+                
+                # Determine who lost a die and set the next starting player
+                loser_name = None
+                for p in self.players:
+                    if p.get_dice_count() < pre_call_player_counts[p.name]:
+                        loser_name = p.name
+                        break
+                
+                # Set starting player for next round (player after the loser)
+                if loser_name:
+                    loser_idx = next(i for i, p in enumerate(self.players) if p.name == loser_name)
+                    # Get the next player after the loser (wrapping around)
+                    next_player_idx = (loser_idx + 1) % len(self.players)
+                    # Skip eliminated players
+                    while self.players[next_player_idx].get_dice_count() == 0:
+                        next_player_idx = (next_player_idx + 1) % len(self.players)
+                    self.current_player_idx = next_player_idx
                 
                 self.move_history = [] # Reset move history for the new round
                 

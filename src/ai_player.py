@@ -109,34 +109,8 @@ Example output:
 
 CRITICAL: Your entire response MUST be ONLY valid JSON. No text before or after the JSON object. No markdown formatting. No backticks. Just the raw JSON object."""
         
-        # Format move history for prompt in a format that shows previous JSON actions and utterances
-        move_history_text = ""
-        for i, move in enumerate(game_state.get('move_history', [])):
-                player_name = move['player']
-                
-                if move["action"] == "bid":
-                    action_summary = f"{player_name}: {{\"action\": \"bid\", \"quantity\": {move['quantity']}, \"face\": {move['face']}}}"
-                    # Add utterance if available in the future
-                    if "utterance" in move:
-                        action_summary += f", \"utterance\": \"{move['utterance']}\""
-                    action_summary += "}\n"
-                    move_history_text += action_summary
-                    
-                elif move["action"] == "liar":
-                    action_summary = f"{player_name}: {{\"action\": \"call\""
-                    # Add utterance if available
-                    if "utterance" in move:
-                        action_summary += f", \"utterance\": \"{move['utterance']}\""
-                    action_summary += "}\n"
-                    move_history_text += action_summary
-                    
-                    # Add outcome information
-                    if "outcome" in move:
-                        target_player = move.get('target_player', 'previous player')
-                        if move["outcome"] == "success":
-                            move_history_text += f"Outcome: {player_name} was right! {target_player} lost a die.\n"
-                        else:
-                            move_history_text += f"Outcome: {player_name} was wrong! {player_name} lost a die.\n"
+        # Format move history organized by rounds for clearer structure
+        move_history_text = self._format_move_history_by_rounds(game_state)
         
         # Calculate player and dice information
         player_names = list(game_state['player_dice_counts'].keys())
@@ -170,14 +144,107 @@ Players: {player_names}
 Dice counts: {dice_counts}
 Current bid: {current_bid}
 Eliminated players: {eliminated_text}
-Turns so far this round (latest last):
-{move_history_text}{call_liar_note}
+
+### Game history
+{move_history_text if move_history_text else "(No previous moves)"}
+{call_liar_note}
 
 ### Your turn
 It is now your move. Return exactly one JSON object following the format described above."""
 
         # Return the prompts to be used in the API request
         return {"system": system_prompt, "user": user_prompt}
+    
+    def _format_move_history_by_rounds(self, game_state: GameState) -> str:
+        """Format move history organized by rounds for better clarity"""
+        move_history = game_state.get('move_history', [])
+        current_round = game_state.get('round_number', 1)
+        player_dice_counts = game_state.get('player_dice_counts', {})
+        
+        if not move_history:
+            return ""
+        
+        # Group moves by round
+        rounds = {}
+        for move in move_history:
+            round_num = move.get('round', 1)
+            if round_num not in rounds:
+                rounds[round_num] = []
+            rounds[round_num].append(move)
+        
+        # Format the history text
+        history_lines = []
+        
+        # Process completed rounds first
+        completed_rounds = [r for r in sorted(rounds.keys()) if r < current_round]
+        for round_num in completed_rounds:
+            history_lines.append(f"=== ROUND {round_num} ===")
+            round_moves = rounds[round_num]
+            
+            # Format moves in this round
+            round_summary = self._format_round_moves(round_moves)
+            history_lines.append(round_summary)
+            
+            # Add round outcome if available
+            last_move = round_moves[-1] if round_moves else None
+            if last_move and last_move.get('action') == 'liar':
+                if 'outcome' in last_move:
+                    target_player = last_move.get('target_player', 'previous player')
+                    caller = last_move['player']
+                    if last_move['outcome'] == 'success':
+                        history_lines.append(f"→ Round ended: {caller} was right! {target_player} lost a die.")
+                    else:
+                        history_lines.append(f"→ Round ended: {caller} was wrong! {caller} lost a die.")
+            
+            history_lines.append("")  # Empty line between rounds
+        
+        # Add current round if it has moves
+        if current_round in rounds:
+            history_lines.append(f"=== ROUND {current_round} (Current) ===")
+            current_round_moves = rounds[current_round]
+            round_summary = self._format_round_moves(current_round_moves)
+            history_lines.append(round_summary)
+        elif current_round > 1:
+            # If this is a new round with no moves yet, indicate it clearly
+            history_lines.append(f"=== ROUND {current_round} (Current - No moves yet) ===")
+        
+        return "\n".join(history_lines).strip()
+    
+    def _format_round_moves(self, moves: List[Dict[str, Any]]) -> str:
+        """Format moves within a single round"""
+        move_lines = []
+        
+        for move in moves:
+            player_name = move['player']
+            
+            if move["action"] == "bid":
+                quantity = move.get('quantity', 0)
+                face = move.get('face', 0)
+                action_summary = f"{player_name}: {{\"action\": \"bid\", \"quantity\": {quantity}, \"face\": {face}"
+                
+                # Add utterance if available
+                if "utterance" in move:
+                    action_summary += f", \"utterance\": \"{move['utterance']}\""
+                action_summary += "}"
+                move_lines.append(action_summary)
+                
+            elif move["action"] == "liar":
+                action_summary = f"{player_name}: {{\"action\": \"call\""
+                # Add utterance if available
+                if "utterance" in move:
+                    action_summary += f", \"utterance\": \"{move['utterance']}\""
+                action_summary += "}"
+                move_lines.append(action_summary)
+                
+                # Add outcome information for liar calls
+                if "outcome" in move:
+                    target_player = move.get('target_player', 'previous player')
+                    if move["outcome"] == "success":
+                        move_lines.append(f"Outcome: {player_name} was right! {target_player} lost a die.")
+                    else:
+                        move_lines.append(f"Outcome: {player_name} was wrong! {player_name} lost a die.")
+        
+        return "\n".join(move_lines)
     
     def get_prompt_and_params(self, game_state: GameState) -> RequestParams:
         """Prepare the API request parameters but don't send yet"""

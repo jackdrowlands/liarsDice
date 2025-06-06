@@ -1,0 +1,99 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-04 21:04:35
+Total Games: 10
+Models/Game: 4
+Providers: mistralai, qwen, meta-llama
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     mistralai/mistral-nemo        Thomas              984.7     10.0%          1         10        
+2     mistralai/ministral-3b        Andrew              1045.8     10.0%          1         10        
+3     meta-llama/llama-3.1-8b-i...  Megan               984.0     0.0%          0         10        
+4     qwen/qwen-2.5-7b-instruct     Amanda              985.4     0.0%          0         10        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. mistralai/mistral-nemo (as 'Thomas')
+   Provider: mistralai
+   Win Rate: 10.0% (1/10)
+   Elo: 984.7
+   Bluff Success: 2.5%
+   Lie Detection (F1): 17.5%
+   Rule Adherence: 20.0%
+   Avg. Rounds/Game: 3.5
+   Liar Call Success: 0.0%
+
+2. mistralai/ministral-3b (as 'Andrew')
+   Provider: mistralai
+   Win Rate: 10.0% (1/10)
+   Elo: 1045.8
+   Bluff Success: 0.0%
+   Lie Detection (F1): 13.6%
+   Rule Adherence: 17.2%
+   Avg. Rounds/Game: 3.5
+   Liar Call Success: 50.0%
+
+3. meta-llama/llama-3.1-8b-instruct (as 'Megan')
+   Provider: meta-llama
+   Win Rate: 0.0% (0/10)
+   Elo: 984.0
+   Bluff Success: 0.0%
+   Lie Detection (F1): 6.7%
+   Rule Adherence: 13.0%
+   Avg. Rounds/Game: 3.5
+   Liar Call Success: 0.0%
+
+4. qwen/qwen-2.5-7b-instruct (as 'Amanda')
+   Provider: qwen
+   Win Rate: 0.0% (0/10)
+   Elo: 985.4
+   Bluff Success: 4.5%
+   Lie Detection (F1): 0.0%
+   Rule Adherence: 20.0%
+   Avg. Rounds/Game: 3.5
+   Liar Call Success: 0.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+Game 5:  Andrew (mistralai/ministral-3b) defeated Megan (meta-llama/llama-3.1-8b-instruct), Thomas (mistralai/mistral-nemo), Amanda (qwen/qwen-2.5-7b-instruct)
+Game 8:  Thomas (mistralai/mistral-nemo) defeated Megan (meta-llama/llama-3.1-8b-instruct), Andrew (mistralai/ministral-3b), Amanda (qwen/qwen-2.5-7b-instruct)
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- mistralai/mistral-nemo achieved 10.0% win rate (1/10 games)
+- Exceptional lie detection with 17.5% F1 score
+- Strategic bluffing with 2.5% success rate
+- Perfect rule adherence at 20.0%
+
+Strategic Analysis:
+- Average game length: 17.5 rounds
+- mistralai/mistral-nemo: Superior strategy with 10.0% win rate
+- mistralai/ministral-3b: 10.0% win rate
+- Clear advantage in lie detection: 17.5% vs 13.6% F1 score
+
+Elo Progression:
+- Thomas: 1000 → 985 (-15 points)
+- Andrew: 1000 → 1046 (+46 points)
+- Megan: 1000 → 984 (-16 points)
+- Amanda: 1000 → 985 (-15 points)
+
+Tournament Highlights:
+- Competitive tournament with close results
+- 2 games completed successfully
+- Extended strategic battles
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250604_210435_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250604_210435_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250604_210435_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250604_210435_win_matrix_heatmap.png

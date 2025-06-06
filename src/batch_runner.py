@@ -222,7 +222,7 @@ class AsyncGameRunner:
         prompt_dict = player.get_prompt_for_game(game_state)
         raw_prompt = f"System: {prompt_dict['system']}\n\nUser: {prompt_dict['user']}"
         game_state['raw_prompt'] = raw_prompt
-        logger.debug(f"Raw prompt: {raw_prompt}")
+        # logger.debug(f"Raw prompt: {raw_prompt}")
         
         prep_time = time.time() - prep_start_time
         self.timing_data["prepare_request"].append(prep_time)

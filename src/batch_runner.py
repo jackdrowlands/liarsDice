@@ -47,6 +47,83 @@ class RateLimitError(Exception):
         self.message = f"{message} for model: {model_id}"
         super().__init__(self.message)
 
+# Custom Exception for Credit Exhaustion
+class CreditExhaustionError(Exception):
+    def __init__(self, model_id, message="Credits exhausted"):
+        self.model_id = model_id
+        self.message = f"{message} for model: {model_id}"
+        super().__init__(self.message)
+
+class CreditPauseHandler:
+    """Handles pausing the tournament when credits are exhausted"""
+    def __init__(self):
+        self.paused = False
+        self.pause_event = threading.Event()
+        self.pause_event.set()  # Initially not paused
+    
+    def pause_tournament(self, model_id, reason="Credits exhausted"):
+        """Pause all tournament operations and wait for user action"""
+        if self.paused:
+            return  # Already paused
+            
+        self.paused = True
+        self.pause_event.clear()  # This will block any thread calling wait_if_paused()
+        
+        print(f"\n{'='*60}")
+        print(f"TOURNAMENT PAUSED: {reason} for model: {model_id}")
+        print(f"{'='*60}")
+        print("All tournament operations have been paused.")
+        print("Please choose an option:")
+        print("1. Add more credits to your OpenRouter account and press Enter to continue")
+        print("2. Enter a new API key")
+        print("3. Exit tournament")
+        
+        while True:
+            try:
+                choice = input("\nEnter your choice (1/2/3): ").strip()
+                
+                if choice == '1':
+                    input("Press Enter after adding credits to continue...")
+                    print("Resuming tournament...")
+                    self.resume_tournament()
+                    break
+                elif choice == '2':
+                    new_key = input("Enter new OpenRouter API key: ").strip()
+                    if new_key:
+                        os.environ["OPENROUTER_API_KEY"] = new_key
+                        print("API key updated. Resuming tournament...")
+                        self.resume_tournament()
+                        break
+                    else:
+                        print("Invalid API key. Please try again.")
+                elif choice == '3':
+                    print("Exiting tournament...")
+                    raise KeyboardInterrupt("User requested tournament exit due to credit exhaustion")
+                else:
+                    print("Invalid choice. Please enter 1, 2, or 3.")
+            except KeyboardInterrupt:
+                print("\nTournament cancelled by user.")
+                raise
+            except EOFError:
+                print("\nInput stream closed. Exiting tournament.")
+                raise KeyboardInterrupt("Input stream closed")
+    
+    def resume_tournament(self):
+        """Resume tournament operations"""
+        self.paused = False
+        self.pause_event.set()  # Allow threads to continue
+    
+    def wait_if_paused(self):
+        """Block if tournament is paused"""
+        self.pause_event.wait()
+    
+    def is_paused(self):
+        """Check if tournament is currently paused"""
+        return self.paused
+
+# Global credit pause handler
+credit_pause_handler = CreditPauseHandler()
+
 class AsyncGameRunner:
     """
     Runs multiple games concurrently using asyncio.
@@ -117,6 +194,9 @@ class AsyncGameRunner:
     
     async def make_api_request(self, request_params, player_name=None, model=None):
         """Make an async API request with rate limiting and backoff"""
+        # Check if tournament is paused before making request
+        credit_pause_handler.wait_if_paused()
+        
         endpoint_url = request_params["endpoint_url"]
         headers = request_params["headers"]
         data = request_params["data"]
@@ -155,6 +235,23 @@ class AsyncGameRunner:
                     self.timing_data[f"api_call_{model}"].append(response_time)
                     
                 logger.debug(f"API response received from {model} - time: {response_time:.2f}s, status: {response.status_code}")
+                
+                # Check for credit exhaustion (common OpenRouter error codes and messages)
+                if response.status_code in [402, 403]:  # Payment Required or Forbidden
+                    try:
+                        response_json = response.json()
+                        error_message = response_json.get("error", {}).get("message", response.text) if isinstance(response_json.get("error"), dict) else str(response_json.get("error", response.text))
+                    except:
+                        error_message = response.text
+                    
+                    # Check for credit-related error messages
+                    credit_keywords = ["credit", "balance", "insufficient", "funds", "payment", "billing", "quota exceeded"]
+                    if any(keyword in error_message.lower() for keyword in credit_keywords):
+                        logger.error(f"CREDIT EXHAUSTION detected for {model}: {response.status_code} - {error_message}")
+                        credit_pause_handler.pause_tournament(model, f"Credits exhausted: {error_message}")
+                        # After resuming, wait for pause check and continue with retry
+                        credit_pause_handler.wait_if_paused()
+                        continue
                 
                 if response.status_code == 429: # Rate limit exceeded
                     error_msg = f"RATE LIMIT EXCEEDED for {model}: {response.status_code} - {response.text[:200]}"
@@ -216,7 +313,7 @@ class AsyncGameRunner:
         prep_start_time = time.time()
         request_params = player.get_prompt_and_params(game_state)
         game_state['provider'] = request_params["provider"]
-        logger.debug(f"Request params: {request_params}")
+        # logger.debug(f"Request params: {request_params}")
         
         # Capture raw prompt for logging
         prompt_dict = player.get_prompt_for_game(game_state)
@@ -641,6 +738,9 @@ class AsyncGameRunner:
         try:
             round_number = 0
             while not game.game_over:
+                # Check if tournament is paused
+                credit_pause_handler.wait_if_paused()
+                
                 round_number += 1; round_start_time = time.time()
                 elapsed = time.time() - start_time
                 if elapsed > max_duration: self.game_timing_stats[game_num]["timeout"] = {"elapsed_time": elapsed, "rounds_completed": round_number -1}; raise asyncio.TimeoutError(f"Game {game_num} exceeded time limit")
@@ -662,6 +762,11 @@ class AsyncGameRunner:
             print(f"Game {game_num} ABORTED: {rle.message}"); logger.error(f"Game {game_num} ABORTED due to RateLimitError: {rle.message}")
             self.game_timing_stats[game_num]["error"] = f"RateLimitError: {rle.message}"; self.game_timing_stats[game_num]["aborted_due_to_rate_limit"] = True
             return {"winner": None, "game": game, "game_num": game_num, "error": f"RateLimitError: {rle.message}", "aborted_due_to_rate_limit": True}
+        except CreditExhaustionError as cee:
+            if not self.batch_runner.verbose_output: sys.stdout = original_stdout
+            print(f"Game {game_num} PAUSED: {cee.message}"); logger.error(f"Game {game_num} PAUSED due to CreditExhaustionError: {cee.message}")
+            self.game_timing_stats[game_num]["error"] = f"CreditExhaustionError: {cee.message}"; self.game_timing_stats[game_num]["paused_due_to_credit_exhaustion"] = True
+            return {"winner": None, "game": game, "game_num": game_num, "error": f"CreditExhaustionError: {cee.message}", "paused_due_to_credit_exhaustion": True}
         except asyncio.TimeoutError:
             if not self.batch_runner.verbose_output: sys.stdout = original_stdout
             print(f"Game {game_num} timed out and was terminated")
@@ -965,6 +1070,9 @@ class GameBatchRunner:
         start_time = time.time(); max_duration = 3600
         try:
             while not game.game_over:
+                # Check if tournament is paused
+                credit_pause_handler.wait_if_paused()
+                
                 if time.time() - start_time > max_duration: raise TimeoutError(f"Game {game_num} timed out")
                 game.play_round(auto_mode=True, game_num=game_num)
             winner_model = self._process_game_results(game, game_num)

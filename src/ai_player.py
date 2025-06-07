@@ -399,6 +399,12 @@ It is now your move. Return exactly one JSON object following the format describ
         data = request_params["data"]
         
         try:
+            # Import the credit pause handler
+            from .batch_runner import credit_pause_handler
+            
+            # Check if tournament is paused before making request
+            credit_pause_handler.wait_if_paused()
+            
             # Make the API request with timing
             start_time = time.time()
             response = requests.post(
@@ -407,6 +413,23 @@ It is now your move. Return exactly one JSON object following the format describ
                 json=data,
             )
             response_time = time.time() - start_time
+            
+            # Check for credit exhaustion (common OpenRouter error codes and messages)
+            if response.status_code in [402, 403]:  # Payment Required or Forbidden
+                try:
+                    response_json = response.json()
+                    error_message = response_json.get("error", {}).get("message", response.text) if isinstance(response_json.get("error"), dict) else str(response_json.get("error", response.text))
+                except:
+                    error_message = response.text
+                
+                # Check for credit-related error messages
+                credit_keywords = ["credit", "balance", "insufficient", "funds", "payment", "billing", "quota exceeded"]
+                if any(keyword in error_message.lower() for keyword in credit_keywords):
+                    print(f"CREDIT EXHAUSTION detected for {self.model}: {response.status_code} - {error_message}")
+                    credit_pause_handler.pause_tournament(self.model, f"Credits exhausted: {error_message}")
+                    # After resuming, retry the request
+                    credit_pause_handler.wait_if_paused()
+                    return self.get_ai_decision(game_state)  # Retry the entire request
             
             # OpenRouter and local follow OpenAI format
             if response.status_code != 200:

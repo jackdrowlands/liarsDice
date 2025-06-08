@@ -132,7 +132,7 @@ class AsyncGameRunner:
     def __init__(self, batch_runner):
         self.batch_runner = batch_runner
         limits = httpx.Limits(max_connections=50, max_keepalive_connections=50)
-        self.client = httpx.AsyncClient(timeout=30.0, limits=limits)  # Single client for all API calls
+        self.client = httpx.AsyncClient(timeout=600.0, limits=limits)  # Single client for all API calls
         # Track timing data for diagnostics
         self.timing_data = defaultdict(list)
         self.api_call_counts = defaultdict(int)
@@ -548,7 +548,7 @@ class AsyncGameRunner:
             turn_start_time = time.time()
             logger.debug(f"Starting turn for player {player.name} (Model: {player.model})")
             game_state = game.create_game_state_for_ai(player_idx)
-            turn_timeout = 300
+            turn_timeout = 1800
             
             try:
                 decision_task = asyncio.create_task(self.get_ai_decision_async(player, game_state))
@@ -627,7 +627,7 @@ class AsyncGameRunner:
                     game.last_bid = (last_quantity, last_value + 1) if last_value < 6 else (last_quantity + 1, 1)
                 else: game.last_bid = (1, random.randint(3, 6))
                 if isinstance(player, AIPlayer): game.metrics.record_rule_adherence(player.model, False)
-                move_data = {"round": len(game.move_history) + 1, "player": player.name, "action": "bid", "quantity": game.last_bid[0], "value": game.last_bid[1], "error_fallback": True, "error_message": str(e)}
+                move_data = {"round": len(game.move_history) + 1, "player": player.name, "action": "bid", "quantity": game.last_bid[0], "face": game.last_bid[1], "error_fallback": True, "error_message": str(e)}
                 game.move_history.append(move_data)
                 game.player_history[player.name].append(move_data)
                 
@@ -733,7 +733,7 @@ class AsyncGameRunner:
         self.game_timing_stats[game_num] = {"start_time": time.time(), "game_models": [m.get("id") for m in game_models], "player_models": {p.name: p.model for p in game.players if isinstance(p, AIPlayer)}, "round_completion": {}}
         original_stdout = sys.stdout
         if not self.batch_runner.verbose_output: sys.stdout = open(os.devnull, 'w')
-        start_time = time.time(); max_duration = 3600
+        start_time = time.time(); max_duration = 36000 # 10 hours
         logger.info(f"Starting game {game_num} with models: {', '.join([f'{p.name}: {p.model}' for p in game.players if isinstance(p, AIPlayer)])}")
         try:
             round_number = 0
@@ -770,11 +770,11 @@ class AsyncGameRunner:
         except asyncio.TimeoutError:
             if not self.batch_runner.verbose_output: sys.stdout = original_stdout
             print(f"Game {game_num} timed out and was terminated")
-            return {"winner": None, "game": None, "game_num": game_num, "error": "timeout"}
+            return {"winner": None, "game": game, "game_num": game_num, "error": "timeout"}
         except Exception as e:
             if not self.batch_runner.verbose_output: sys.stdout = original_stdout
             print(f"Error in game {game_num}: {e}")
-            return {"winner": None, "game": None, "game_num": game_num, "error": str(e)}
+            return {"winner": None, "game": game, "game_num": game_num, "error": str(e)}
 
     async def run_game_with_semaphore(self, game_num, semaphore):
         async with semaphore: return await self.play_single_game_async(game_num)
@@ -1067,7 +1067,7 @@ class GameBatchRunner:
         game, game_models = self.setup_game(game_num)
         original_stdout = sys.stdout
         if not self.verbose_output: sys.stdout = open(os.devnull, 'w')
-        start_time = time.time(); max_duration = 3600
+        start_time = time.time(); max_duration = 36000 # 10 hours
         try:
             while not game.game_over:
                 # Check if tournament is paused
@@ -1131,7 +1131,7 @@ class GameBatchRunner:
             results = []; completed = 0; total = len(game_nums)
             for future in concurrent.futures.as_completed(futures):
                 gn = futures[future]; completed+=1
-                try: results.append(future.result(timeout=3600)); print(f"Completed game {gn} ({completed}/{total}, {completed/total*100:.1f}%)")
+                try: results.append(future.result(timeout=36000)); print(f"Completed game {gn} ({completed}/{total}, {completed/total*100:.1f}%)")
                 except Exception as e: print(f"Error game {gn}: {e}"); results.append(None)
                 if self.enable_autosaves and completed % max(1, total//5) == 0: print(f"Autosaving at {completed}/{total}"); threading.Thread(target=self.save_tournament_state).start()
             self.update_leaderboard(); self.save_tournament_state()

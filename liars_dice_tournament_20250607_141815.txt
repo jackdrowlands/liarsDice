@@ -1,0 +1,437 @@
+LIARS DICE TOURNAMENT RESULTS
+================================================================================
+Date: 2025-06-07 14:18:15
+Total Games: 100
+Models/Game: 6
+Providers: google, openai, meta-llama, qwen, mistralai
+
+LEADERBOARD
+====================================================================================================
+Rank  Model                         Human Name          Elo       Win Rate       Wins      Games     
+----------------------------------------------------------------------------------------------------
+1     qwen/qwen3-30b-a3b            Amanda              984.0     53.3%          16        30        
+2     google/gemini-2.5-flash-p...  Jessica             1073.0     46.2%          12        26        
+3     qwen/qwen3-235b-a22b          Emily               1073.0     45.5%          10        22        
+4     google/gemini-2.0-flash-001   Matthew             986.7     27.8%          5         18        
+5     google/gemini-flash-1.5       Jennifer            1073.0     26.5%          9         34        
+6     meta-llama/llama-3.3-70b-...  Nicole              986.7     25.0%          7         28        
+7     openai/gpt-4.1-mini           Michael             986.1     24.1%          7         29        
+8     meta-llama/llama-3.1-8b-i...  Kevin               1073.0     23.8%          5         21        
+9     mistralai/ministral-3b        Megan               984.7     16.7%          4         24        
+10    openai/gpt-4.1-nano           John                984.7     16.0%          4         25        
+11    meta-llama/llama-4-maverick   Jennifer            986.1     13.8%          4         29        
+12    meta-llama/llama-4-scout      Brian               984.7     10.7%          3         28        
+13    openai/gpt-4o-mini            James               984.0     10.0%          3         30        
+14    mistralai/mistral-nemo        Nicole              986.1     9.1%          2         22        
+15    google/gemini-flash-1.5-8b    Matthew             1073.0     8.3%          2         24        
+16    qwen/qwen-2.5-7b-instruct     Andrew              986.1     7.7%          2         26        
+17    mistralai/mistral-small       Sarah               985.4     4.8%          1         21        
+18    mistralai/mistral-small-2...  Sarah               984.0     4.2%          1         24        
+19    mistralai/mistral-saba        Emily               985.4     4.2%          1         24        
+20    mistralai/pixtral-12b         Laura               985.4     4.0%          1         25        
+21    mistralai/mistral-small-3...  Michael             985.4     3.6%          1         28        
+22    mistralai/devstral-small      Sarah               984.0     0.0%          0         21        
+23    google/gemini-2.0-flash-l...  Thomas              986.7     0.0%          0         17        
+24    mistralai/ministral-8b        Ashley              984.0     0.0%          0         24        
+
+DETAILED MODEL STATISTICS
+================================================================================
+
+1. qwen/qwen3-30b-a3b (as 'Amanda')
+   Provider: qwen
+   Win Rate: 53.3% (16/30)
+   Elo: 984.0
+   Bluff Success: 59.3%
+   Lie Detection (F1): 63.0%
+   Rule Adherence: 99.7%
+   Avg. Rounds/Game: 27.0
+   Liar Call Success: 90.9%
+
+2. google/gemini-2.5-flash-preview-05-20 (as 'Jessica')
+   Provider: google
+   Win Rate: 46.2% (12/26)
+   Elo: 1073.0
+   Bluff Success: 52.1%
+   Lie Detection (F1): 58.2%
+   Rule Adherence: 99.7%
+   Avg. Rounds/Game: 27.4
+   Liar Call Success: 83.3%
+
+3. qwen/qwen3-235b-a22b (as 'Emily')
+   Provider: qwen
+   Win Rate: 45.5% (10/22)
+   Elo: 1073.0
+   Bluff Success: 63.0%
+   Lie Detection (F1): 69.9%
+   Rule Adherence: 79.5%
+   Avg. Rounds/Game: 27.1
+   Liar Call Success: 63.6%
+
+4. google/gemini-2.0-flash-001 (as 'Matthew')
+   Provider: google
+   Win Rate: 27.8% (5/18)
+   Elo: 986.7
+   Bluff Success: 46.1%
+   Lie Detection (F1): 42.2%
+   Rule Adherence: 100.0%
+   Avg. Rounds/Game: 26.9
+   Liar Call Success: 50.0%
+
+5. google/gemini-flash-1.5 (as 'Jennifer')
+   Provider: google
+   Win Rate: 26.5% (9/34)
+   Elo: 1073.0
+   Bluff Success: 35.9%
+   Lie Detection (F1): 53.4%
+   Rule Adherence: 99.6%
+   Avg. Rounds/Game: 27.4
+   Liar Call Success: 100.0%
+
+6. meta-llama/llama-3.3-70b-instruct (as 'Nicole')
+   Provider: meta-llama
+   Win Rate: 25.0% (7/28)
+   Elo: 986.7
+   Bluff Success: 51.4%
+   Lie Detection (F1): 48.1%
+   Rule Adherence: 74.0%
+   Avg. Rounds/Game: 27.6
+   Liar Call Success: 66.7%
+
+7. openai/gpt-4.1-mini (as 'Michael')
+   Provider: openai
+   Win Rate: 24.1% (7/29)
+   Elo: 986.1
+   Bluff Success: 37.0%
+   Lie Detection (F1): 51.7%
+   Rule Adherence: 96.4%
+   Avg. Rounds/Game: 27.5
+   Liar Call Success: 50.0%
+
+8. meta-llama/llama-3.1-8b-instruct (as 'Kevin')
+   Provider: meta-llama
+   Win Rate: 23.8% (5/21)
+   Elo: 1073.0
+   Bluff Success: 41.5%
+   Lie Detection (F1): 47.7%
+   Rule Adherence: 90.0%
+   Avg. Rounds/Game: 28.0
+   Liar Call Success: 80.0%
+
+9. mistralai/ministral-3b (as 'Megan')
+   Provider: mistralai
+   Win Rate: 16.7% (4/24)
+   Elo: 984.7
+   Bluff Success: 49.3%
+   Lie Detection (F1): 33.2%
+   Rule Adherence: 85.5%
+   Avg. Rounds/Game: 27.4
+   Liar Call Success: 60.0%
+
+10. openai/gpt-4.1-nano (as 'John')
+   Provider: openai
+   Win Rate: 16.0% (4/25)
+   Elo: 984.7
+   Bluff Success: 50.4%
+   Lie Detection (F1): 43.7%
+   Rule Adherence: 98.2%
+   Avg. Rounds/Game: 27.8
+   Liar Call Success: 80.0%
+
+11. meta-llama/llama-4-maverick (as 'Jennifer')
+   Provider: meta-llama
+   Win Rate: 13.8% (4/29)
+   Elo: 986.1
+   Bluff Success: 37.4%
+   Lie Detection (F1): 26.9%
+   Rule Adherence: 35.1%
+   Avg. Rounds/Game: 27.7
+   Liar Call Success: 100.0%
+
+12. meta-llama/llama-4-scout (as 'Brian')
+   Provider: meta-llama
+   Win Rate: 10.7% (3/28)
+   Elo: 984.7
+   Bluff Success: 37.5%
+   Lie Detection (F1): 49.3%
+   Rule Adherence: 43.5%
+   Avg. Rounds/Game: 27.3
+   Liar Call Success: 50.0%
+
+13. openai/gpt-4o-mini (as 'James')
+   Provider: openai
+   Win Rate: 10.0% (3/30)
+   Elo: 984.0
+   Bluff Success: 56.8%
+   Lie Detection (F1): 34.5%
+   Rule Adherence: 98.9%
+   Avg. Rounds/Game: 27.4
+   Liar Call Success: 37.5%
+
+14. mistralai/mistral-nemo (as 'Nicole')
+   Provider: mistralai
+   Win Rate: 9.1% (2/22)
+   Elo: 986.1
+   Bluff Success: 52.3%
+   Lie Detection (F1): 30.1%
+   Rule Adherence: 92.7%
+   Avg. Rounds/Game: 26.9
+   Liar Call Success: 100.0%
+
+15. google/gemini-flash-1.5-8b (as 'Matthew')
+   Provider: google
+   Win Rate: 8.3% (2/24)
+   Elo: 1073.0
+   Bluff Success: 37.4%
+   Lie Detection (F1): 55.1%
+   Rule Adherence: 94.5%
+   Avg. Rounds/Game: 27.5
+   Liar Call Success: 100.0%
+
+16. qwen/qwen-2.5-7b-instruct (as 'Andrew')
+   Provider: qwen
+   Win Rate: 7.7% (2/26)
+   Elo: 986.1
+   Bluff Success: 26.5%
+   Lie Detection (F1): 3.8%
+   Rule Adherence: 92.4%
+   Avg. Rounds/Game: 27.5
+   Liar Call Success: 100.0%
+
+17. mistralai/mistral-small (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 4.8% (1/21)
+   Elo: 985.4
+   Bluff Success: 38.3%
+   Lie Detection (F1): 33.2%
+   Rule Adherence: 96.1%
+   Avg. Rounds/Game: 27.0
+   Liar Call Success: 100.0%
+
+18. mistralai/mistral-small-24b-instruct-2501 (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 4.2% (1/24)
+   Elo: 984.0
+   Bluff Success: 38.3%
+   Lie Detection (F1): 28.3%
+   Rule Adherence: 95.7%
+   Avg. Rounds/Game: 27.3
+   Liar Call Success: 0.0%
+
+19. mistralai/mistral-saba (as 'Emily')
+   Provider: mistralai
+   Win Rate: 4.2% (1/24)
+   Elo: 985.4
+   Bluff Success: 18.8%
+   Lie Detection (F1): 23.1%
+   Rule Adherence: 93.0%
+   Avg. Rounds/Game: 27.5
+   Liar Call Success: 100.0%
+
+20. mistralai/pixtral-12b (as 'Laura')
+   Provider: mistralai
+   Win Rate: 4.0% (1/25)
+   Elo: 985.4
+   Bluff Success: 42.1%
+   Lie Detection (F1): 39.7%
+   Rule Adherence: 90.3%
+   Avg. Rounds/Game: 27.4
+   Liar Call Success: 0.0%
+
+21. mistralai/mistral-small-3.1-24b-instruct (as 'Michael')
+   Provider: mistralai
+   Win Rate: 3.6% (1/28)
+   Elo: 985.4
+   Bluff Success: 44.1%
+   Lie Detection (F1): 33.2%
+   Rule Adherence: 93.4%
+   Avg. Rounds/Game: 27.5
+   Liar Call Success: 50.0%
+
+22. mistralai/devstral-small (as 'Sarah')
+   Provider: mistralai
+   Win Rate: 0.0% (0/21)
+   Elo: 984.0
+   Bluff Success: 31.7%
+   Lie Detection (F1): 19.0%
+   Rule Adherence: 92.8%
+   Avg. Rounds/Game: 27.1
+   Liar Call Success: 0.0%
+
+23. google/gemini-2.0-flash-lite-001 (as 'Thomas')
+   Provider: google
+   Win Rate: 0.0% (0/17)
+   Elo: 986.7
+   Bluff Success: 35.3%
+   Lie Detection (F1): 12.8%
+   Rule Adherence: 99.0%
+   Avg. Rounds/Game: 26.7
+   Liar Call Success: 0.0%
+
+24. mistralai/ministral-8b (as 'Ashley')
+   Provider: mistralai
+   Win Rate: 0.0% (0/24)
+   Elo: 984.0
+   Bluff Success: 48.9%
+   Lie Detection (F1): 39.3%
+   Rule Adherence: 80.5%
+   Avg. Rounds/Game: 27.6
+   Liar Call Success: 0.0%
+
+GAME-BY-GAME RESULTS
+================================================================================
+Game 20:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated James (openai/gpt-4o-mini), Megan (mistralai/ministral-3b), Sarah (mistralai/mistral-small), Nicole (mistralai/mistral-nemo), Thomas (google/gemini-2.0-flash-lite-001)
+Game 5:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Sarah (mistralai/devstral-small), Megan (mistralai/ministral-3b), Emily (mistralai/mistral-saba), Michael (openai/gpt-4.1-mini), Sarah-6 (mistralai/mistral-small)
+Game 19:  Matthew (google/gemini-flash-1.5-8b) defeated Ashley (mistralai/ministral-8b), Brian (meta-llama/llama-4-scout), Laura (mistralai/pixtral-12b), Megan (mistralai/ministral-3b), James (openai/gpt-4o-mini)
+Game 15:  Jennifer (google/gemini-flash-1.5) defeated Sarah (mistralai/mistral-small), Emily (mistralai/mistral-saba), Thomas (google/gemini-2.0-flash-lite-001), Jennifer-5 (meta-llama/llama-4-maverick), Brian (meta-llama/llama-4-scout)
+Game 12:  Kevin (meta-llama/llama-3.1-8b-instruct) defeated Sarah (mistralai/mistral-small-24b-instruct-2501), Jennifer (meta-llama/llama-4-maverick), Michael (mistralai/mistral-small-3.1-24b-instruct), James (openai/gpt-4o-mini), Emily (mistralai/mistral-saba)
+Game 18:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Kevin (meta-llama/llama-3.1-8b-instruct), Ashley (mistralai/ministral-8b), Matthew (google/gemini-flash-1.5-8b), Jennifer (meta-llama/llama-4-maverick), Emily (mistralai/mistral-saba)
+Game 21:  Jennifer (google/gemini-flash-1.5) defeated Megan (mistralai/ministral-3b), Matthew (google/gemini-flash-1.5-8b), Michael (mistralai/mistral-small-3.1-24b-instruct), Brian (meta-llama/llama-4-scout), Nicole (meta-llama/llama-3.3-70b-instruct)
+Game 23:  Jennifer-6 (meta-llama/llama-4-maverick) defeated Megan (mistralai/ministral-3b), Michael (mistralai/mistral-small-3.1-24b-instruct), Jennifer (google/gemini-flash-1.5), Ashley (mistralai/ministral-8b), Kevin (meta-llama/llama-3.1-8b-instruct)
+Game 32:  Megan (mistralai/ministral-3b) defeated Kevin (meta-llama/llama-3.1-8b-instruct), Laura (mistralai/pixtral-12b), Jennifer (meta-llama/llama-4-maverick), Michael (openai/gpt-4.1-mini), Emily (mistralai/mistral-saba)
+Game 7:  Brian (meta-llama/llama-4-scout) defeated Nicole (meta-llama/llama-3.3-70b-instruct), Ashley (mistralai/ministral-8b), Jennifer (google/gemini-flash-1.5), Sarah (mistralai/devstral-small), Matthew (google/gemini-2.0-flash-001)
+Game 8:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated Thomas (google/gemini-2.0-flash-lite-001), Jennifer (google/gemini-flash-1.5), Ashley (mistralai/ministral-8b), Andrew (qwen/qwen-2.5-7b-instruct), Kevin (meta-llama/llama-3.1-8b-instruct)
+Game 1:  Kevin (meta-llama/llama-3.1-8b-instruct) defeated Jennifer (meta-llama/llama-4-maverick), Nicole (meta-llama/llama-3.3-70b-instruct), Matthew (google/gemini-2.0-flash-001), Emily (mistralai/mistral-saba), Laura (mistralai/pixtral-12b)
+Game 11:  Michael (openai/gpt-4.1-mini) defeated Sarah (mistralai/mistral-small-24b-instruct-2501), Jennifer (meta-llama/llama-4-maverick), Sarah-4 (mistralai/devstral-small), Matthew (google/gemini-2.0-flash-001), Laura (mistralai/pixtral-12b)
+Game 27:  Nicole (mistralai/mistral-nemo) defeated Matthew (google/gemini-2.0-flash-001), John (openai/gpt-4.1-nano), Sarah (mistralai/devstral-small), Jennifer (meta-llama/llama-4-maverick), Michael (mistralai/mistral-small-3.1-24b-instruct)
+Game 9:  Laura (mistralai/pixtral-12b) defeated Michael (openai/gpt-4.1-mini), Nicole (meta-llama/llama-3.3-70b-instruct), Brian (meta-llama/llama-4-scout), Emily (mistralai/mistral-saba), Jessica (google/gemini-2.5-flash-preview-05-20)
+Game 6:  Jennifer (google/gemini-flash-1.5) defeated Michael (openai/gpt-4.1-mini), Brian (meta-llama/llama-4-scout), Nicole (mistralai/mistral-nemo), Jennifer-5 (meta-llama/llama-4-maverick), Michael-6 (mistralai/mistral-small-3.1-24b-instruct)
+Game 24:  Michael (openai/gpt-4.1-mini) defeated Sarah (mistralai/devstral-small), Jennifer (google/gemini-flash-1.5), Andrew (qwen/qwen-2.5-7b-instruct), Matthew (google/gemini-flash-1.5-8b), James (openai/gpt-4o-mini)
+Game 17:  Jennifer-6 (meta-llama/llama-4-maverick) defeated Brian (meta-llama/llama-4-scout), James (openai/gpt-4o-mini), Megan (mistralai/ministral-3b), Sarah (mistralai/devstral-small), Jennifer (google/gemini-flash-1.5)
+Game 10:  Andrew (qwen/qwen-2.5-7b-instruct) defeated Amanda (qwen/qwen3-30b-a3b), Jennifer (google/gemini-flash-1.5), Nicole (meta-llama/llama-3.3-70b-instruct), Laura (mistralai/pixtral-12b), Ashley (mistralai/ministral-8b)
+Game 2:  Brian (meta-llama/llama-4-scout) defeated Jennifer (google/gemini-flash-1.5), Andrew (qwen/qwen-2.5-7b-instruct), James (openai/gpt-4o-mini), Kevin (meta-llama/llama-3.1-8b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501)
+Game 31:  Kevin (meta-llama/llama-3.1-8b-instruct) defeated John (openai/gpt-4.1-nano), Brian (meta-llama/llama-4-scout), Jessica (google/gemini-2.5-flash-preview-05-20), Andrew (qwen/qwen-2.5-7b-instruct), Michael (mistralai/mistral-small-3.1-24b-instruct)
+Game 33:  James (openai/gpt-4o-mini) defeated Jennifer (google/gemini-flash-1.5), Thomas (google/gemini-2.0-flash-lite-001), Sarah (mistralai/devstral-small), Sarah-5 (mistralai/mistral-small), Nicole (mistralai/mistral-nemo)
+Game 41:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Matthew (google/gemini-flash-1.5-8b), Michael (openai/gpt-4.1-mini), Megan (mistralai/ministral-3b), James (openai/gpt-4o-mini), Sarah (mistralai/mistral-small)
+Game 37:  Amanda (qwen/qwen3-30b-a3b) defeated Sarah (mistralai/mistral-small), Thomas (google/gemini-2.0-flash-lite-001), Michael (mistralai/mistral-small-3.1-24b-instruct), Nicole (mistralai/mistral-nemo), Brian (meta-llama/llama-4-scout)
+Game 36:  Sarah-5 (mistralai/mistral-small) defeated Sarah (mistralai/mistral-small-24b-instruct-2501), Michael (mistralai/mistral-small-3.1-24b-instruct), Laura (mistralai/pixtral-12b), Emily (mistralai/mistral-saba), John (openai/gpt-4.1-nano)
+Game 22:  Emily (qwen/qwen3-235b-a22b) defeated Amanda (qwen/qwen3-30b-a3b), John (openai/gpt-4.1-nano), Thomas (google/gemini-2.0-flash-lite-001), Michael (openai/gpt-4.1-mini), Jennifer (google/gemini-flash-1.5)
+Game 35:  Matthew (google/gemini-flash-1.5-8b) defeated Laura (mistralai/pixtral-12b), Nicole (mistralai/mistral-nemo), Emily (mistralai/mistral-saba), Megan (mistralai/ministral-3b), Brian (meta-llama/llama-4-scout)
+Game 4:  Nicole (mistralai/mistral-nemo) defeated Jessica (google/gemini-2.5-flash-preview-05-20), Thomas (google/gemini-2.0-flash-lite-001), Emily (qwen/qwen3-235b-a22b), Megan (mistralai/ministral-3b), Michael (openai/gpt-4.1-mini)
+Game 39:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated Thomas (google/gemini-2.0-flash-lite-001), Andrew (qwen/qwen-2.5-7b-instruct), Michael (mistralai/mistral-small-3.1-24b-instruct), Emily (mistralai/mistral-saba), Ashley (mistralai/ministral-8b)
+Game 3:  Emily (qwen/qwen3-235b-a22b) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Ashley (mistralai/ministral-8b), James (openai/gpt-4o-mini), Jennifer (meta-llama/llama-4-maverick), Nicole (meta-llama/llama-3.3-70b-instruct)
+Game 46:  Megan (mistralai/ministral-3b) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Jennifer (google/gemini-flash-1.5), James (openai/gpt-4o-mini), Nicole (meta-llama/llama-3.3-70b-instruct), Michael-6 (openai/gpt-4.1-mini)
+Game 38:  John (openai/gpt-4.1-nano) defeated Brian (meta-llama/llama-4-scout), Sarah (mistralai/mistral-small-24b-instruct-2501), Thomas (google/gemini-2.0-flash-lite-001), Jennifer (meta-llama/llama-4-maverick), Nicole (meta-llama/llama-3.3-70b-instruct)
+Game 29:  Emily-5 (qwen/qwen3-235b-a22b) defeated Megan (mistralai/ministral-3b), Matthew (google/gemini-flash-1.5-8b), Emily (mistralai/mistral-saba), Matthew-4 (google/gemini-2.0-flash-001), Amanda (qwen/qwen3-30b-a3b)
+Game 28:  Andrew (qwen/qwen-2.5-7b-instruct) defeated Jennifer (meta-llama/llama-4-maverick), Matthew (google/gemini-flash-1.5-8b), Amanda (qwen/qwen3-30b-a3b), John (openai/gpt-4.1-nano), Ashley (mistralai/ministral-8b)
+Game 14:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Laura (mistralai/pixtral-12b), Emily (qwen/qwen3-235b-a22b), John (openai/gpt-4.1-nano), Michael (openai/gpt-4.1-mini), Sarah (mistralai/devstral-small)
+Game 25:  Emily (qwen/qwen3-235b-a22b) defeated Nicole (meta-llama/llama-3.3-70b-instruct), Michael (openai/gpt-4.1-mini), John (openai/gpt-4.1-nano), Matthew (google/gemini-2.0-flash-001), Amanda (qwen/qwen3-30b-a3b)
+Game 45:  Michael (mistralai/mistral-small-3.1-24b-instruct) defeated Laura (mistralai/pixtral-12b), Nicole (mistralai/mistral-nemo), John (openai/gpt-4.1-nano), Jennifer (google/gemini-flash-1.5), Jennifer-6 (meta-llama/llama-4-maverick)
+Game 40:  Amanda (qwen/qwen3-30b-a3b) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Ashley (mistralai/ministral-8b), Emily (mistralai/mistral-saba), Jessica (google/gemini-2.5-flash-preview-05-20), James (openai/gpt-4o-mini)
+Game 34:  Amanda (qwen/qwen3-30b-a3b) defeated John (openai/gpt-4.1-nano), Jessica (google/gemini-2.5-flash-preview-05-20), Kevin (meta-llama/llama-3.1-8b-instruct), Andrew (qwen/qwen-2.5-7b-instruct), James (openai/gpt-4o-mini)
+Game 30:  Matthew (google/gemini-2.0-flash-001) defeated Emily (mistralai/mistral-saba), Nicole (mistralai/mistral-nemo), Andrew (qwen/qwen-2.5-7b-instruct), Laura (mistralai/pixtral-12b), Emily-6 (qwen/qwen3-235b-a22b)
+Game 47:  Michael (openai/gpt-4.1-mini) defeated Kevin (meta-llama/llama-3.1-8b-instruct), Brian (meta-llama/llama-4-scout), Laura (mistralai/pixtral-12b), Sarah (mistralai/mistral-small), Matthew (google/gemini-flash-1.5-8b)
+Game 48:  Amanda (qwen/qwen3-30b-a3b) defeated Kevin (meta-llama/llama-3.1-8b-instruct), James (openai/gpt-4o-mini), Nicole (mistralai/mistral-nemo), Brian (meta-llama/llama-4-scout), Ashley (mistralai/ministral-8b)
+Game 51:  Michael (openai/gpt-4.1-mini) defeated Jessica (google/gemini-2.5-flash-preview-05-20), Matthew (google/gemini-2.0-flash-001), Emily (mistralai/mistral-saba), Matthew-5 (google/gemini-flash-1.5-8b), Jennifer (google/gemini-flash-1.5)
+Game 13:  Jennifer-6 (meta-llama/llama-4-maverick) defeated Jessica (google/gemini-2.5-flash-preview-05-20), Nicole (mistralai/mistral-nemo), Matthew (google/gemini-flash-1.5-8b), Emily (qwen/qwen3-235b-a22b), Jennifer (google/gemini-flash-1.5)
+Game 56:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated James (openai/gpt-4o-mini), Emily (mistralai/mistral-saba), Nicole (meta-llama/llama-3.3-70b-instruct), Sarah (mistralai/mistral-small), Matthew (google/gemini-flash-1.5-8b)
+Game 43:  Jennifer (google/gemini-flash-1.5) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Jennifer-3 (meta-llama/llama-4-maverick), Matthew (google/gemini-flash-1.5-8b), Amanda (qwen/qwen3-30b-a3b), Jessica (google/gemini-2.5-flash-preview-05-20)
+Game 52:  Brian (meta-llama/llama-4-scout) defeated Nicole (mistralai/mistral-nemo), Ashley (mistralai/ministral-8b), Laura (mistralai/pixtral-12b), Michael (openai/gpt-4.1-mini), Andrew (qwen/qwen-2.5-7b-instruct)
+Game 16:  Amanda (qwen/qwen3-30b-a3b) defeated Laura (mistralai/pixtral-12b), Emily (qwen/qwen3-235b-a22b), Nicole (meta-llama/llama-3.3-70b-instruct), Andrew (qwen/qwen-2.5-7b-instruct), Matthew (google/gemini-flash-1.5-8b)
+Game 55:  Amanda (qwen/qwen3-30b-a3b) defeated Emily (mistralai/mistral-saba), Jennifer (google/gemini-flash-1.5), Sarah (mistralai/devstral-small), Nicole (meta-llama/llama-3.3-70b-instruct), Thomas (google/gemini-2.0-flash-lite-001)
+Game 44:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Amanda (qwen/qwen3-30b-a3b), Nicole (meta-llama/llama-3.3-70b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501), Jennifer (meta-llama/llama-4-maverick), Laura (mistralai/pixtral-12b)
+Game 54:  Amanda (qwen/qwen3-30b-a3b) defeated Megan (mistralai/ministral-3b), Brian (meta-llama/llama-4-scout), Sarah (mistralai/mistral-small), Nicole (mistralai/mistral-nemo), Jennifer (google/gemini-flash-1.5)
+Game 57:  Kevin (meta-llama/llama-3.1-8b-instruct) defeated John (openai/gpt-4.1-nano), Andrew (qwen/qwen-2.5-7b-instruct), Sarah (mistralai/mistral-small), Megan (mistralai/ministral-3b), Sarah-6 (mistralai/mistral-small-24b-instruct-2501)
+Game 42:  Matthew (google/gemini-2.0-flash-001) defeated Ashley (mistralai/ministral-8b), Laura (mistralai/pixtral-12b), James (openai/gpt-4o-mini), Andrew (qwen/qwen-2.5-7b-instruct), Jennifer (meta-llama/llama-4-maverick)
+Game 60:  Jennifer (meta-llama/llama-4-maverick) defeated Matthew (google/gemini-flash-1.5-8b), John (openai/gpt-4.1-nano), Michael (mistralai/mistral-small-3.1-24b-instruct), Michael-4 (openai/gpt-4.1-mini), Megan (mistralai/ministral-3b)
+Game 61:  Michael (openai/gpt-4.1-mini) defeated Megan (mistralai/ministral-3b), Nicole (mistralai/mistral-nemo), Matthew (google/gemini-flash-1.5-8b), Andrew (qwen/qwen-2.5-7b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501)
+Game 70:  Matthew (google/gemini-2.0-flash-001) defeated Nicole (meta-llama/llama-3.3-70b-instruct), Megan (mistralai/ministral-3b), Ashley (mistralai/ministral-8b), Sarah (mistralai/mistral-small), Kevin (meta-llama/llama-3.1-8b-instruct)
+Game 66:  Amanda (qwen/qwen3-30b-a3b) defeated Sarah (mistralai/devstral-small), James (openai/gpt-4o-mini), Kevin (meta-llama/llama-3.1-8b-instruct), Thomas (google/gemini-2.0-flash-lite-001), Nicole (meta-llama/llama-3.3-70b-instruct)
+Game 58:  Sarah (mistralai/mistral-small-24b-instruct-2501) defeated Nicole (mistralai/mistral-nemo), Kevin (meta-llama/llama-3.1-8b-instruct), Andrew (qwen/qwen-2.5-7b-instruct), Brian (meta-llama/llama-4-scout), Michael (openai/gpt-4.1-mini)
+Game 74:  Matthew (google/gemini-2.0-flash-001) defeated James (openai/gpt-4o-mini), Thomas (google/gemini-2.0-flash-lite-001), Michael (mistralai/mistral-small-3.1-24b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501), Jessica (google/gemini-2.5-flash-preview-05-20)
+Game 71:  Michael (openai/gpt-4.1-mini) defeated Sarah (mistralai/mistral-small), Matthew (google/gemini-flash-1.5-8b), Amanda (qwen/qwen3-30b-a3b), Sarah-4 (mistralai/mistral-small-24b-instruct-2501), Michael-6 (mistralai/mistral-small-3.1-24b-instruct)
+Game 64:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Nicole (mistralai/mistral-nemo), Sarah (mistralai/mistral-small-24b-instruct-2501), James (openai/gpt-4o-mini), Kevin (meta-llama/llama-3.1-8b-instruct), Amanda (qwen/qwen3-30b-a3b)
+Game 62:  Jennifer (google/gemini-flash-1.5) defeated John (openai/gpt-4.1-nano), Megan (mistralai/ministral-3b), Laura (mistralai/pixtral-12b), Andrew (qwen/qwen-2.5-7b-instruct), Emily (mistralai/mistral-saba)
+Game 76:  Emily (mistralai/mistral-saba) defeated Kevin (meta-llama/llama-3.1-8b-instruct), Jennifer (meta-llama/llama-4-maverick), Ashley (mistralai/ministral-8b), James (openai/gpt-4o-mini), John (openai/gpt-4.1-nano)
+Game 65:  John (openai/gpt-4.1-nano) defeated Sarah (mistralai/mistral-small), Jennifer (meta-llama/llama-4-maverick), Michael (openai/gpt-4.1-mini), Michael-4 (mistralai/mistral-small-3.1-24b-instruct), Jessica (google/gemini-2.5-flash-preview-05-20)
+Game 26:  Emily (qwen/qwen3-235b-a22b) defeated Andrew (qwen/qwen-2.5-7b-instruct), Sarah (mistralai/devstral-small), Jennifer (google/gemini-flash-1.5), Nicole (meta-llama/llama-3.3-70b-instruct), Brian (meta-llama/llama-4-scout)
+Game 73:  Jennifer (google/gemini-flash-1.5) defeated Michael (openai/gpt-4.1-mini), John (openai/gpt-4.1-nano), Brian (meta-llama/llama-4-scout), Matthew (google/gemini-flash-1.5-8b), Jennifer-6 (meta-llama/llama-4-maverick)
+Game 79:  Jennifer (google/gemini-flash-1.5) defeated James (openai/gpt-4o-mini), Jennifer-3 (meta-llama/llama-4-maverick), Ashley (mistralai/ministral-8b), Laura (mistralai/pixtral-12b), Michael (mistralai/mistral-small-3.1-24b-instruct)
+Game 63:  Emily-4 (qwen/qwen3-235b-a22b) defeated Sarah (mistralai/mistral-small-24b-instruct-2501), Nicole (mistralai/mistral-nemo), Emily (mistralai/mistral-saba), Nicole-5 (meta-llama/llama-3.3-70b-instruct), Jennifer (google/gemini-flash-1.5)
+Game 68:  Amanda (qwen/qwen3-30b-a3b) defeated Sarah (mistralai/mistral-small-24b-instruct-2501), Sarah-2 (mistralai/devstral-small), Matthew (google/gemini-2.0-flash-001), Ashley (mistralai/ministral-8b), John (openai/gpt-4.1-nano)
+Game 77:  Amanda (qwen/qwen3-30b-a3b) defeated Nicole (meta-llama/llama-3.3-70b-instruct), Kevin (meta-llama/llama-3.1-8b-instruct), Jennifer (google/gemini-flash-1.5), Emily (mistralai/mistral-saba), Laura (mistralai/pixtral-12b)
+Game 82:  Matthew (google/gemini-2.0-flash-001) defeated Nicole (mistralai/mistral-nemo), Sarah (mistralai/mistral-small), Brian (meta-llama/llama-4-scout), Jennifer (google/gemini-flash-1.5), Sarah-6 (mistralai/mistral-small-24b-instruct-2501)
+Game 50:  Emily (qwen/qwen3-235b-a22b) defeated Brian (meta-llama/llama-4-scout), Amanda (qwen/qwen3-30b-a3b), Sarah (mistralai/devstral-small), Sarah-5 (mistralai/mistral-small), Jennifer (google/gemini-flash-1.5)
+Game 80:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated James (openai/gpt-4o-mini), Jennifer (meta-llama/llama-4-maverick), Emily (mistralai/mistral-saba), Sarah (mistralai/mistral-small), Kevin (meta-llama/llama-3.1-8b-instruct)
+Game 78:  James (openai/gpt-4o-mini) defeated Jessica (google/gemini-2.5-flash-preview-05-20), Amanda (qwen/qwen3-30b-a3b), Jennifer (google/gemini-flash-1.5), Sarah (mistralai/mistral-small-24b-instruct-2501), Laura (mistralai/pixtral-12b)
+Game 59:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated Jennifer (google/gemini-flash-1.5), Emily (mistralai/mistral-saba), Emily-4 (qwen/qwen3-235b-a22b), Thomas (google/gemini-2.0-flash-lite-001), Michael (mistralai/mistral-small-3.1-24b-instruct)
+Game 85:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated Thomas (google/gemini-2.0-flash-lite-001), Sarah (mistralai/mistral-small), Ashley (mistralai/ministral-8b), Matthew (google/gemini-flash-1.5-8b), Michael (openai/gpt-4.1-mini)
+Game 83:  Jennifer (google/gemini-flash-1.5) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Andrew (qwen/qwen-2.5-7b-instruct), Nicole (mistralai/mistral-nemo), Matthew (google/gemini-2.0-flash-001), Sarah (mistralai/mistral-small-24b-instruct-2501)
+Game 67:  Amanda (qwen/qwen3-30b-a3b) defeated Andrew (qwen/qwen-2.5-7b-instruct), Ashley (mistralai/ministral-8b), John (openai/gpt-4.1-nano), Brian (meta-llama/llama-4-scout), Jessica (google/gemini-2.5-flash-preview-05-20)
+Game 86:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Andrew (qwen/qwen-2.5-7b-instruct), Matthew (google/gemini-flash-1.5-8b), Sarah (mistralai/mistral-small-24b-instruct-2501), Nicole (meta-llama/llama-3.3-70b-instruct), Michael (mistralai/mistral-small-3.1-24b-instruct)
+Game 69:  Megan (mistralai/ministral-3b) defeated Michael (openai/gpt-4.1-mini), Emily (qwen/qwen3-235b-a22b), Sarah (mistralai/mistral-small-24b-instruct-2501), Kevin (meta-llama/llama-3.1-8b-instruct), Brian (meta-llama/llama-4-scout)
+Game 90:  John (openai/gpt-4.1-nano) defeated Jennifer (meta-llama/llama-4-maverick), Michael (mistralai/mistral-small-3.1-24b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501), Matthew (google/gemini-flash-1.5-8b), James (openai/gpt-4o-mini)
+Game 91:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated Sarah (mistralai/mistral-small), Sarah-2 (mistralai/devstral-small), Matthew (google/gemini-flash-1.5-8b), Megan (mistralai/ministral-3b), Brian (meta-llama/llama-4-scout)
+Game 53:  Amanda (qwen/qwen3-30b-a3b) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), John (openai/gpt-4.1-nano), Ashley (mistralai/ministral-8b), Emily (qwen/qwen3-235b-a22b), Andrew (qwen/qwen-2.5-7b-instruct)
+Game 81:  Emily (qwen/qwen3-235b-a22b) defeated James (openai/gpt-4o-mini), Megan (mistralai/ministral-3b), Sarah (mistralai/mistral-small-24b-instruct-2501), Thomas (google/gemini-2.0-flash-lite-001), Nicole (mistralai/mistral-nemo)
+Game 75:  Michael (openai/gpt-4.1-mini) defeated Emily (qwen/qwen3-235b-a22b), Amanda (qwen/qwen3-30b-a3b), Brian (meta-llama/llama-4-scout), Sarah (mistralai/devstral-small), Michael-6 (mistralai/mistral-small-3.1-24b-instruct)
+Game 93:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Megan (mistralai/ministral-3b), Jennifer (google/gemini-flash-1.5), Amanda (qwen/qwen3-30b-a3b), Laura (mistralai/pixtral-12b), John (openai/gpt-4.1-nano)
+Game 95:  John (openai/gpt-4.1-nano) defeated Michael (openai/gpt-4.1-mini), Matthew (google/gemini-flash-1.5-8b), James (openai/gpt-4o-mini), Nicole (meta-llama/llama-3.3-70b-instruct), Michael-6 (mistralai/mistral-small-3.1-24b-instruct)
+Game 89:  Kevin (meta-llama/llama-3.1-8b-instruct) defeated Brian (meta-llama/llama-4-scout), John (openai/gpt-4.1-nano), Ashley (mistralai/ministral-8b), Michael (openai/gpt-4.1-mini), Nicole (mistralai/mistral-nemo)
+Game 99:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Ashley (mistralai/ministral-8b), Sarah (mistralai/mistral-small), James (openai/gpt-4o-mini), Sarah-4 (mistralai/devstral-small), Sarah-5 (mistralai/mistral-small-24b-instruct-2501)
+Game 92:  Jennifer (google/gemini-flash-1.5) defeated Laura (mistralai/pixtral-12b), Jessica (google/gemini-2.5-flash-preview-05-20), James (openai/gpt-4o-mini), Matthew (google/gemini-2.0-flash-001), Andrew (qwen/qwen-2.5-7b-instruct)
+Game 88:  James (openai/gpt-4o-mini) defeated Matthew (google/gemini-2.0-flash-001), Sarah (mistralai/devstral-small), Jennifer (meta-llama/llama-4-maverick), John (openai/gpt-4.1-nano), Andrew (qwen/qwen-2.5-7b-instruct)
+Game 98:  Jessica (google/gemini-2.5-flash-preview-05-20) defeated Michael (mistralai/mistral-small-3.1-24b-instruct), Thomas (google/gemini-2.0-flash-lite-001), Andrew (qwen/qwen-2.5-7b-instruct), Emily (mistralai/mistral-saba), Nicole (mistralai/mistral-nemo)
+Game 49:  Emily-3 (qwen/qwen3-235b-a22b) defeated Emily (mistralai/mistral-saba), Andrew (qwen/qwen-2.5-7b-instruct), Jennifer (google/gemini-flash-1.5), Michael (openai/gpt-4.1-mini), Nicole (meta-llama/llama-3.3-70b-instruct)
+Game 94:  Amanda (qwen/qwen3-30b-a3b) defeated Jennifer (google/gemini-flash-1.5), Jessica (google/gemini-2.5-flash-preview-05-20), Sarah (mistralai/devstral-small), Matthew (google/gemini-flash-1.5-8b), Jennifer-6 (meta-llama/llama-4-maverick)
+Game 97:  Megan (mistralai/ministral-3b) defeated Amanda (qwen/qwen3-30b-a3b), Laura (mistralai/pixtral-12b), Michael (mistralai/mistral-small-3.1-24b-instruct), Michael-4 (openai/gpt-4.1-mini), Matthew (google/gemini-2.0-flash-001)
+Game 72:  Emily (qwen/qwen3-235b-a22b) defeated Jennifer (meta-llama/llama-4-maverick), Brian (meta-llama/llama-4-scout), Sarah (mistralai/mistral-small), Ashley (mistralai/ministral-8b), Sarah-6 (mistralai/devstral-small)
+Game 84:  Amanda (qwen/qwen3-30b-a3b) defeated James (openai/gpt-4o-mini), Michael (openai/gpt-4.1-mini), Emily (qwen/qwen3-235b-a22b), Sarah (mistralai/devstral-small), Sarah-5 (mistralai/mistral-small-24b-instruct-2501)
+Game 100:  Amanda (qwen/qwen3-30b-a3b) defeated Laura (mistralai/pixtral-12b), Andrew (qwen/qwen-2.5-7b-instruct), Sarah (mistralai/mistral-small-24b-instruct-2501), Sarah-4 (mistralai/devstral-small), Megan (mistralai/ministral-3b)
+Game 96:  Nicole (meta-llama/llama-3.3-70b-instruct) defeated James (openai/gpt-4o-mini), Ashley (mistralai/ministral-8b), Brian (meta-llama/llama-4-scout), Thomas (google/gemini-2.0-flash-lite-001), Emily (qwen/qwen3-235b-a22b)
+Game 87:  Amanda (qwen/qwen3-30b-a3b) defeated Matthew (google/gemini-2.0-flash-001), John (openai/gpt-4.1-nano), Emily (qwen/qwen3-235b-a22b), Laura (mistralai/pixtral-12b), Jennifer (meta-llama/llama-4-maverick)
+
+KEY PERFORMANCE INSIGHTS
+================================================================================
+
+Model Dominance:
+- qwen/qwen3-30b-a3b achieved 53.3% win rate (16/30 games)
+- Exceptional lie detection with 63.0% F1 score
+- Strategic bluffing with 59.3% success rate
+- Perfect rule adherence at 99.7%
+
+Strategic Analysis:
+- Average game length: 27.4 rounds
+- qwen/qwen3-30b-a3b: Superior strategy with 53.3% win rate
+- google/gemini-2.5-flash-preview-05-20: 46.2% win rate
+- Clear advantage in lie detection: 63.0% vs 58.2% F1 score
+
+Elo Progression:
+- Amanda: 1000 → 984 (-16 points)
+- Jessica: 1000 → 1073 (+73 points)
+- Emily: 1000 → 1073 (+73 points)
+- Matthew: 1000 → 987 (-13 points)
+- Jennifer: 1000 → 1073 (+73 points)
+- Nicole: 1000 → 987 (-13 points)
+- Michael: 1000 → 986 (-14 points)
+- Kevin: 1000 → 1073 (+73 points)
+- Megan: 1000 → 985 (-15 points)
+- John: 1000 → 985 (-15 points)
+- Jennifer: 1000 → 986 (-14 points)
+- Brian: 1000 → 985 (-15 points)
+- James: 1000 → 984 (-16 points)
+- Nicole: 1000 → 986 (-14 points)
+- Matthew: 1000 → 1073 (+73 points)
+- Andrew: 1000 → 986 (-14 points)
+- Sarah: 1000 → 985 (-15 points)
+- Sarah: 1000 → 984 (-16 points)
+- Emily: 1000 → 985 (-15 points)
+- Laura: 1000 → 985 (-15 points)
+- Michael: 1000 → 985 (-15 points)
+- Sarah: 1000 → 984 (-16 points)
+- Thomas: 1000 → 987 (-13 points)
+- Ashley: 1000 → 984 (-16 points)
+
+Tournament Highlights:
+- Competitive tournament with close results
+- 100 games completed successfully
+- Extended strategic battles
+
+
+ENHANCED VISUALIZATIONS
+================================================================================
+Visualizations in liars_dice_tournament_20250607_141815_visualizations/
+Generated files:
+- Elo Bar Chart: elo_ratings_comparison.png
+- Elo Progression (Enhanced): liars_dice_tournament_20250607_141815_elo_progression.png
+- Metrics Radar (Enhanced): liars_dice_tournament_20250607_141815_metrics_radar_enhanced.png
+- Win Matrix (Enhanced): liars_dice_tournament_20250607_141815_win_matrix_heatmap.png

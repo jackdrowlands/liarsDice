@@ -1,1 +1,30 @@
-*.json
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-wheel-metadata/
+.idea/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Data, logs, and results
+/diagnostics/
+/Final Results/
+/games/
+/logs/
+/metrics_visualizations/
+liars_dice_tournament_*
+tournament_*
+
+# Large files
+*.zip
+*.png
+analysis.ipynb
+
+# OS specific
+.DS_Store

@@ -1,3 +1,0 @@
-Model,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
-meta-llama/llama-3.2-1b-instruct,meta-llama,984.0,66.0,66,100,3.2166666666666663,89.73333333333332,71.89122291107586,74.76127666623023,6.053999999999999,25.156157731157744,33.0,28.210583750372066,3.7239905142529595,7.24,66,0,0
-meta-llama/llama-3.2-3b-instruct,meta-llama,1016.0,28.000000000000004,28,100,1.5999999999999996,87.38333333333333,46.86446657917246,55.790138619550355,6.480499999999999,31.025268183716502,32.0,37.54770321308449,1.1171635208160846,7.24,28,0,0

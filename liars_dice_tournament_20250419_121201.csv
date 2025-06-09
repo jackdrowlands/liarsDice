@@ -1,7 +1,0 @@
-Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
-google/gemini-2.5-pro-preview-03-25,Jordan Smith,google,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-google/gemini-2.5-flash-preview,Logan Bailey,google,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-google/gemini-2.5-flash-preview:thinking,Blake Taylor,google,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-openai/o4-mini,Indigo Carter,openai,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-qwen/qwq-32b,Cameron Reed,qwen,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-openai/o4-mini-high,Indigo Carter,openai,1000,0.0,0,10,0,0,0,0,0,0,0,0,0,0.0,0,0,0

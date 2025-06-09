@@ -1,3 +1,0 @@
-Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection F1,Rule Adherence
-qwen2.5-1.5b-instruct-mlx,Emily,N/A,1016.0,70.0,7,10,1.6666666666666665,79.46122994652406,24.43460595471374
-gemma-3-1b-it-qat,David,N/A,984.0,30.0,3,10,1.6666666666666665,44.84265734265734,22.554207762827975

@@ -1,3 +1,0 @@
-Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg API Response Time,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
-gemma-3-1b-it-qat,Logan Bailey,unknown,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0
-gemma-3-4b-it-qat,Logan Bailey,unknown,1000,0.0,0,1,0,0,0,0,0,0,0,0,0,0.0,0,0,0

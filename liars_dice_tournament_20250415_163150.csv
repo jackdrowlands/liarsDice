@@ -1,4 +1,0 @@
-Model,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection Precision,Lie Detection Recall,Lie Detection F1,Average Final Bid,Bid Optimality,Adaptation Score,Rule Adherence Rate,Avg Rounds per Game,Early Game Wins,Mid Game Wins,Long Game Wins
-openai/gpt-4.1-nano,openai,1031.263693206478,100.0,2,2,0.0,83.88888888888889,100.0,91.11842105263159,0.0,77.08333333333333,0.0,69.67418546365914,11.5,0,2,0
-lmstudio-community/gemma-3-1b-it,lmstudio-community,984.0,0.0,0,2,0.0,0.0,0.0,0.0,3.8,11.805555555555555,0.0,70.0,11.5,0,0,0
-lmstudio-community/llama-3.2-1b-instruct,lmstudio-community,984.736306793522,0.0,0,2,22.619047619047617,100.0,43.75,60.606060606060595,4.7023809523809526,41.666666666666664,0.0,45.41666666666667,11.5,0,0,0

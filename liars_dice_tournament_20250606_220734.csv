@@ -1,3 +1,0 @@
-Model,Human Name,Provider,Elo,Win Rate,Wins,Games,Bluff Success Rate,Lie Detection F1,Rule Adherence
-meta-llama/llama-3.1-8b-instruct,Amanda,meta-llama,1016.0,100.0,1,1,0.0,85.71428571428571,92.3076923076923
-mistralai/mistral-nemo,Thomas,mistralai,984.0,0.0,0,1,0.0,75.0,100.0
